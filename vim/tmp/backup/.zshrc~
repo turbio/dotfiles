@@ -263,4 +263,4 @@ function preexec {
 	printf "\033]0;zsh - %s\a" "$1"
 }
 
-#alias vim='nvim'
+alias vim='nvim'

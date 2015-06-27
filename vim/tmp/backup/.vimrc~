@@ -1,8 +1,8 @@
 "{{{ neobundle
+"
 if !1 | finish | endif
 
-
-call plug#begin('~/.nvim/plugged')
+call plug#begin('~/.vim/plugged')
 
 "----------------------------------------
 "bundles
@@ -110,9 +110,9 @@ augroup cline
 augroup END
 "}}}
 "backup stuff {{{
-set undodir=~/.nvim/tmp/undo//
-set backupdir=~/.nvim/tmp/backup//
-set directory=~/.nvim/tmp/swap//
+set undodir=~/.vim/tmp/undo//
+set backupdir=~/.vim/tmp/backup//
+set directory=~/.vim/tmp/swap//
 set backup
 set noswapfile
 "}}}
@@ -390,7 +390,7 @@ set noexpandtab
 "tnoremap <leader>k <nop>
 "tnoremap <leader>l <nop>
 
-tnoremap jk <C-\><C-n>
+"tnoremap jk <C-\><C-n>
 
 "nnoremap <space>h <C-w>h
 "nnoremap <space>j <C-w>j

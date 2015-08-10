@@ -1,3 +1,4 @@
-nvim/plugged/
+vim/plugged/
 config/*
-nvim/tmp/
+vim/tmp/*
+ncmpcpp/

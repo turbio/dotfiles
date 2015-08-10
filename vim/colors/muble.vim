@@ -167,7 +167,7 @@ hi Repeat			ctermfg=1		ctermbg=NONE	cterm=NONE
 hi Statement		ctermfg=1		ctermbg=NONE	cterm=NONE
 hi SpecialChar		ctermfg=13		ctermbg=NONE	cterm=NONE
 hi cppSTLfunction	ctermfg=11		ctermbg=NONE	cterm=NONE
-hi Type				ctermfg=1		ctermbg=NONE	cterm=NONE
+"hi Type				ctermfg=1		ctermbg=NONE	cterm=NONE
 hi Boolean			ctermfg=13		ctermbg=NONE	cterm=NONE
 hi Number			ctermfg=13		ctermbg=NONE	cterm=NONE
 hi Character		ctermfg=11		ctermbg=NONE	cterm=NONE
@@ -208,6 +208,11 @@ hi YcmErrorSign		ctermfg=9	ctermbg=NONE
 hi cTodo			ctermfg=3	ctermbg=NONE
 hi cParen			ctermfg=3	ctermbg=NONE
 hi MatchParen		ctermbg=NONE	cterm=underline
+
+"nerdtree
+hi Directory		ctermfg=12
+hi NERDTreeExecFile	ctermfg=10
+hi NERDTreeDirSlash	ctermfg=12
 
 "fancy highlighting stuff
 hi def InterestingWord1 ctermfg=16 ctermbg=214

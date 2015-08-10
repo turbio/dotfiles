@@ -1,3 +1,4 @@
 vim/plugged/
 config/*
-vim/tmp/
+vim/tmp/*
+ncmpcpp/error.log

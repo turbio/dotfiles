@@ -46,6 +46,8 @@ Plug 'Shougo/unite.vim'
 Plug 'Shougo/vimfiler.vim'
 Plug 'Shougo/neossh.vim'
 Plug 'benekastah/neomake'
+"Plug 'hdima/python-syntax'
+Plug 'sentientmachine/Pretty-Vim-Python'
 "----------------------------------------
 
 call plug#end()

@@ -33,7 +33,7 @@ Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
 Plug 'Valloric/YouCompleteMe'
-Plug 'Shougo/neocomplete.vim'
+"Plug 'Shougo/neocomplete.vim'
 Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
 Plug 'SirVer/ultisnips'
@@ -52,7 +52,6 @@ Plug 'sentientmachine/Pretty-Vim-Python'
 
 call plug#end()
 
-nnoremap <F5> :Neomake<CR>
 "}}}
 "basic options {{{
 "tab stuff
@@ -147,6 +146,7 @@ set gdefault
 
 "space space to clear
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
+nnoremap <CR> :
 
 "keep in center whenn searching
 nnoremap n nzzzv
@@ -183,6 +183,8 @@ nnoremap <silent> <leader>3 :call HiInterestingWord(3)<cr>
 nnoremap <silent> <leader>4 :call HiInterestingWord(4)<cr>
 nnoremap <silent> <leader>5 :call HiInterestingWord(5)<cr>
 nnoremap <silent> <leader>6 :call HiInterestingWord(6)<cr>
+
+nnoremap YY ^y$
 
 "}}}
 
@@ -241,13 +243,7 @@ nnoremap vv ^vg_
 cmap w!! w !sudo tee > /dev/null %
 
 "toggle between relative and fixed line numbers
-function! NumberToggle()
-	if(&relativenumber == 1)
-		set relativenumber!
-	else
-		set relativenumber
-	endif
-endfunc
+set relativenumber
 "leader {{{
 "strip whitespace
 nnoremap <leader>w :%s/\s\+$//<cr>:let @/=''<cr>
@@ -299,6 +295,12 @@ let g:ycm_confirm_extra_conf = 0
 let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
 let g:ycm_error_symbol = '●'
 "let g:ycm_error_symbol = ''
+"}}}
+"neocomplete {{{
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#enable_smart_case = 1
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 "}}}
 "ulti snips {{{
 "ultisnips
@@ -407,3 +409,5 @@ set fillchars=vert:│
 
 "for some reason it wasn't working the first time
 set pastetoggle=<f5>
+
+autocmd VimLeave * NERDTreeClose

@@ -9,6 +9,8 @@ set fish_color_error red
 if status --is-login
 	set PATH $PATH ~/bin #local bin
 	#set SHELL /bin/zsh
+	set EDITOR vim
+
 end
 
 set fish_greeting
@@ -41,6 +43,17 @@ alias vol="alsamixer"
 
 #opening stuff
 alias ]="xdg-open"
+
+alias :3='cat'
+
+#some fancy git aliases
+alias gst="git status -sb"
+alias gdf="git diff"
+alias gdfc="git diff --cached"
+alias gcm="git commit -m"
+alias gad="git add -A"
+
+alias calc="bc -l"
 
 #welcome
 ~/.config/fish/welcome

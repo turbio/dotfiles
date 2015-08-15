@@ -1,3 +1,11 @@
+#if [ -z "$SESSION_CAPTURE" ];
+#then
+#	export SESSION_CAPTURE=1
+#	exec capses
+#else
+#	#echo "oh no";
+#fi
+
 #vim ctrlp like fuzzy?
 #source ~/.config/zsh/zsh-fuzzy-match/fuzzy-match.zsh
 #fuk

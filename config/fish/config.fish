@@ -7,7 +7,7 @@ set fish_color_error red
 
 #path stuff
 if status --is-login
-	set PATH $PATH ~/bin #local bin
+	set PATH $PATH ~/.bin #local bin
 	#set SHELL /bin/zsh
 	set EDITOR vim
 

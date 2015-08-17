@@ -1,0 +1,18 @@
+#!/bin/bash
+
+([ -z "$1" ] || [ -n "$2" ]) && cat <<EOF && exit 1
+wordparam: Find words you can make with the short parameters of commands.
+Author: Matthew (Archenoth) MacLean
+
+Usage: "$0 <command>"
+EOF
+
+man $1 &>/dev/null || {
+    echo "Cannot find manpage for $1"
+    exit 1
+}
+
+echo "Generating for $1..."
+aspell -d en dump master | aspell -l en expand | \
+    grep -e "$(echo "["$(for i in $(man $1 | grep -oe '\s-[a-Z]' | sort | \
+	uniq | cut -d'-' -f2); do echo -n $i; done)"]*")" -o | sort | uniq

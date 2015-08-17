@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#Copy contents of a file
+cat "$1" | cb;

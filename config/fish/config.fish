@@ -9,7 +9,7 @@ set fish_color_error red
 if status --is-login
 	set PATH $PATH ~/.bin #local bin
 	#set SHELL /bin/zsh
-	set EDITOR vim
+	set EDITOR nvim
 
 end
 
@@ -54,6 +54,8 @@ alias gcm="git commit -m"
 alias gad="git add -A"
 
 alias calc="bc -l"
+
+alias vim="nvim"
 
 #welcome
 ~/.config/fish/welcome

@@ -46,8 +46,15 @@ Plug 'Shougo/unite.vim'
 Plug 'Shougo/vimfiler.vim'
 Plug 'Shougo/neossh.vim'
 Plug 'benekastah/neomake'
+Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
+Plug 'turbio/browserlink.vim'
+"Plug 'seletskiy/vim-autosurround'
+	"inoremap  ( (<C-O>:call AutoSurround(")")<CR>
+"Plug 'lornix/vim-scrollbar'
+"Plug 'dbsr/vimfox'
+
 "----------------------------------------
 
 call plug#end()
@@ -60,7 +67,7 @@ set tabstop=4
 set shiftwidth=4
 set cindent
 
-set shell=bash
+set shell=zsh
 set pastetoggle=<f5>
 set wildmode=longest,list,full
 set wildmenu
@@ -288,13 +295,18 @@ nnoremap <leader>fh :FSHere<CR>
 "nnoremap A<esc> <nop>
 "}}}
 "plugin settings {{{
+"scrollbar {{{
+"let g:scrollbar_thumb='a'
+"let g:scrollbar_clear='b'
+"}}}
 "ycm {{{
 set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
 "let g:ycm_collect_identifiers_from_tags_files = 1
 "let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf = '~/.vim/ycm_config.py'
 let g:ycm_error_symbol = '●'
+"let g:loaded_youcompleteme = 1
 "let g:ycm_error_symbol = ''
 "}}}
 "neocomplete {{{
@@ -326,10 +338,10 @@ let g:syntastic_auto_loc_list = 1 " Auto-open the error list
 "}}}
 "}}}
 
-"function! Noscrollbar(...)
-"let w:airline_section_z = '%{noscrollbar#statusline()}'
-"endfunction
-"call airline#add_statusline_func('Noscrollbar')
+function! Noscrollbar(...)
+	let w:airline_section_y = '%{noscrollbar#statusline(20,'' '',''█'',[''▐''],[''▌''])}'
+endfunction
+call airline#add_statusline_func('Noscrollbar')
 
 filetype plugin indent on
 
@@ -394,7 +406,7 @@ set noexpandtab
 "tnoremap <leader>k <nop>
 "tnoremap <leader>l <nop>
 
-"tnoremap jk <C-\><C-n>
+tnoremap jk <C-\><C-n>
 
 "nnoremap <space>h <C-w>h
 "nnoremap <space>j <C-w>j
@@ -409,6 +421,7 @@ nnoremap <A-l> <C-w>l
 set fillchars=vert:│
 
 "for some reason it wasn't working the first time
-set pastetoggle=<f5>
+set pastetoggle=<f2>
 
-autocmd VimLeave * NERDTreeClose
+autocmd FileType python set ts=4
+autocmd FileType python set noexpandtab

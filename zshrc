@@ -271,4 +271,16 @@ function preexec {
 	printf "\033]0;zsh - %s\a" "$1"
 }
 
-#alias vim='nvim'
+alias vim='nvim'
+
+# Make ^Z toggle between ^Z and fg
+function ctrlz() {
+if [[ $#BUFFER == 0 ]]; then
+    fg >/dev/null 2>&1 && zle redisplay
+else
+    zle push-input
+fi
+}
+
+zle -N ctrlz
+bindkey '^Z' ctrlz

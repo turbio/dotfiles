@@ -18,7 +18,7 @@ bspc monitor eDP1 -d 1 2 3 4 5 6 7 8 9
 #bspc rule -a Kupfer.py focus=on
 #bspc rule -a Screenkey manage=off
 
-bspc config top_padding 15
+#bspc config top_padding 15
 
 #heheheh
 bspc rule -a "*" floating=on

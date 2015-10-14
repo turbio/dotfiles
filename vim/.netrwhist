@@ -1,3 +1,9 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =1
-let g:netrw_dirhist_1='/home/mason/git/adv'
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/home/mason/git/haveijackedit/haveijackedit/__pycache__'
+let g:netrw_dirhist_2='/home/mason/git/haveijackedit/index'
+let g:netrw_dirhist_3='/home/mason/git/haveijackedit/index/__pycache__'
+let g:netrw_dirhist_4='/home/mason/git/haveijackedit/index/migrations'
+let g:netrw_dirhist_5='/home/mason/git/haveijackedit/index/migrations/__pycache__'
+let g:netrw_dirhist_6='/home/mason/git/haveijackedit/index/static'
+let g:netrw_dirhist_7='/home/mason/git/haveijackedit/haveijackedit'

@@ -4,6 +4,7 @@
 
 ctrl + alt + t
 	xfce4-terminal
+#gnome-terminal
 
 super + alt + Escape
 	bspc quit

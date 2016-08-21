@@ -5,3 +5,4 @@ ncmpcpp/error.log
 bin/*
 vim/ycm_config.py
 vim/ycm_config.pyc
+/vim/.netrwhist

@@ -6,8 +6,9 @@ call plug#begin('~/.vim/plugged')
 "----------------------------------------
 "bundles
 Plug 'tpope/vim-endwise'
+"Plug 'justinmk/vim-sneak'
 "Plug 'ShowMarks'
-Plug 'airblade/vim-gitgutter'
+"Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
 Plug 'scrooloose/syntastic'
 Plug 'majutsushi/tagbar'
@@ -16,44 +17,55 @@ Plug 'kien/ctrlp.vim'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
-Plug 'gerw/vim-HiLinkTrace'
-Plug 'jaxbot/semantic-highlight.vim'
+"Plug 'gerw/vim-HiLinkTrace'
+"Plug 'jaxbot/semantic-highlight.vim'
 Plug 'rstacruz/sparkup'
 "Plug 'Raimondi/delimitMate'
 Plug 'scrooloose/nerdcommenter'
 Plug 'tpope/vim-eunuch'
-Plug 'FSwitch'
-Plug 'gcavallanti/vim-noscrollbar'
+"Plug 'FSwitch'
+"Plug 'gcavallanti/vim-noscrollbar'
 "Plug 'gcmt/taboo.vim'
-Plug 'xolox/vim-notes'
+"Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'bling/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 Plug 'justinmk/vim-syntax-extra'
-Plug 'jceb/vim-orgmode'
+"Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
 Plug 'Valloric/YouCompleteMe'
 "Plug 'Shougo/neocomplete.vim'
-Plug 'davidhalter/jedi-vim'
+"Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
 Plug 'SirVer/ultisnips'
-"Plug 'honza/vim-snippets'
+Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
 Plug 'xuhdev/vim-latex-live-preview'
 Plug 'koron/nyancat-vim'
-Plug 'Nibble'
-Plug 'Shougo/unite.vim'
-Plug 'Shougo/vimfiler.vim'
-Plug 'Shougo/neossh.vim'
-Plug 'benekastah/neomake'
+"Plug 'Nibble'
+"Plug 'Shougo/unite.vim'
+"Plug 'Shougo/vimfiler.vim'
+"Plug 'Shougo/neossh.vim'
+"Plug 'benekastah/neomake'
 Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
-Plug 'turbio/browserlink.vim'
+
+Plug '~/git/bracey.vim'
+"Plug 'turbio/bracey.vim'
+
 "Plug 'seletskiy/vim-autosurround'
 	"inoremap  ( (<C-O>:call AutoSurround(")")<CR>
 "Plug 'lornix/vim-scrollbar'
 "Plug 'dbsr/vimfox'
+Plug 'hail2u/vim-css3-syntax'
+
+"a bunch of different css colorizers, haven't decided which is the best
+"Plug 'ap/vim-css-color'
+"Plug 'gorodinskiy/vim-coloresque'
+"Plug 'chrisbra/Colorizer'
+Plug 'lilydjwg/colorizer'
 
 "----------------------------------------
 
@@ -154,7 +166,6 @@ set gdefault
 
 "space space to clear
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
-nnoremap <CR> :
 
 "keep in center whenn searching
 nnoremap n nzzzv
@@ -302,18 +313,33 @@ nnoremap <leader>fh :FSHere<CR>
 "ycm {{{
 set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
-"let g:ycm_collect_identifiers_from_tags_files = 1
-"let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_collect_identifiers_from_tags_files = 1
+let g:ycm_seed_identifiers_with_syntax = 1
 let g:ycm_global_ycm_extra_conf = '~/.vim/ycm_config.py'
+let g:ycm_semantic_triggers =  {
+	\   'c' : ['->', '.'],
+	\   'css': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
+	\   'scss': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
+	\   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+	\             're!\[.*\]\s'],
+	\   'ocaml' : ['.', '#'],
+	\   'cpp,objcpp' : ['->', '.', '::'],
+	\   'perl' : ['->'],
+	\   'php' : ['->', '::'],
+	\   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+	\   'ruby' : ['.', '::'],
+	\   'lua' : ['.', ':'],
+	\   'erlang' : [':'],
+	\ }
 let g:ycm_error_symbol = '●'
 "let g:loaded_youcompleteme = 1
 "let g:ycm_error_symbol = ''
 "}}}
 "neocomplete {{{
-let g:neocomplete#enable_at_startup = 1
-let g:neocomplete#enable_smart_case = 1
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+"let g:neocomplete#enable_at_startup = 1
+"let g:neocomplete#enable_smart_case = 1
+"inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+"autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 "}}}
 "ulti snips {{{
 "ultisnips
@@ -322,6 +348,7 @@ let g:UltiSnipsExpandTrigger = "<C-j>"
 let g:UltiSnipsListSnippets = "<C-k>"
 let g:UltiSnipsJumpForwardTrigger = "<C-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
+
 "}}}
 "airline {{{
 let g:airline_powerline_fonts=1
@@ -336,12 +363,17 @@ let g:syntastic_full_redraws = 1
 let g:syntastic_auto_jump = 2 " Jump to syntax errors
 let g:syntastic_auto_loc_list = 1 " Auto-open the error list
 "}}}
+"bracey {{{
+"let g:bracey_server_allow_remote_connetions = 0
+let g:bracey_server_port = 13378
+"let g:bracey_auto_start_server = 0
+"}}}
 "}}}
 
-function! Noscrollbar(...)
-	let w:airline_section_y = '%{noscrollbar#statusline(20,'' '',''█'',[''▐''],[''▌''])}'
-endfunction
-call airline#add_statusline_func('Noscrollbar')
+"function! Noscrollbar(...)
+	"let w:airline_section_y = '%{noscrollbar#statusline(20,'' '',''█'',[''▐''],[''▌''])}'
+"endfunction
+"call airline#add_statusline_func('Noscrollbar')
 
 filetype plugin indent on
 
@@ -406,17 +438,19 @@ set noexpandtab
 "tnoremap <leader>k <nop>
 "tnoremap <leader>l <nop>
 
-tnoremap jk <C-\><C-n>
+if has('nvim')
+	tnoremap jk <C-\><C-n>
+endif
 
 "nnoremap <space>h <C-w>h
 "nnoremap <space>j <C-w>j
 "nnoremap <space>k <C-w>k
 "nnoremap <space>l <C-w>l
 
-nnoremap <A-h> <C-w>h
-nnoremap <A-j> <C-w>j
-nnoremap <A-k> <C-w>k
-nnoremap <A-l> <C-w>l
+"nnoremap <A-h> <C-w>h
+"nnoremap <A-j> <C-w>j
+"nnoremap <A-k> <C-w>k
+"nnoremap <A-l> <C-w>l
 
 set fillchars=vert:│
 

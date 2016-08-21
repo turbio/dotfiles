@@ -143,7 +143,7 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 #fish stuff is cool
-#source ~/.config/zsh/zsh-autosuggestions/autosuggestions.zsh
+source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 #
 #zle-line-init() {
 #	zle autosuggest-start
@@ -154,7 +154,6 @@ bindkey '^[[B' history-substring-search-down
 #
 #AUTOSUGGESTION_HIGHLIGHT_COLOR='fg=black,bold'
 #AUTOSUGGESTION_HIGHLIGHT_CURSOR=0
-
 
 #for unarchiveing stuff
 alias uz='unzip'

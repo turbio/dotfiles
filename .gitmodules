@@ -7,3 +7,6 @@
 [submodule "config/zsh/zsh-history-substring-search"]
 	path = config/zsh/zsh-history-substring-search
 	url = git@github.com:zsh-users/zsh-history-substring-search.git
+[submodule "config/zsh/zsh-autosuggestions"]
+	path = config/zsh/zsh-autosuggestions
+	url = git@github.com:zsh-users/zsh-autosuggestions.git

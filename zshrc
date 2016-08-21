@@ -235,16 +235,7 @@ alias t="todo.sh"
 #esac
 #~/.stegosaurus
 
-export PATH=~/bin:~/.gem/ruby/2.2.0/bin:$PATH
-
-#get new mac address
-function randmac () {
-	macaddr=`echo $FQDN|md5sum|sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02:\1:\2:\3:\4:\5/'`;
-	sudo ip link set wlp1s0 down;
-	sudo ip link set wlp1s0 addr $macaddr;
-	sudo ip link set wlp1s0 up;
-	echo new mac: $macaddr
-}
+export PATH=~/bin:~/.gem/ruby/2.3.0/bin:$PATH
 
 #colors in less
 export LESS_TERMCAP_mb=$'\E[01;31m'

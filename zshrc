@@ -261,7 +261,9 @@ function preexec {
 	printf "\033]0;zsh - %s\a" "$1"
 }
 
-alias vim='nvim'
+if (( $+commands[nvim] )) ; then
+	alias vim='nvim'
+fi
 
 # Make ^Z toggle between ^Z and fg
 function ctrlz() {

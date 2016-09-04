@@ -181,10 +181,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 
 #a bunch of aliases to speed things up
-alias pm="sudo pm-suspend-hybrid"
-alias net="wicd-curses"
-alias vol="alsamixer"
-alias get="yaourt -S"	#quickly install pacages
 alias chr="google-chrome"	#because I use chome a lot
 alias y="yaourt"	#because typing the french word for yogurt is hard
 alias bri="sudo brightness" #quickly change brightness
@@ -195,7 +191,7 @@ alias gdf="git diff"
 alias gdfc="git diff --cached"
 alias gcm="git commit -m"
 alias gad="git add -A"
-alias gpom="git push origin master"
+alias gpu="git push"
 alias gpl="git pull"
 
 #i cool idea i got from somewhere... forgot where

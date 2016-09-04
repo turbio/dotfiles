@@ -8,16 +8,17 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-endwise'
 "Plug 'justinmk/vim-sneak'
 "Plug 'ShowMarks'
-"Plug 'airblade/vim-gitgutter'
+Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
-Plug 'scrooloose/syntastic'
+"Plug 'scrooloose/syntastic'
 Plug 'majutsushi/tagbar'
 "Plug 'Gundo'
 Plug 'kien/ctrlp.vim'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
-"Plug 'gerw/vim-HiLinkTrace'
+Plug 'gerw/vim-HiLinkTrace'
+Plug 'tpope/vim-sleuth'
 "Plug 'jaxbot/semantic-highlight.vim'
 Plug 'rstacruz/sparkup'
 "Plug 'Raimondi/delimitMate'
@@ -47,10 +48,12 @@ Plug 'koron/nyancat-vim'
 "Plug 'Shougo/unite.vim'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
-"Plug 'benekastah/neomake'
+Plug 'benekastah/neomake'
 Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
+Plug 'tpope/vim-fireplace'
+Plug 'jelera/vim-javascript-syntax'
 
 Plug '~/git/bracey.vim'
 "Plug 'turbio/bracey.vim'
@@ -84,7 +87,6 @@ set pastetoggle=<f5>
 set wildmode=longest,list,full
 set wildmenu
 set mouse=a
-set encoding=utf-8
 set modelines=0
 set autoindent
 set showmode
@@ -92,7 +94,7 @@ set hidden
 set showcmd
 set visualbell
 set cursorline
-set ttyfast
+"set ttyfast
 set ruler
 set backspace=indent,eol,start
 set number
@@ -310,6 +312,17 @@ nnoremap <leader>fh :FSHere<CR>
 "let g:scrollbar_thumb='a'
 "let g:scrollbar_clear='b'
 "}}}
+"gitgutter {{{
+let g:gitgutter_sign_column_always = 1
+let g:gitgutter_realtime = 1
+let g:gitgutter_eager = 1
+
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '~'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_modified_removed = '~'
+let g:gitgutter_sign_removed_first_line = '^'
+"}}}
 "ycm {{{
 set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
@@ -331,7 +344,7 @@ let g:ycm_semantic_triggers =  {
 	\   'lua' : ['.', ':'],
 	\   'erlang' : [':'],
 	\ }
-let g:ycm_error_symbol = '●'
+let g:ycm_error_symbol = ''
 "let g:loaded_youcompleteme = 1
 "let g:ycm_error_symbol = ''
 "}}}
@@ -357,11 +370,20 @@ let g:airline#extensions#tabline#enabled = 1
 "}}}
 "syntastic {{{
 "Syntastic config
-let g:syntastic_error_symbol = '✗'
+let g:syntastic_error_symbol = ''
 let g:syntastic_warning_symbol = '⚠'
-let g:syntastic_full_redraws = 1
-let g:syntastic_auto_jump = 2 " Jump to syntax errors
-let g:syntastic_auto_loc_list = 1 " Auto-open the error list
+"let g:syntastic_full_redraws = 1
+let g:syntastic_auto_jump = 0 " Jump to syntax errors
+let g:syntastic_auto_loc_list = 0 " Auto-open the error list
+
+let g:syntastic_javascript_checkers = ['eslint']
+
+"}}}
+"neomake {{{
+autocmd! BufWritePost,BufEnter * Neomake
+let g:neomake_verbose = 0
+let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
+let g:neomake_airline = 0
 "}}}
 "bracey {{{
 "let g:bracey_server_allow_remote_connetions = 0
@@ -406,13 +428,6 @@ endif"
 "let g:showmarks_textother="\t"
 "let g:showmarks_enable=1
 
-"dummy gutter sign so the gutter is always shown
-sign define dummy
-execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
-autocmd BufEnter * sign define dummy
-execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
-autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
-
 "because it wasn't working before
 set noexpandtab
 
@@ -440,6 +455,7 @@ set noexpandtab
 
 if has('nvim')
 	tnoremap jk <C-\><C-n>
+	Guifont Terminus:h9
 endif
 
 "nnoremap <space>h <C-w>h
@@ -459,3 +475,20 @@ set pastetoggle=<f2>
 
 autocmd FileType python set ts=4
 autocmd FileType python set noexpandtab
+
+let g:terminal_color_0="#272822"
+let g:terminal_color_1="#F92672"
+let g:terminal_color_2="#82B414"
+let g:terminal_color_3="#FD971F"
+let g:terminal_color_4="#268BD2"
+let g:terminal_color_5="#8C54FE"
+let g:terminal_color_6="#56C2D5"
+let g:terminal_color_7="#FFFFFF"
+let g:terminal_color_8="#5C5C5C"
+let g:terminal_color_9="#FF5995"
+let g:terminal_color_10="#A6E22E"
+let g:terminal_color_11="#E6DB74"
+let g:terminal_color_12="#62ADE3"
+let g:terminal_color_13="#AE81FF"
+let g:terminal_color_14="#66D9EF"
+let g:terminal_color_15="#CCCCCC"

@@ -69,6 +69,7 @@ Plug 'hail2u/vim-css3-syntax'
 "Plug 'gorodinskiy/vim-coloresque'
 "Plug 'chrisbra/Colorizer'
 Plug 'lilydjwg/colorizer'
+Plug 'ryanoasis/vim-devicons'
 
 "----------------------------------------
 
@@ -455,7 +456,6 @@ set noexpandtab
 
 if has('nvim')
 	tnoremap jk <C-\><C-n>
-	Guifont Terminus:h9
 endif
 
 "nnoremap <space>h <C-w>h

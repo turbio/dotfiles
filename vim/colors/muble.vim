@@ -31,7 +31,6 @@ hi Operator			ctermfg=1		ctermbg=NONE	cterm=NONE	guifg=#f92672	guibg=NONE		gui=N
 hi Type				ctermfg=1		ctermbg=NONE	cterm=NONE	guifg=#f92672	guibg=NONE		gui=NONE
 hi Boolean			ctermfg=13		ctermbg=NONE	cterm=NONE	guifg=#ae81ff	guibg=NONE		gui=NONE
 hi Number			ctermfg=13		ctermbg=NONE	cterm=NONE	guifg=#ae81ff	guibg=NONE		gui=NONE
-hi javaScriptNumber	ctermfg=13		ctermbg=NONE	cterm=NONE	guifg=#ae81ff	guibg=NONE		gui=NONE
 hi Character		ctermfg=11		ctermbg=NONE	cterm=NONE	guifg=#e6db74	guibg=NONE		gui=NONE
 hi NonText			ctermfg=59		ctermbg=NONE	cterm=NONE	guifg=#5c5c5c	guibg=NONE		gui=NONE
 hi SpecialKey		ctermfg=59		ctermbg=NONE	cterm=NONE	guifg=#5f5f5f	guibg=NONE		gui=NONE
@@ -67,12 +66,20 @@ hi YcmErrorSection	ctermfg=1		ctermbg=NONE	cterm=underline	guifg=NONE	guibg=NONE
 hi YcmErrorSign		ctermfg=1		ctermbg=NONE	cterm=NONE	guifg=#ff0000	guibg=NONE		gui=NONE
 
 "javascript
+hi javaScriptNumber     ctermfg=13	ctermbg=NONE	cterm=NONE	guifg=#ae81ff	guibg=NONE		gui=NONE
 hi javaScriptFuncArg	ctermfg=3	ctermbg=NONE	cterm=NONE	guifg=#fd971f	guibg=NONE		gui=NONE
 hi javaScriptFuncDef	ctermfg=10	ctermbg=NONE	cterm=NONE	guifg=#a6e223	guibg=NONE		gui=NONE
 hi javaScriptParens		ctermfg=7	ctermbg=NONE	cterm=NONE	guifg=#ffffff	guibg=NONE		gui=NONE
 hi javaScriptNull		ctermfg=1	ctermbg=NONE	cterm=NONE	guifg=#f92672	guibg=NONE		gui=NONE
 hi javaScriptEndColons	ctermfg=7	ctermbg=NONE	cterm=NONE	guifg=#ffffff	guibg=NONE		gui=NONE
 hi javaScriptFuncComma	ctermfg=7	ctermbg=NONE	cterm=NONE	guifg=#ffffff	guibg=NONE		gui=NONE
+hi javaScriptAjaxMethods	ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptBrowserObjects	ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptMessage		ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptExceptions		ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptLogicSymbols	ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptWebAPI			ctermfg=NONE	ctermbg=NONE	cterm=NONE	guifg=NONE	guibg=NONE		gui=NONE
+hi javaScriptFuncExp		ctermfg=10		ctermbg=NONE	cterm=NONE	guifg=#82b414	guibg=NONE	gui=NONE
 
 "ruby
 hi rubyStringDelimiter	ctermfg=11	ctermbg=NONE	cterm=NONE	guifg=#e6db74	guibg=NONE		gui=NONE

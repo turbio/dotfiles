@@ -56,8 +56,7 @@ Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace'
 Plug 'jelera/vim-javascript-syntax'
 
-Plug '~/git/bracey.vim'
-"Plug 'turbio/bracey.vim'
+Plug 'turbio/bracey.vim'
 
 "Plug 'seletskiy/vim-autosurround'
 	"inoremap  ( (<C-O>:call AutoSurround(")")<CR>

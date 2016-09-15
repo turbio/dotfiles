@@ -123,3 +123,13 @@ super + button{1-3}
 
 super + @button{1-3}
 	bspc pointer -u
+
+## Media keys
+XF86AudioRaiseVolume
+	pactl set-sink-volume 0 +5%
+
+XF86AudioLowerVolume
+	pactl set-sink-volume 0 -5%
+
+XF86AudioMute
+	amixer -q set Master toggle

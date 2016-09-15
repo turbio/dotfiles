@@ -6,6 +6,7 @@ call plug#begin('~/.vim/plugged')
 "----------------------------------------
 "bundles
 Plug 'tpope/vim-endwise'
+Plug 'turbio/muble.vim'
 "Plug 'justinmk/vim-sneak'
 "Plug 'ShowMarks'
 Plug 'airblade/vim-gitgutter'

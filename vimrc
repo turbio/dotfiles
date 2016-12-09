@@ -5,22 +5,23 @@ call plug#begin('~/.vim/plugged')
 
 "----------------------------------------
 "bundles
+
 Plug 'tpope/vim-endwise'
-"Plug 'justinmk/vim-sneak'
+Plug 'justinmk/vim-sneak'
 "Plug 'ShowMarks'
 Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
 "Plug 'scrooloose/syntastic'
-Plug 'majutsushi/tagbar'
+"Plug 'majutsushi/tagbar'
 "Plug 'Gundo'
 Plug 'kien/ctrlp.vim'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
-Plug 'gerw/vim-HiLinkTrace'
-Plug 'tpope/vim-sleuth'
+"Plug 'gerw/vim-HiLinkTrace'
+"Plug 'tpope/vim-sleuth'
 "Plug 'jaxbot/semantic-highlight.vim'
-Plug 'rstacruz/sparkup'
+"Plug 'rstacruz/sparkup'
 "Plug 'Raimondi/delimitMate'
 Plug 'scrooloose/nerdcommenter'
 Plug 'tpope/vim-eunuch'
@@ -31,45 +32,46 @@ Plug 'tpope/vim-eunuch'
 Plug 'xolox/vim-misc'
 Plug 'bling/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'justinmk/vim-syntax-extra'
+"Plug 'justinmk/vim-syntax-extra'
 "Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
-Plug 'Valloric/YouCompleteMe'
+"Plug 'Valloric/YouCompleteMe'
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
-Plug 'xuhdev/vim-latex-live-preview'
-Plug 'koron/nyancat-vim'
+"Plug 'xuhdev/vim-latex-live-preview'
+"Plug 'koron/nyancat-vim'
 "Plug 'Nibble'
 "Plug 'Shougo/unite.vim'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
 Plug 'benekastah/neomake'
-Plug 'tpope/vim-fugitive'
+"Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
-Plug 'tpope/vim-fireplace'
+Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'jelera/vim-javascript-syntax'
+Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 
-Plug '~/git/bracey.vim'
-"Plug 'turbio/bracey.vim'
+"Plug '~/git/bracey.vim'
+Plug 'turbio/bracey.vim'
 
 "Plug 'seletskiy/vim-autosurround'
 	"inoremap  ( (<C-O>:call AutoSurround(")")<CR>
 "Plug 'lornix/vim-scrollbar'
 "Plug 'dbsr/vimfox'
-Plug 'hail2u/vim-css3-syntax'
+"Plug 'hail2u/vim-css3-syntax'
 
 "a bunch of different css colorizers, haven't decided which is the best
 "Plug 'ap/vim-css-color'
 "Plug 'gorodinskiy/vim-coloresque'
 "Plug 'chrisbra/Colorizer'
-Plug 'lilydjwg/colorizer'
-Plug 'ryanoasis/vim-devicons'
+"Plug 'lilydjwg/colorizer'
+"Plug 'ryanoasis/vim-devicons'
 
 "----------------------------------------
 
@@ -276,6 +278,8 @@ nnoremap <leader>w :%s/\s\+$//<cr>:let @/=''<cr>
 "reselect pasted
 nnoremap <leader>v V`]
 
+
+
 "Toggle spelling
 nmap <leader>s :set invspell<CR>:set spell?<CR>
 
@@ -323,6 +327,12 @@ let g:gitgutter_sign_modified = '~'
 let g:gitgutter_sign_removed = '-'
 let g:gitgutter_sign_modified_removed = '~'
 let g:gitgutter_sign_removed_first_line = '^'
+"}}}
+"sneak {{{
+nnoremap \ <Plug>Sneak_s
+"}}}
+"ctrlp {{{
+let g:ctrlp_custom_ignore = 'node_modules\|\.git'
 "}}}
 "ycm {{{
 set completeopt-=preview

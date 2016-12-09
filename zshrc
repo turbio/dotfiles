@@ -143,7 +143,7 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 #fish stuff is cool
-source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+#source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 #zle-line-init() {
 #	zle autosuggest-start

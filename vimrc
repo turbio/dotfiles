@@ -8,6 +8,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-endwise'
 Plug 'justinmk/vim-sneak'
+Plug 'turbio/muble.vim'
 "Plug 'ShowMarks'
 Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
@@ -57,7 +58,6 @@ Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'jelera/vim-javascript-syntax'
 Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 
-"Plug '~/git/bracey.vim'
 Plug 'turbio/bracey.vim'
 
 "Plug 'seletskiy/vim-autosurround'

@@ -8,6 +8,8 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-endwise'
 Plug 'justinmk/vim-sneak'
+Plug 'turbio/muble.vim'
+"Plug 'justinmk/vim-sneak'
 "Plug 'ShowMarks'
 Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'

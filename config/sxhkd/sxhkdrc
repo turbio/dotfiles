@@ -74,7 +74,6 @@ super + {_,shift + }c
 super + {Left,Right}
 	bspc desktop -f {prev,next}
 
-# focus the next/previous desktop
 super + shift + Right
 	bspc node -d next; bspc desktop -f next
 

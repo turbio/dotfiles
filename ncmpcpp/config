@@ -33,7 +33,6 @@ browser_display_mode = "classic" (classic/columns)
 progressbar_look = ───
 user_interface = "alternative" (classic/alternative)
 default_find_mode = "wrapped" (wrapped/normal)
-default_space_mode = "add" (add/select)
 header_visibility = "yes"
 statusbar_visibility = "yes"
 cyclic_scrolling = "no"

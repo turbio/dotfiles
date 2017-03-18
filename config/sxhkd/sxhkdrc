@@ -8,6 +8,10 @@ super + Return
 	#gnome-terminal
 
 # program launcher
+super + semicolon
+	passmenu
+
+# pass launcher
 super + space
 	dmenu_run
 
@@ -41,6 +45,12 @@ super + y
 # swap the current node and the biggest node
 super + g
 	bspc node -s biggest
+
+super + z
+	bspc node @/ -R 90
+
+super + x
+	bspc node @/ -R -90
 
 #
 # state/flags
@@ -131,4 +141,4 @@ XF86AudioLowerVolume
 	pactl set-sink-volume 0 -5%
 
 XF86AudioMute
-	amixer -q set Master toggle
+	pactl set-sink-mute 0 toggle

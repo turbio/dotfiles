@@ -90,7 +90,7 @@ bindkey "^[[1;5C" end-of-line
 #some "essential" stuff
 setopt AUTO_CD
 setopt CORRECT
-setopt completealiases
+#setopt completealiases
 setopt append_history
 setopt share_history
 setopt hist_verify
@@ -186,13 +186,20 @@ alias y="yaourt"	#because typing the french word for yogurt is hard
 alias bri="sudo brightness" #quickly change brightness
 
 #some cool fancy git aliases
+alias g="git"
+compdef g=git
+
 alias gst="git status -sb"
+compdef gst=git
+
 alias gdf="git diff"
 alias gdfc="git diff --cached"
 alias gcm="git commit -m"
 alias gad="git add -A"
-alias gpu="git push"
-alias gpl="git pull"
+alias gp="git push"
+alias gco="git checkout -B"
+compdef gco=git
+#alias gpu="git pull --rebase"
 
 #i cool idea i got from somewhere... forgot where
 alias .="cd .."
@@ -230,7 +237,7 @@ alias t="todo.sh"
 #esac
 #~/.stegosaurus
 
-export PATH=~/bin:~/.gem/ruby/2.3.0/bin:$PATH
+export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/.local/share/gopath/bin:$PATH
 
 #colors in less
 export LESS_TERMCAP_mb=$'\E[01;31m'
@@ -272,3 +279,5 @@ fi
 
 zle -N ctrlz
 bindkey '^Z' ctrlz
+
+export GOPATH=~/.local/share/gopath

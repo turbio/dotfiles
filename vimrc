@@ -13,13 +13,13 @@ Plug 'turbio/muble.vim'
 Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
 "Plug 'scrooloose/syntastic'
-"Plug 'majutsushi/tagbar'
+Plug 'majutsushi/tagbar'
 "Plug 'Gundo'
 Plug 'kien/ctrlp.vim'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
-"Plug 'gerw/vim-HiLinkTrace'
+Plug 'gerw/vim-HiLinkTrace'
 "Plug 'tpope/vim-sleuth'
 "Plug 'jaxbot/semantic-highlight.vim'
 "Plug 'rstacruz/sparkup'
@@ -37,7 +37,8 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
-"Plug 'Valloric/YouCompleteMe'
+Plug 'Valloric/YouCompleteMe'
+"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
@@ -51,12 +52,13 @@ Plug 'honza/vim-snippets'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
 Plug 'benekastah/neomake'
-"Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'jelera/vim-javascript-syntax'
 Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+Plug 'lambdatoast/elm.vim'
 
 Plug 'turbio/bracey.vim'
 
@@ -334,6 +336,9 @@ nnoremap \ <Plug>Sneak_s
 "ctrlp {{{
 let g:ctrlp_custom_ignore = 'node_modules\|\.git'
 "}}}
+"deoplete {{{
+let g:deoplete#enable_at_startup = 1
+"}}}
 "ycm {{{
 set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
@@ -365,6 +370,9 @@ let g:ycm_error_symbol = ''
 "inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 "autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 "}}}
+"tagbar {{{
+autocmd BufRead,BufNewFile *.js let g:tagbar_ctags_bin = "jsctags -f"
+"}}}
 "ulti snips {{{
 "ultisnips
 let g:UltiSnipsEditSplit = "horizontal"
@@ -382,7 +390,7 @@ let g:airline#extensions#tabline#enabled = 1
 "syntastic {{{
 "Syntastic config
 let g:syntastic_error_symbol = ''
-let g:syntastic_warning_symbol = '⚠'
+let g:syntastic_warning_symbol = ''
 "let g:syntastic_full_redraws = 1
 let g:syntastic_auto_jump = 0 " Jump to syntax errors
 let g:syntastic_auto_loc_list = 0 " Auto-open the error list
@@ -394,7 +402,9 @@ let g:syntastic_javascript_checkers = ['eslint']
 autocmd! BufWritePost,BufEnter * Neomake
 let g:neomake_verbose = 0
 let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
+let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
 let g:neomake_airline = 0
+let g:neomake_logfile = '/tmp/neomake'
 "}}}
 "bracey {{{
 "let g:bracey_server_allow_remote_connetions = 0
@@ -502,3 +512,27 @@ let g:terminal_color_12="#62ADE3"
 let g:terminal_color_13="#AE81FF"
 let g:terminal_color_14="#66D9EF"
 let g:terminal_color_15="#CCCCCC"
+
+function! MarkWindowSwap()
+    let g:markedWinNum = winnr()
+endfunction
+
+function! DoWindowSwap()
+    "Mark destination
+    let curNum = winnr()
+    let curBuf = bufnr( "%" )
+    exe g:markedWinNum . "wincmd w"
+    "Switch to source and shuffle dest->source
+    let markedBuf = bufnr( "%" )
+    "Hide and open so that we aren't prompted and keep history
+    exe 'hide buf' curBuf
+    "Switch to dest and shuffle source->dest
+    exe curNum . "wincmd w"
+    "Hide and open so that we aren't prompted and keep history
+    exe 'hide buf' markedBuf 
+endfunction
+
+noremap <silent> <leader>mw :call MarkWindowSwap()<CR>
+noremap <silent> <leader>pw :call DoWindowSwap()<CR>
+
+let $GOPATH = "/home/mason/.local/share/gopath"

@@ -6,6 +6,9 @@ call plug#begin('~/.vim/plugged')
 "----------------------------------------
 "bundles
 
+Plug 'sbdchd/neoformat'
+Plug 'tpope/vim-obsession'
+Plug 'bufkill.vim'
 Plug 'tpope/vim-endwise'
 Plug 'justinmk/vim-sneak'
 Plug 'turbio/muble.vim'
@@ -56,7 +59,8 @@ Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
-Plug 'jelera/vim-javascript-syntax'
+"Plug 'jelera/vim-javascript-syntax'
+Plug 'pangloss/vim-javascript'
 Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'lambdatoast/elm.vim'
 
@@ -321,8 +325,8 @@ nnoremap <leader>fh :FSHere<CR>
 "}}}
 "gitgutter {{{
 let g:gitgutter_sign_column_always = 1
-let g:gitgutter_realtime = 1
-let g:gitgutter_eager = 1
+let g:gitgutter_realtime = 0
+let g:gitgutter_eager = 0
 
 let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '~'
@@ -405,6 +409,11 @@ let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
 let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
 let g:neomake_airline = 0
 let g:neomake_logfile = '/tmp/neomake'
+"}}}
+"neoformat {{{
+autocmd FileType javascript set formatprg=prettier\ --stdin\ --single-quote\ --trailing-comma\ all\ --bracket-spacing
+let g:neoformat_enabled_javascript = ['prettier']
+let g:neoformat_try_formatprg = 1
 "}}}
 "bracey {{{
 "let g:bracey_server_allow_remote_connetions = 0
@@ -535,4 +544,9 @@ endfunction
 noremap <silent> <leader>mw :call MarkWindowSwap()<CR>
 noremap <silent> <leader>pw :call DoWindowSwap()<CR>
 
-let $GOPATH = "/home/mason/.local/share/gopath"
+let $GOPATH = getcwd()
+
+augroup fmt
+  autocmd!
+  autocmd BufWritePre * Neoformat
+augroup END

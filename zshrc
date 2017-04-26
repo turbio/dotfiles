@@ -75,18 +75,6 @@ job_status(){
 
 }
 
-#fix home, del, et. al. keys
-bindkey "^[[1~" beginning-of-line
-bindkey "^[[4~" end-of-line
-bindkey "^[[2~" overwrite-mode
-bindkey "^[[3~" delete-char
-bindkey "^[[5~" up-line-or-history
-bindkey "^[[6~" down-line-or-history
-
-#control right and left act as hoem and end for laptops
-bindkey "^[[1;5D" beginning-of-line
-bindkey "^[[1;5C" end-of-line
-
 #some "essential" stuff
 setopt AUTO_CD
 setopt CORRECT
@@ -136,24 +124,13 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND='fg=red,bold'
 
 # bind UP and DOWN arrow keys to history search
 zmodload zsh/terminfo
-bindkey "$terminfo[kcuu1]" history-substring-search-up
-bindkey "$terminfo[kcud1]" history-substring-search-down
 # bind UP and DOWN arrow keys
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-
-#fish stuff is cool
-#source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-#zle-line-init() {
-#	zle autosuggest-start
-#}
-#zle -N zle-line-init
-#bindkey '^T' autosuggest-toggle
-#bindkey -a 'f' vi-forward-blank-word
-#
-#AUTOSUGGESTION_HIGHLIGHT_COLOR='fg=black,bold'
-#AUTOSUGGESTION_HIGHLIGHT_CURSOR=0
+bindkey '^j' history-substring-search-down
+bindkey '^k' history-substring-search-up
+bindkey '^h' backward-char
+bindkey '^l' forward-char
+bindkey '^[h' backward-word
+bindkey '^[l' forward-word
 
 #for unarchiveing stuff
 alias uz='unzip'
@@ -281,3 +258,7 @@ zle -N ctrlz
 bindkey '^Z' ctrlz
 
 export GOPATH=~/.local/share/gopath
+
+export GCE_EMAIL="ansible-deploy@marine-cycle-160323.iam.gserviceaccount.com"
+export GCE_PROJECT="marine-cycle-160323"
+export GCE_CREDENTIALS_FILE_PATH="/home/mason/git/repl.it/goval-deploy/.gcp"

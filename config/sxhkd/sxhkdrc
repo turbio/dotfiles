@@ -80,21 +80,15 @@ super + {p,b,comma,period}
 super + {_,shift + }c
 	bspc node -f {next,prev}
 
-# focus the next/previous desktop
-super + {Left,Right}
-	bspc desktop -f {prev,next}
-
-super + shift + Right
+super + shift + o
 	bspc node -d next; bspc desktop -f next
 
-super + shift + Left
+super + shift + i
 	bspc node -d prev; bspc desktop -f prev
 
 # focus the older or newer node in the focus history
-super + {o,i}
-	bspc wm -h off; \
-	bspc node {older,newer} -f; \
-	bspc wm -h on
+super + {i,o}
+	bspc desktop -f {prev,next}
 
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}

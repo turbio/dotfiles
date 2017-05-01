@@ -3,9 +3,6 @@ if !1 | finish | endif
 
 call plug#begin('~/.vim/plugged')
 
-"----------------------------------------
-"bundles
-
 Plug 'sbdchd/neoformat'
 Plug 'tpope/vim-obsession'
 Plug 'bufkill.vim'
@@ -19,6 +16,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'majutsushi/tagbar'
 "Plug 'Gundo'
 Plug 'kien/ctrlp.vim'
+Plug 'undotree.vim'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
@@ -61,6 +59,7 @@ Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 "Plug 'jelera/vim-javascript-syntax'
 Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
 Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'lambdatoast/elm.vim'
 
@@ -79,9 +78,9 @@ Plug 'turbio/bracey.vim'
 "Plug 'lilydjwg/colorizer'
 "Plug 'ryanoasis/vim-devicons'
 
-"----------------------------------------
-
 call plug#end()
+
+let g:jsx_ext_required = 0
 
 "}}}
 "basic options {{{

@@ -5,7 +5,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'sbdchd/neoformat'
 Plug 'tpope/vim-obsession'
-Plug 'bufkill.vim'
+"Plug 'bufkill.vim'
 Plug 'tpope/vim-endwise'
 Plug 'justinmk/vim-sneak'
 Plug 'turbio/muble.vim'
@@ -13,10 +13,10 @@ Plug 'turbio/muble.vim'
 Plug 'airblade/vim-gitgutter'
 "Plug 'nathanaelkane/vim-indent-guides'
 "Plug 'scrooloose/syntastic'
-Plug 'majutsushi/tagbar'
+Plug 'majutsushi/tagbar', { 'on': 'Tagbar' }
 "Plug 'Gundo'
 Plug 'kien/ctrlp.vim'
-Plug 'undotree.vim'
+"Plug 'undotree.vim', { 'on': 'UndotreeToggle' }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
@@ -43,8 +43,8 @@ Plug 'Valloric/YouCompleteMe'
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
+"Plug 'SirVer/ultisnips'
+"Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
 "Plug 'xuhdev/vim-latex-live-preview'
 "Plug 'koron/nyancat-vim'
@@ -57,16 +57,17 @@ Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
-"Plug 'jelera/vim-javascript-syntax'
+
 Plug 'pangloss/vim-javascript'
-Plug 'mxw/vim-jsx'
-Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+Plug 'MaxMEllon/vim-jsx-pretty'
+
+"Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'lambdatoast/elm.vim'
 
 Plug 'turbio/bracey.vim'
 
 "Plug 'seletskiy/vim-autosurround'
-	"inoremap  ( (<C-O>:call AutoSurround(")")<CR>
+  "inoremap  ( (<C-O>:call AutoSurround(")")<CR>
 "Plug 'lornix/vim-scrollbar'
 "Plug 'dbsr/vimfox'
 "Plug 'hail2u/vim-css3-syntax'
@@ -79,8 +80,6 @@ Plug 'turbio/bracey.vim'
 "Plug 'ryanoasis/vim-devicons'
 
 call plug#end()
-
-let g:jsx_ext_required = 0
 
 "}}}
 "basic options {{{
@@ -134,9 +133,9 @@ let mapleader=" "
 "fixes cron i think
 set backupskip=/tmp/*
 augroup cline
-	au!
-	au WinLeave,InsertEnter * set nocursorline
-	au WinEnter,InsertLeave * set cursorline
+  au!
+  au WinLeave,InsertEnter * set nocursorline
+  au WinEnter,InsertLeave * set cursorline
 augroup END
 "}}}
 "backup stuff {{{
@@ -184,26 +183,26 @@ nnoremap N Nzzzv
 nnoremap * *<c-o>
 
 function! HiInterestingWord(n) "{{{
-	" Save our location.
-	normal! mz
+  " Save our location.
+  normal! mz
 
-	" Yank the current word into the z register.
-	normal! "zyiw
+  " Yank the current word into the z register.
+  normal! "zyiw
 
-	" Calculate an arbitrary match ID.	Hopefully nothing else is using it.
-	let mid = 86750 + a:n
+  " Calculate an arbitrary match ID.  Hopefully nothing else is using it.
+  let mid = 86750 + a:n
 
-	" Clear existing matches, but don't worry if they don't exist.
-	silent! call matchdelete(mid)
+  " Clear existing matches, but don't worry if they don't exist.
+  silent! call matchdelete(mid)
 
-	" Construct a literal pattern that has to match at boundaries.
-	let pat = '\V\<' . escape(@z, '\') . '\>'
+  " Construct a literal pattern that has to match at boundaries.
+  let pat = '\V\<' . escape(@z, '\') . '\>'
 
-	" Actually match the words.
-	call matchadd("InterestingWord" . a:n, pat, 1, mid)
+  " Actually match the words.
+  call matchadd("InterestingWord" . a:n, pat, 1, mid)
 
-	" Move back to our original location.
-	normal! `z
+  " Move back to our original location.
+  normal! `z
 endfunction
 
 nnoremap <silent> <leader>1 :call HiInterestingWord(1)<cr>
@@ -219,10 +218,10 @@ nnoremap YY ^y$
 
 "visual mode search
 function! s:VSetSearch()
-	let temp = @@
-	norm! gvy
-	let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
-	let @@ = temp
+  let temp = @@
+  norm! gvy
+  let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
+  let @@ = temp
 endfunction
 
 vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR><c-o>
@@ -334,7 +333,7 @@ let g:gitgutter_sign_modified_removed = '~'
 let g:gitgutter_sign_removed_first_line = '^'
 "}}}
 "sneak {{{
-nnoremap \ <Plug>Sneak_s
+nmap \ <Plug>Sneak_s
 "}}}
 "ctrlp {{{
 let g:ctrlp_custom_ignore = 'node_modules\|\.git'
@@ -345,25 +344,28 @@ let g:deoplete#enable_at_startup = 1
 "ycm {{{
 set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
-let g:ycm_collect_identifiers_from_tags_files = 1
+let g:ycm_collect_identifiers_from_tags_files = 0
 let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_global_ycm_extra_conf = '~/.vim/ycm_config.py'
 let g:ycm_semantic_triggers =  {
-	\   'c' : ['->', '.'],
-	\   'css': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
-	\   'scss': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
-	\   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
-	\             're!\[.*\]\s'],
-	\   'ocaml' : ['.', '#'],
-	\   'cpp,objcpp' : ['->', '.', '::'],
-	\   'perl' : ['->'],
-	\   'php' : ['->', '::'],
-	\   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-	\   'ruby' : ['.', '::'],
-	\   'lua' : ['.', ':'],
-	\   'erlang' : [':'],
-	\ }
+  \   'c' : ['->', '.'],
+  \   'css': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
+  \   'scss': [ 're!^\t+', 're!^\s{4}', 're!:\s+' ],
+  \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+  \             're!\[.*\]\s'],
+  \   'ocaml' : ['.', '#'],
+  \   'cpp,objcpp' : ['->', '.', '::'],
+  \   'perl' : ['->'],
+  \   'php' : ['->', '::'],
+  \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'ruby' : ['.', '::'],
+  \   'lua' : ['.', ':'],
+  \   'erlang' : [':'],
+  \ }
 let g:ycm_error_symbol = ''
+noremap <leader>t :YcmCompleter GetType<cr>
+noremap <leader>j :YcmCompleter GoTo<cr>
+noremap <leader>d :YcmCompleter GetDoc<cr>
+noremap <leader>r :YcmCompleter RefactorRename<Space>
 "let g:loaded_youcompleteme = 1
 "let g:ycm_error_symbol = ''
 "}}}
@@ -378,11 +380,11 @@ autocmd BufRead,BufNewFile *.js let g:tagbar_ctags_bin = "jsctags -f"
 "}}}
 "ulti snips {{{
 "ultisnips
-let g:UltiSnipsEditSplit = "horizontal"
-let g:UltiSnipsExpandTrigger = "<C-j>"
-let g:UltiSnipsListSnippets = "<C-k>"
-let g:UltiSnipsJumpForwardTrigger = "<C-j>"
-let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
+"let g:UltiSnipsEditSplit = "horizontal"
+"let g:UltiSnipsExpandTrigger = "<C-j>"
+"let g:UltiSnipsListSnippets = "<C-k>"
+"let g:UltiSnipsJumpForwardTrigger = "<C-j>"
+"let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
 
 "}}}
 "airline {{{
@@ -410,9 +412,25 @@ let g:neomake_airline = 0
 let g:neomake_logfile = '/tmp/neomake'
 "}}}
 "neoformat {{{
-autocmd FileType javascript set formatprg=prettier\ --stdin\ --single-quote\ --trailing-comma\ all\ --bracket-spacing
+let g:neoformat_javascript_prettier = {
+            \ 'exe': 'prettier',
+            \ 'args': ['--stdin', '--single-quote', '--trailing-comma', 'all', '--bracket-spacing'],
+            \ 'replace': 0,
+            \ 'stdin': 1,
+            \ 'no_append': 1,
+            \ }
+let g:neoformat_basic_format_align = 1
+let g:neoformat_basic_format_retab = 1
+let g:neoformat_basic_format_trim = 1
+let g:neoformat_only_msg_on_error = 1
+
 let g:neoformat_enabled_javascript = ['prettier']
-let g:neoformat_try_formatprg = 1
+
+augroup neoformat
+  autocmd BufWritePre *.js Neoformat
+  "autocmd BufWritePre,TextChanged,InsertLeave *.js Neoformat
+augroup END
+
 "}}}
 "bracey {{{
 "let g:bracey_server_allow_remote_connetions = 0
@@ -422,7 +440,7 @@ let g:bracey_server_port = 13378
 "}}}
 
 "function! Noscrollbar(...)
-	"let w:airline_section_y = '%{noscrollbar#statusline(20,'' '',''█'',[''▐''],[''▌''])}'
+  "let w:airline_section_y = '%{noscrollbar#statusline(20,'' '',''█'',[''▐''],[''▌''])}'
 "endfunction
 "call airline#add_statusline_func('Noscrollbar')
 
@@ -436,8 +454,8 @@ set spelllang=en
 set linebreak
 
 if exists('+breakindent')
-	set breakindent " preserves the indent level of wrapped lines
-	set showbreak=↪ " illustrate wrapped lines
+  set breakindent " preserves the indent level of wrapped lines
+  set showbreak=↪ " illustrate wrapped lines
 endif"
 
 "ctrl-D to toggle shell
@@ -483,7 +501,7 @@ set noexpandtab
 "tnoremap <leader>l <nop>
 
 if has('nvim')
-	tnoremap jk <C-\><C-n>
+  tnoremap jk <C-\><C-n>
 endif
 
 "nnoremap <space>h <C-w>h
@@ -545,11 +563,6 @@ noremap <silent> <leader>pw :call DoWindowSwap()<CR>
 
 let $GOPATH = getcwd()
 
-augroup fmt
-  autocmd!
-  autocmd BufWritePre * Neoformat
-augroup END
-
 command! CloseHiddenBuffers call s:CloseHiddenBuffers()
 function! s:CloseHiddenBuffers()
   let open_buffers = []
@@ -564,3 +577,34 @@ function! s:CloseHiddenBuffers()
     endif
   endfor
 endfunction
+
+"gvim stuff
+if has("gui_running")
+  set guioptions-=m  "remove menu bar
+  set guioptions-=T  "remove toolbar
+  set guioptions-=r  "remove right-hand scroll bar
+  set guioptions-=L  "remove left-hand scroll bar
+  set guifont=xos4\ Terminus\ Regular\ 9
+  set background=dark
+endif
+
+set noerrorbells
+set novisualbell
+
+"let g:javascript_conceal_function             = "ƒ"
+"let g:javascript_conceal_null                 = "ø"
+"let g:javascript_conceal_this                 = "@"
+"let g:javascript_conceal_return               = "⇚"
+"let g:javascript_conceal_undefined            = "¿"
+"let g:javascript_conceal_NaN                  = "ℕ"
+"let g:javascript_conceal_prototype            = "¶"
+"let g:javascript_conceal_static               = "•"
+"let g:javascript_conceal_super                = "Ω"
+"let g:javascript_conceal_arrow_function       = "⇒"
+"let g:javascript_conceal_noarg_arrow_function = "🞅"
+"let g:javascript_conceal_underscore_arrow_function = "🞅"
+"set conceallevel=1
+
+"let g:jsx_ext_required = 0
+
+noremap <leader>g :Ggrep <cword><cr>

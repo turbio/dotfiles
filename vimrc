@@ -51,6 +51,7 @@ Plug 'Valloric/YouCompleteMe'
 "Plug 'koron/nyancat-vim'
 "Plug 'Nibble'
 "Plug 'Shougo/unite.vim'
+Plug 'Shougo/denite.nvim'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
 Plug 'benekastah/neomake'
@@ -610,3 +611,17 @@ set novisualbell
 "let g:jsx_ext_required = 0
 
 noremap <leader>g :Ggrep <cword><cr>
+
+noremap <C-o> :bn<cr>
+noremap <C-i> :bp<cr>
+
+inoremap \zer 0
+inoremap \one 1
+inoremap \two 2
+inoremap \thr 3
+inoremap \fur 4
+inoremap \fiv 5
+inoremap \six 6
+inoremap \sev 7
+inoremap \eig 8
+inoremap \nin 9

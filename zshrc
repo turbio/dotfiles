@@ -173,8 +173,13 @@ alias gdf="git diff"
 alias gdfc="git diff --cached"
 alias gcm="git commit -m"
 alias gad="git add -A"
-alias gp="git push"
-alias gco="git checkout -B"
+alias gp='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
+
+git_branch_upsert() {
+	git checkout $1 2>/dev/null || git checkout -b $1
+}
+
+alias gco="git_branch_upsert"
 compdef gco=git
 #alias gpu="git pull --rebase"
 

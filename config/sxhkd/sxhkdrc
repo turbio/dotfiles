@@ -9,11 +9,11 @@ super + Return
 
 # program launcher
 super + semicolon
-	passmenu
+	rofi-pass
 
 # pass launcher
 super + space
-	dmenu_run
+	rofi -show run
 
 # make sxhkd reload its configuration files:
 super + Escape

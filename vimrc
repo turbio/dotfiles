@@ -59,6 +59,7 @@ Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
 Plug 'pangloss/vim-javascript'
 Plug 'MaxMEllon/vim-jsx-pretty'
@@ -370,7 +371,6 @@ noremap <leader>j :YcmCompleter GoTo<cr>
 noremap <leader>d :YcmCompleter GetDoc<cr>
 noremap <leader>r :YcmCompleter RefactorRename<Space>
 "let g:loaded_youcompleteme = 1
-"let g:ycm_error_symbol = ''
 "}}}
 "neocomplete {{{
 "let g:neocomplete#enable_at_startup = 1

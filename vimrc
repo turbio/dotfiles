@@ -16,6 +16,7 @@ Plug 'airblade/vim-gitgutter'
 "Plug 'scrooloose/syntastic'
 Plug 'majutsushi/tagbar', { 'on': 'Tagbar' }
 "Plug 'Gundo'
+Plug 'mbbill/undotree'
 Plug 'kien/ctrlp.vim'
 "Plug 'undotree.vim', { 'on': 'UndotreeToggle' }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -59,6 +60,7 @@ Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
 Plug 'pangloss/vim-javascript'
 Plug 'MaxMEllon/vim-jsx-pretty'
@@ -178,6 +180,12 @@ set gdefault
 
 "space space to clear
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
+
+let g:undotree_SplitWidth=10
+let g:undotree_DiffAutoOpen=0
+let g:undotree_WindowLayout=3
+
+noremap <leader>ut :UndotreeShow<cr>
 
 "keep in center whenn searching
 nnoremap n nzzzv
@@ -408,11 +416,11 @@ let g:syntastic_javascript_checkers = ['eslint']
 "}}}
 "neomake {{{
 autocmd! BufWritePost,BufEnter * Neomake
-let g:neomake_verbose = 0
+let g:neomake_place_signs = 1
 let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
 let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
-let g:neomake_airline = 0
-let g:neomake_logfile = '/tmp/neomake'
+let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
+let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 "}}}
 "neoformat {{{
 let g:neoformat_javascript_prettier = {
@@ -625,3 +633,8 @@ inoremap \six 6
 inoremap \sev 7
 inoremap \eig 8
 inoremap \nin 9
+
+cnoremap <c-h> <Left>
+cnoremap <c-j> <Down>
+cnoremap <c-k> <Up>
+cnoremap <c-l> <Right>

@@ -378,7 +378,6 @@ noremap <leader>j :YcmCompleter GoTo<cr>
 noremap <leader>d :YcmCompleter GetDoc<cr>
 noremap <leader>r :YcmCompleter RefactorRename<Space>
 "let g:loaded_youcompleteme = 1
-"let g:ycm_error_symbol = ''
 "}}}
 "neocomplete {{{
 "let g:neocomplete#enable_at_startup = 1

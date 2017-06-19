@@ -267,3 +267,7 @@ export GOPATH=~/.local/share/gopath
 export GCE_EMAIL="ansible-deploy@marine-cycle-160323.iam.gserviceaccount.com"
 export GCE_PROJECT="marine-cycle-160323"
 export GCE_CREDENTIALS_FILE_PATH="/home/mason/git/repl.it/goval-deploy/.gcp"
+
+export FZF_DEFAULT_COMMAND='ag --hidden  -g ""'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

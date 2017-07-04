@@ -17,7 +17,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'majutsushi/tagbar', { 'on': 'Tagbar' }
 "Plug 'Gundo'
 Plug 'mbbill/undotree'
-Plug 'kien/ctrlp.vim'
 "Plug 'undotree.vim', { 'on': 'UndotreeToggle' }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
@@ -158,28 +157,15 @@ colorscheme muble
 set t_Co=256
 "}}}
 "seaching {{{
-set ignorecase
 set smartcase
+set ignorecase
 set incsearch
-
-"set showmatch
-"THIS COMMAND RIGHT HERE IS FUCKING AWEFUL. BASICALLY WHENEVER YOU ENTER A
-"CLOSING BRACE IT DECIES TO JUMP TO THE MATCHING OEPNING BRACE AND THEN BACK
-"TO THE CLOSING BRACE. THIS ALL TAKES AT LEAST A HALF A SECOND AND BASICALLY
-"FREEZES ALL INPUT JUST SO IT CAN MOVE THE CURSOR THERE AND BACK IN THE HOPES
-"THAT MAYBE, JUST MAYBE YOU ARE UNABLE TO SEE BRACES WITHOUT HELP. IN
-"ADITION TO ALL THIS, IT DECIES THAT, IF THERE IS ALREADY A BRACE THERE (LIKE
-"IF THEY ARE NESTED OR SOME SHIT) IT WILL MAKE SURE TO NOT EVEN CREATE A
-"BRACE, BUT STILL JUMP TO BE MATCHING BRACE AND BACK. THIS MEANS THAT YOU THEN
-"HAVE TO MOVE SO THAT YOU'RE CURSOR IS NOT TOUCHING A BRACE JUST TO ADD ONE.
-"SOMETIMES YOU MAY EVEN HAVE TO ADD A SPACE, ADD A BRACE, THEN REMOVE THE
-"SPACE. WHO THE FUCK THOUGHT THIS WAS A GOD IDEA.
 
 set hlsearch
 set gdefault
 
 "space space to clear
-noremap <leader><space> :noh<cr>:call clearmatches()<cr>
+noremap <silent> <leader><space> :noh<cr>:call clearmatches()<cr>
 
 let g:undotree_SplitWidth=10
 let g:undotree_DiffAutoOpen=0
@@ -216,12 +202,12 @@ function! HiInterestingWord(n) "{{{
   normal! `z
 endfunction
 
-nnoremap <silent> <leader>1 :call HiInterestingWord(1)<cr>
-nnoremap <silent> <leader>2 :call HiInterestingWord(2)<cr>
-nnoremap <silent> <leader>3 :call HiInterestingWord(3)<cr>
-nnoremap <silent> <leader>4 :call HiInterestingWord(4)<cr>
-nnoremap <silent> <leader>5 :call HiInterestingWord(5)<cr>
-nnoremap <silent> <leader>6 :call HiInterestingWord(6)<cr>
+noremap <silent> <leader>1 :call HiInterestingWord(1)<cr>
+noremap <silent> <leader>2 :call HiInterestingWord(2)<cr>
+noremap <silent> <leader>3 :call HiInterestingWord(3)<cr>
+noremap <silent> <leader>4 :call HiInterestingWord(4)<cr>
+noremap <silent> <leader>5 :call HiInterestingWord(5)<cr>
+noremap <silent> <leader>6 :call HiInterestingWord(6)<cr>
 
 nnoremap YY ^y$
 
@@ -346,8 +332,8 @@ let g:gitgutter_sign_removed_first_line = '^'
 "sneak {{{
 nmap \ <Plug>Sneak_s
 "}}}
-"ctrlp {{{
-let g:ctrlp_custom_ignore = 'node_modules\|\.git'
+"fzf {{{
+noremap <C-p> :FZF<CR>
 "}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
@@ -386,7 +372,7 @@ noremap <leader>r :YcmCompleter RefactorRename<Space>
 "autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 "}}}
 "tagbar {{{
-autocmd BufRead,BufNewFile *.js let g:tagbar_ctags_bin = "jsctags -f"
+"autocmd BufRead,BufNewFile *.js let g:tagbar_ctags_bin = "jsctags -f"
 "}}}
 "ulti snips {{{
 "ultisnips
@@ -633,7 +619,12 @@ inoremap \sev 7
 inoremap \eig 8
 inoremap \nin 9
 
-cnoremap <c-h> <Left>
-cnoremap <c-j> <Down>
-cnoremap <c-k> <Up>
-cnoremap <c-l> <Right>
+cnoremap <C-h> <Left>
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
+cnoremap <C-l> <Right>
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l

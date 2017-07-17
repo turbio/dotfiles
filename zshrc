@@ -219,7 +219,7 @@ alias t="todo.sh"
 #esac
 #~/.stegosaurus
 
-export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/.local/share/gopath/bin:$PATH
+export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/git/gocode/bin:$PATH
 
 #colors in less
 export LESS_TERMCAP_mb=$'\E[01;31m'
@@ -262,7 +262,7 @@ fi
 zle -N ctrlz
 bindkey '^Z' ctrlz
 
-export GOPATH=~/.local/share/gopath
+export GOPATH=~/git/gocode
 
 export GCE_EMAIL="ansible-deploy@marine-cycle-160323.iam.gserviceaccount.com"
 export GCE_PROJECT="marine-cycle-160323"

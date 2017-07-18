@@ -39,13 +39,13 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
-"Plug 'Valloric/YouCompleteMe'
+Plug 'Valloric/YouCompleteMe'
 "Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
-"Plug 'SirVer/ultisnips'
-"Plug 'honza/vim-snippets'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
 "Plug 'xuhdev/vim-latex-live-preview'
 "Plug 'koron/nyancat-vim'
@@ -377,10 +377,10 @@ noremap <leader>r :YcmCompleter RefactorRename<Space>
 "ulti snips {{{
 "ultisnips
 "let g:UltiSnipsEditSplit = "horizontal"
-"let g:UltiSnipsExpandTrigger = "<C-j>"
-"let g:UltiSnipsListSnippets = "<C-k>"
-"let g:UltiSnipsJumpForwardTrigger = "<C-j>"
-"let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
+let g:UltiSnipsExpandTrigger = "<C-j>"
+let g:UltiSnipsListSnippets = "<C-k>"
+let g:UltiSnipsJumpForwardTrigger = "<C-j>"
+let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
 
 "}}}
 "airline {{{
@@ -406,6 +406,9 @@ let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
 let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
 let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
+
+let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
+
 "}}}
 "neoformat {{{
 let g:neoformat_javascript_prettier = {

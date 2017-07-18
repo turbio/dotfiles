@@ -20,11 +20,11 @@
 #typing exit in tmux closes the current window and detaches tmux which should
 #result in the shell closing becase it has been replaced
 #exit() {
-	#if [[ -z $TMUX ]]; then
-		#builtin exit
-	#else
-		#tmux kill-window \; detach
-	#fi
+#if [[ -z $TMUX ]]; then
+#builtin exit
+#else
+#tmux kill-window \; detach
+#fi
 #}
 
 ##start up tmux
@@ -32,14 +32,14 @@
 ##attach to existing session and create a new window
 #if [ "$TMUX" = "" ];
 #then
-	#tmux has-session
-	#if (( $? == 0 ))
-	#then
-		#exec tmux -2 new-session -t 0 \; new-window
-	#else
-		#exec tmux -2 new
-	#fi
-	##replace zsh with tmux which will then start zsh
+#tmux has-session
+#if (( $? == 0 ))
+#then
+#exec tmux -2 new-session -t 0 \; new-window
+#else
+#exec tmux -2 new
+#fi
+##replace zsh with tmux which will then start zsh
 #fi
 
 #custom key bindings and other stuff
@@ -96,7 +96,7 @@ autoload zrecompile
 setopt nullglob
 setopt list_packed
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' \
-    'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+	'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
 #fancy schmancy zsh coloring (not really sure about it yet though)
 source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -213,9 +213,9 @@ alias t="todo.sh"
 
 #dynamic title and stuff
 #case $TERM in
-  #xterm*)
-    #precmd () {print -Pn "e]0;%~a"}
-    #;;
+#xterm*)
+#precmd () {print -Pn "e]0;%~a"}
+#;;
 #esac
 #~/.stegosaurus
 
@@ -252,11 +252,11 @@ fi
 
 # Make ^Z toggle between ^Z and fg
 function ctrlz() {
-if [[ $#BUFFER == 0 ]]; then
-    fg >/dev/null 2>&1 && zle redisplay
-else
-    zle push-input
-fi
+	if [[ $#BUFFER == 0 ]]; then
+		fg >/dev/null 2>&1 && zle redisplay
+	else
+		zle push-input
+	fi
 }
 
 zle -N ctrlz
@@ -268,6 +268,6 @@ export GCE_EMAIL="ansible-deploy@marine-cycle-160323.iam.gserviceaccount.com"
 export GCE_PROJECT="marine-cycle-160323"
 export GCE_CREDENTIALS_FILE_PATH="/home/mason/git/repl.it/goval-deploy/.gcp"
 
-export FZF_DEFAULT_COMMAND='ag --hidden  -g ""'
+export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

@@ -162,10 +162,6 @@ alias chr="google-chrome"	#because I use chome a lot
 alias y="yaourt"	#because typing the french word for yogurt is hard
 alias bri="sudo brightness" #quickly change brightness
 
-#some cool fancy git aliases
-alias g="git"
-compdef g=git
-
 alias gst="git status -sb"
 compdef gst=git
 
@@ -190,6 +186,9 @@ alias ...="cd ../../.."
 alias ....="cd ../../../.."
 alias .....="cd ../../../../.."
 #okey I think that is enough...
+
+#alias g=grep
+#alias gg=git grep
 
 #opening stuff
 alias ]="xdg-open"

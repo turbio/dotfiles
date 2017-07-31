@@ -4,7 +4,8 @@
 
 # terminal emulator
 super + Return
-	xfce4-terminal
+	alacritty
+	#xfce4-terminal
 	#gnome-terminal
 
 # program launcher
@@ -81,10 +82,10 @@ super + {_,shift + }c
 	bspc node -f {next,prev}
 
 super + shift + o
-	bspc node -d next; bspc desktop -f next
+	bspc node -d next -f
 
 super + shift + i
-	bspc node -d prev; bspc desktop -f prev
+	bspc node -d prev -f
 
 # focus the older or newer node in the focus history
 super + {i,o}
@@ -113,19 +114,6 @@ super + ctrl + space
 # cancel the preselection for the focused desktop
 super + ctrl + shift + space
 	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
-
-#
-# move/resize
-#
-
-~button1
-	bspc pointer -g focus
-
-super + button{1-3}
-	bspc pointer -g {move,resize_side,resize_corner}
-
-super + @button{1-3}
-	bspc pointer -u
 
 ## Media keys
 XF86AudioRaiseVolume

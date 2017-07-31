@@ -65,7 +65,7 @@ Plug 'pangloss/vim-javascript'
 Plug 'MaxMEllon/vim-jsx-pretty'
 
 "Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
-Plug 'lambdatoast/elm.vim'
+Plug 'elmcast/elm-vim'
 
 "Plug '~/git/bracey.vim'
 Plug 'turbio/bracey.vim'

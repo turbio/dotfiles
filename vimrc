@@ -5,6 +5,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'sbdchd/neoformat'
 Plug 'tpope/vim-obsession'
+Plug 'HerringtonDarkholme/yats.vim'
 "Plug 'bufkill.vim'
 Plug 'tpope/vim-endwise'
 Plug 'justinmk/vim-sneak'
@@ -39,8 +40,9 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
 "Plug 'fholgado/minibufexpl.vim'
-Plug 'Valloric/YouCompleteMe'
-"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+"Plug 'Valloric/YouCompleteMe'
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'zchee/deoplete-go', { 'do': 'make'}
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
@@ -60,11 +62,12 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'mhartington/nvim-typescript'
 
 Plug 'pangloss/vim-javascript'
 Plug 'MaxMEllon/vim-jsx-pretty'
 
-"Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'elmcast/elm-vim'
 
 "Plug '~/git/bracey.vim'
@@ -319,7 +322,7 @@ nnoremap <leader>fh :FSHere<CR>
 "let g:scrollbar_clear='b'
 "}}}
 "gitgutter {{{
-let g:gitgutter_sign_column_always = 1
+set signcolumn=yes
 let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
 
@@ -337,6 +340,12 @@ noremap <C-p> :FZF<CR>
 "}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
+
+let g:deoplete#enable_debug = 1
+let g:deoplete#enable_profile = 1
+call deoplete#enable_logging('DEBUG', '/tmp/deoplete.log')
+
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "}}}
 "ycm {{{
 set completeopt-=preview
@@ -418,9 +427,9 @@ let g:neoformat_javascript_prettier = {
 			\ 'stdin': 1,
 			\ 'no_append': 1,
 			\ }
-let g:neoformat_basic_format_align = 1
-let g:neoformat_basic_format_retab = 1
-let g:neoformat_basic_format_trim = 1
+"let g:neoformat_basic_format_align = 1
+"let g:neoformat_basic_format_retab = 1
+"let g:neoformat_basic_format_trim = 1
 let g:neoformat_only_msg_on_error = 1
 
 let g:neoformat_enabled_javascript = ['prettier']

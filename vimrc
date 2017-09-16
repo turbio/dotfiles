@@ -42,6 +42,8 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'Valloric/YouCompleteMe'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'mhartington/nvim-typescript'
+
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
@@ -61,12 +63,13 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'mhartington/nvim-typescript'
 
 Plug 'pangloss/vim-javascript'
+Plug 'sebastianmarkow/deoplete-rust'
+Plug 'rust-lang/rust.vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 
-Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+"Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'elmcast/elm-vim'
 
 Plug 'turbio/bracey.vim'
@@ -342,6 +345,8 @@ let g:deoplete#enable_at_startup = 1
 let g:deoplete#enable_debug = 1
 let g:deoplete#enable_profile = 1
 call deoplete#enable_logging('DEBUG', '/tmp/deoplete.log')
+
+let g:deoplete#sources#rust#racer_binary='/usr/bin/racer'
 
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "}}}

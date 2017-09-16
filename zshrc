@@ -60,7 +60,7 @@ PS1="%F{white}%K{$color_1} %n %f%k%F{$color_1}%K{$color_2}"$'\ue0b0'"%f%k%F{whit
 #PS1=$PS1_INSERT
 
 #export KEYTIMEOUT=1
-export EDITOR=vim
+export EDITOR=nvim
 
 #RPS1='$(git_super_status)'
 

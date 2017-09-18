@@ -268,5 +268,6 @@ export GCE_PROJECT="marine-cycle-160323"
 export GCE_CREDENTIALS_FILE_PATH="/home/mason/git/repl.it/goval-deploy/.gcp"
 
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
+export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

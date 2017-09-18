@@ -171,7 +171,7 @@ set gdefault
 "space space to clear
 noremap <silent> <leader><space> :noh<cr>:call clearmatches()<cr>
 
-let g:undotree_SplitWidth=10
+let g:undotree_SplitWidth=30
 let g:undotree_DiffAutoOpen=0
 let g:undotree_WindowLayout=3
 
@@ -420,6 +420,7 @@ let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
+let g:neomake_javascript_enabled_makers = ['flow', 'eslint']
 
 "}}}
 "neoformat {{{

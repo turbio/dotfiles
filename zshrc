@@ -221,6 +221,18 @@ alias t="todo.sh"
 
 export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/git/gocode/bin:~/.cargo/bin:$PATH
 
+# local bin
+export PATH=~/bin:$PATH
+
+# ruby 2.3
+export PATH=~/.gem/ruby/2.3.0/bin:$PATH
+
+# ruby 2.4
+export PATH=~/.gem/ruby/2.4.0/bin:$PATH
+
+# go
+export PATH=~/git/gocode/bin:$PATH
+
 #colors in less
 export LESS_TERMCAP_mb=$'\E[01;31m'
 export LESS_TERMCAP_md=$'\E[01;31m'

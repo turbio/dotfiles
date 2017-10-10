@@ -63,6 +63,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'Yggdroot/indentLine'
 
 Plug 'pangloss/vim-javascript'
 Plug 'sebastianmarkow/deoplete-rust'
@@ -336,6 +337,12 @@ let g:gitgutter_sign_removed_first_line = '^'
 "sneak {{{
 nmap \ <Plug>Sneak_s
 "}}}
+" indentLine {{{
+let g:indentLine_char = '┊'
+let g:indentLine_first_char='┊'
+let g:indentLine_concealcursor=0
+let g:indentLine_showFirstIndentLevel=1
+" }}}
 "fzf {{{
 noremap <C-p> :FZF<CR>
 "}}}

@@ -42,12 +42,14 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'Valloric/YouCompleteMe'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'tweekmonster/deoplete-clang2'
+Plug 'carlitux/deoplete-ternjs'
 Plug 'mhartington/nvim-typescript'
 
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
-Plug 'SirVer/ultisnips'
+"Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
 "Plug 'xuhdev/vim-latex-live-preview'
@@ -63,7 +65,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'Yggdroot/indentLine'
+"Plug 'Yggdroot/indentLine'
 
 Plug 'pangloss/vim-javascript'
 Plug 'sebastianmarkow/deoplete-rust'
@@ -176,7 +178,7 @@ let g:undotree_SplitWidth=30
 let g:undotree_DiffAutoOpen=0
 let g:undotree_WindowLayout=3
 
-noremap <leader>ut :UndotreeShow<cr>
+noremap <leader>ut :UndotreeToggle \| UndotreeFocus<cr>
 
 "keep in center whenn searching
 nnoremap n nzzzv
@@ -642,20 +644,6 @@ set novisualbell
 "let g:jsx_ext_required = 0
 
 noremap <leader>g :Ggrep <cword><cr>
-
-noremap <C-o> :bn<cr>
-noremap <C-i> :bp<cr>
-
-inoremap \zer 0
-inoremap \one 1
-inoremap \two 2
-inoremap \thr 3
-inoremap \fur 4
-inoremap \fiv 5
-inoremap \six 6
-inoremap \sev 7
-inoremap \eig 8
-inoremap \nin 9
 
 cnoremap <C-h> <Left>
 cnoremap <C-j> <Down>

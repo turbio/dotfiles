@@ -158,9 +158,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 
 #a bunch of aliases to speed things up
-alias chr="google-chrome"	#because I use chome a lot
-alias y="yaourt"	#because typing the french word for yogurt is hard
-alias bri="sudo brightness" #quickly change brightness
 
 alias gst="git status -sb"
 compdef gst=git
@@ -179,14 +176,6 @@ alias gco="git_branch_upsert"
 compdef gco=git
 #alias gpu="git pull --rebase"
 
-#i cool idea i got from somewhere... forgot where
-alias .="cd .."
-alias ..="cd ../.."
-alias ...="cd ../../.."
-alias ....="cd ../../../.."
-alias .....="cd ../../../../.."
-#okey I think that is enough...
-
 #alias g=grep
 #alias gg=git grep
 
@@ -194,21 +183,12 @@ alias .....="cd ../../../../.."
 alias ]="xdg-open"
 
 #mplayer control
-alias plr="ncmpcpp"
 
 #don't forget this
 sh ~/.config/zsh/welcome
 #export HISTFILESIZE=
 export HISTSIZE=1000000000
 alias shn="sync; shutdown -h now"
-
-#todo
-export TODOTXT_DEFAULT_ACTION=ls
-alias t="todo.sh"
-
-#gpoder stuff
-#export GPODDER_HOME=~/.config/
-#export GPODDER_DOWNLOAD_DIR=~/Music/
 
 #dynamic title and stuff
 #case $TERM in

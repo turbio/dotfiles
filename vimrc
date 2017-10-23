@@ -44,6 +44,7 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'tweekmonster/deoplete-clang2'
 Plug 'carlitux/deoplete-ternjs'
+
 Plug 'mhartington/nvim-typescript'
 
 "Plug 'Shougo/neocomplete.vim'
@@ -68,7 +69,6 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 "Plug 'Yggdroot/indentLine'
 
 Plug 'pangloss/vim-javascript'
-Plug 'sebastianmarkow/deoplete-rust'
 Plug 'rust-lang/rust.vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 
@@ -353,9 +353,8 @@ let g:deoplete#enable_at_startup = 1
 
 let g:deoplete#enable_debug = 1
 let g:deoplete#enable_profile = 1
-call deoplete#enable_logging('DEBUG', '/tmp/deoplete.log')
 
-let g:deoplete#sources#rust#racer_binary='/usr/bin/racer'
+let g:deoplete#sources#rust#racer_binary='/home/mason/.cargo/bin/racer'
 
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "}}}

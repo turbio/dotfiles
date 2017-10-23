@@ -55,6 +55,7 @@ color_2=green
 color_3=blue
 #normal_color=red
 #insert_color=red
+autoload -U colors && colors
 PS1="%F{white}%K{$color_1} %n %f%k%F{$color_1}%K{$color_2}"$'\ue0b0'"%f%k%F{white}%K{$color_2} %m %f%k%F{$color_2}%K{$color_3}"$'\ue0b0'"%f%k%F{white}%K{$color_3} %~ %f%k%F{$color_3}"$'\ue0b0'"%{$reset_color%}"
 #PS1_NORMAL="%F{white}%K{$color_1} %n %f%k%F{$color_1}%K{$color_2}"$'\ue0b0'"%f%k%F{white}%K{$color_2} %m %f%k%F{$color_2}%K{$color_3}"$'\ue0b0'"%f%k%F{white}%K{$color_3} %~ %f%k%K{$normal_color}%F{$color_3}"$'\ue0b0'"%f%F{white}%K{$normal_color}"$'\u2022'"%f%k%F{$normal_color}%K{}"$'\ue0b0'"%f%k%F"
 #PS1=$PS1_INSERT
@@ -197,6 +198,8 @@ alias shn="sync; shutdown -h now"
 #;;
 #esac
 #~/.stegosaurus
+
+export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/git/gocode/bin:~/.cargo/bin:$PATH
 
 # local bin
 export PATH=~/bin:$PATH

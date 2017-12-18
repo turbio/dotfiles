@@ -26,7 +26,7 @@ ColorPalette=#272728282222;#f9f926267272;#8282b4b41414;#fdfd97971f1f;#26268b8bd2
 /*ColorBold=#93a1a1*/
 /*ColorBoldUseDefault=FALSE*/
 /*TabActivityColor=#dc322f*/
-FontName=Iosevka 12
+FontName=xos4 Terminus 9
 MiscAlwaysShowTabs=FALSE
 MiscBell=FALSE
 MiscBordersDefault=TRUE
@@ -55,4 +55,6 @@ MiscUseShiftArrowsToScroll=FALSE
 ScrollingOnOutput=FALSE
 MiscCopyOnSelect=FALSE
 MiscSlimTabs=FALSE
+TitleInitial=t
+TitleMode=TERMINAL_TITLE_REPLACE
 

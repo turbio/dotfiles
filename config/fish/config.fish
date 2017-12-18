@@ -7,18 +7,11 @@ set fish_color_error red
 
 #path stuff
 if status --is-login
-	set PATH $PATH ~/.bin #local bin
-	#set SHELL /bin/zsh
-	set EDITOR nvim
+    set PATH $PATH ~/.bin #local bin
+    #set SHELL /bin/zsh
+    set EDITOR nvim
 
 end
-
-set GOPATH ~/git/gocode
-
-#alias stuff
-#fun stuff
-alias starwars='telnet towel.blinkenlights.nl'
-alias hack='cat /dev/urandom | hexdump -c'
 
 #ls stuff
 alias lsa='ls --color=auto -A'
@@ -60,7 +53,12 @@ alias vim="nvim"
 bind \cj down-or-search
 bind \ck up-or-search
 
+function fish_mode_prompt
+end
+
+fish_vi_key_bindings
+
 #welcome
 function fish_greeting
-  ~/.config/fish/welcome
+    ~/.config/fish/welcome
 end

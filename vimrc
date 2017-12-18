@@ -46,6 +46,7 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'tweekmonster/deoplete-clang2'
 Plug 'sebastianmarkow/deoplete-rust'
+Plug 'dag/vim-fish'
 Plug 'copy/deoplete-ocaml'
 "Plug 'carlitux/deoplete-ternjs'
 

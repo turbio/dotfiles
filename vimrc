@@ -355,14 +355,27 @@ noremap <C-p> :FZF<CR>
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
 
-let g:deoplete#enable_debug = 1
+let g:deoplete#debug_enabled = 1
 let g:deoplete#enable_profile = 1
+
+let g:deoplete#enable_camel_case = 0
+let g:deoplete#enable_refresh_always = 0
+let g:deoplete#max_menu_width = 40
+let g:deoplete#auto_complete_delay = 0
+
+let g:deoplete#ignore_sources = {}
+let g:deoplete#ignore_sources._ = [
+		\ 'around',
+	\ ]
+
 
 " rust
 let g:deoplete#sources#rust#racer_binary='/home/mason/.cargo/bin/racer'
 
 " tern
 let g:deoplete#sources#ternjs#types = 1
+let g:deoplete#sources#ternjs#timeout = 1
+let g:deoplete#sources#ternjs#case_insensitive = 1
 
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "}}}
@@ -435,8 +448,8 @@ let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
 let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 
-let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
-let g:neomake_javascript_enabled_makers = ['flow', 'eslint']
+let g:neomake_go_enabled_makers = ['go', 'golint']
+let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
 
 "}}}
 "neoformat {{{

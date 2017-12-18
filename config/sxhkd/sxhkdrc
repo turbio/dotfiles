@@ -4,8 +4,8 @@
 
 # terminal emulator
 super + Return
-	alacritty
-	#xfce4-terminal
+	xfce4-terminal
+	#alacritty
 	#gnome-terminal
 
 # program launcher

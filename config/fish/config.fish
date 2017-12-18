@@ -13,7 +13,7 @@ if status --is-login
 
 end
 
-set fish_greeting
+set GOPATH ~/git/gocode
 
 #alias stuff
 #fun stuff
@@ -57,5 +57,10 @@ alias calc="bc -l"
 
 alias vim="nvim"
 
+bind \cj down-or-search
+bind \ck up-or-search
+
 #welcome
-~/.config/fish/welcome
+function fish_greeting
+  ~/.config/fish/welcome
+end

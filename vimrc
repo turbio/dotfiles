@@ -46,9 +46,15 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'tweekmonster/deoplete-clang2'
 Plug 'sebastianmarkow/deoplete-rust'
-Plug 'carlitux/deoplete-ternjs'
+Plug 'copy/deoplete-ocaml'
+"Plug 'carlitux/deoplete-ternjs'
 
 Plug 'mhartington/nvim-typescript'
+Plug 'reasonml-editor/vim-reason-plus'
+Plug 'reasonml/vim-reason-loader'
+
+Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
+Plug 'Shougo/echodoc.vim'
 
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
@@ -352,6 +358,18 @@ let g:indentLine_showFirstIndentLevel=1
 "fzf {{{
 noremap <C-p> :FZF<CR>
 "}}}
+"LanguageClient
+let g:LanguageClient_autoStart = 1
+
+nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+
+let g:LanguageClient_serverCommands = {
+  \ 'reason': ['ocaml-language-server', '--stdio'],
+  \ 'ocaml': ['ocaml-language-server', '--stdio'],
+\ }
+"}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
 
@@ -436,7 +454,7 @@ let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
-let g:neomake_javascript_enabled_makers = ['flow', 'eslint']
+let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
 
 "}}}
 "neoformat {{{
@@ -447,16 +465,23 @@ let g:neoformat_javascript_prettier = {
 			\ 'stdin': 1,
 			\ 'no_append': 1,
 			\ }
+let g:neoformat_enabled_javascript = ['prettier']
+
+let g:neoformat_reason_refmt = {
+			\ 'exe': 'refmt',
+			\ 'args': ['--print-width', '80'],
+			\ 'stdin': 1,
+			\ }
+let g:neoformat_enabled_reason = ['refmt']
+
 "let g:neoformat_basic_format_align = 1
 "let g:neoformat_basic_format_retab = 1
 "let g:neoformat_basic_format_trim = 1
 let g:neoformat_only_msg_on_error = 1
-
-let g:neoformat_enabled_javascript = ['prettier']
+let g:neoformat_run_all_formatters = 1
 
 augroup neoformat
 	autocmd BufWritePre * Neoformat
-	"autocmd BufWritePre,TextChanged,InsertLeave *.js Neoformat
 augroup END
 
 function! ToggleNeoformatEnable()

@@ -2,10 +2,13 @@
 # wm independent hotkeys
 #
 
+super + p
+	rofi -show window
+
 # terminal emulator
 super + Return
-	alacritty
-	#xfce4-terminal
+	xfce4-terminal
+	#alacritty
 	#gnome-terminal
 
 # program launcher
@@ -42,10 +45,6 @@ super + m
 # if the current node is automatic, send it to the last manual, otherwise pull the last leaf
 super + y
 	bspc query -N -n focused.automatic && bspc node -n last.!automatic || bspc node last.leaf -n focused
-
-# swap the current node and the biggest node
-super + g
-	bspc node -s biggest
 
 super + z
 	bspc node @/ -R 90

@@ -1,48 +1,49 @@
-function fish_right_prompt
-	set joblist (jobs)
-	if test true
-		set_color purple -b normal
-		echo 
+set fish_prompt_pwd_dir_length 0
 
-		set_color normal -b purple
-		echo (jobs | awk '{print $1}{print $5} ')
+function fish_prompt
+    set -l last_status $status
 
-		set_color normal
-	end
-end
+    if not test $last_status -eq 0
+        set_color normal -b yellow
+        echo -n ' '$last_status' '
 
-function fish_prompt --description 'Write out the prompt'
-		set -l last_status $status
+        set_color yellow -b red
+        echo -n ''
+    end
 
-	if not test $last_status -eq 0
-		set_color normal -b yellow
-		echo -n ' '$last_status' '
+    # User
+    set_color normal -b red
+    echo -n ' '(whoami)' '
 
-		set_color yellow -b red
-		echo -n ''
-	end
+    set_color red -b green
+    echo -n ''
 
-	# User
-	set_color normal -b red
-	echo -n ' '(whoami)' '
+    # Host
+    set_color normal -b green
+    echo -n ' '(hostname)' '
+    set_color normal
 
-	set_color red -b green
-	echo -n ''
+    set_color green -b blue
+    echo -n ''
 
-	# Host
-	set_color normal -b green
-	echo -n ' '(hostname)' '
-	set_color normal
+    # PWD
+    set_color normal -b blue
+    echo -n ' '(prompt_pwd)' '
 
-	set_color green -b blue
-	echo -n ''
+    set_color blue -b normal
 
-	# PWD
-	set_color normal -b blue
-	echo -n ' '(prompt_pwd)' '
+    set joblist (jobs -l -c)
+    if test -n "$joblist"
+        set_color blue -b purple
+        echo -n ''
 
-	set_color blue -b normal
-	echo -n ''
+        set_color normal -b purple
+        echo -n " $joblist "
 
-	set_color normal
+        set_color purple -b normal
+    end
+
+    echo -n ''
+
+    set_color normal
 end

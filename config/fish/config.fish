@@ -10,7 +10,6 @@ if status --is-login
     set PATH $PATH ~/.bin #local bin
     #set SHELL /bin/zsh
     set EDITOR nvim
-
 end
 
 #ls stuff
@@ -49,9 +48,6 @@ alias gad="git add -A"
 alias calc="bc -l"
 
 alias vim="nvim"
-
-bind \cj down-or-search
-bind \ck up-or-search
 
 function fish_mode_prompt
 end

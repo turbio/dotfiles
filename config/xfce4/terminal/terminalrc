@@ -21,7 +21,7 @@
 /*FontAllowBold=FALSE*/
 /*ColorForeground=#ffffffffffff*/
 /*ColorBackground=#272728282222*/
-ColorPalette=#272728282222;#f9f926267272;#8282b4b41414;#fdfd97971f1f;#26268b8bd2d2;#8c8c5454fefe;#5656c2c2d5d5;#ffffffffffff;#5c5c5c5c5c5c;#ffff59599595;#a6a6e2e22e2e;#e6e6dbdb7474;#6262adade3e3;#aeae8181ffff;#6666d9d9efef;#cccccccccccc
+ColorPalette=rgb(39,40,34);rgb(249,38,114);rgb(130,180,20);rgb(253,151,31);rgb(38,139,210);rgb(140,84,254);rgb(86,194,213);rgb(204,204,204);rgb(92,92,92);rgb(255,89,149);rgb(166,226,46);rgb(230,219,116);rgb(98,173,227);rgb(174,129,255);rgb(102,217,239);rgb(255,255,255)
 /*ColorCursor=#0000836cffff*/
 /*ColorBold=#93a1a1*/
 /*ColorBoldUseDefault=FALSE*/

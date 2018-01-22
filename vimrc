@@ -22,7 +22,7 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 "Plug 'terryma/vim-multiple-cursors'
 "Plug 'mhinz/vim-startify'
 Plug 'gerw/vim-HiLinkTrace'
-"Plug 'tpope/vim-sleuth'
+Plug 'tpope/vim-sleuth'
 "Plug 'jaxbot/semantic-highlight.vim'
 "Plug 'rstacruz/sparkup'
 "Plug 'Raimondi/delimitMate'
@@ -46,7 +46,7 @@ Plug 'tweekmonster/deoplete-clang2'
 Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'copy/deoplete-ocaml'
-"Plug 'carlitux/deoplete-ternjs'
+Plug 'carlitux/deoplete-ternjs'
 
 Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
@@ -68,11 +68,12 @@ Plug 'honza/vim-snippets'
 Plug 'Shougo/denite.nvim'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
-Plug 'benekastah/neomake'
+"Plug 'benekastah/neomake'
+Plug 'w0rp/ale'
 Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
-Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+"Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 "Plug 'Yggdroot/indentLine'
 
@@ -103,10 +104,8 @@ call plug#end()
 "}}}
 "basic options {{{
 "tab stuff
-set noexpandtab
-set tabstop=4
-set shiftwidth=4
 set cindent
+set tabstop=4
 
 set shell=zsh
 set pastetoggle=<f5>
@@ -457,7 +456,7 @@ let g:syntastic_javascript_checkers = ['eslint']
 
 "}}}
 "neomake {{{
-autocmd! BufWritePost,BufEnter * Neomake
+"autocmd! BufWritePost,BufEnter * Neomake
 let g:neomake_place_signs = 1
 let g:neomake_error_sign = {'text': '', 'texthl': 'NeomakeErrorSign'}
 let g:neomake_warning_sign = {'text': '', 'texthl': 'NeomakeWarningSign'}
@@ -467,6 +466,11 @@ let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
 let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
 
+"}}}
+"ale {{{
+let g:ale_sign_error = ''
+let g:ale_sign_warning = ''
+let g:airline#extensions#ale#enabled = 1
 "}}}
 "neoformat {{{
 let g:neoformat_javascript_prettier = {
@@ -683,6 +687,9 @@ set novisualbell
 "let g:javascript_conceal_noarg_arrow_function = "🞅"
 "let g:javascript_conceal_underscore_arrow_function = "🞅"
 "set conceallevel=1
+
+let g:javascript_plugin_flow = 1
+
 
 "let g:jsx_ext_required = 0
 

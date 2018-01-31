@@ -144,12 +144,6 @@ alias :3='cat'
 alias starwars='telnet towel.blinkenlights.nl'
 alias hack='cat /dev/urandom | hexdump -c'
 
-#look words up in an online dictionary
-define() {
-	curl dict://dict.org/d:$1
-}
-alias define="define"
-
 #ls stuff
 alias lsa='ls --color=auto -A'
 alias lsl='ls --color=auto -l'

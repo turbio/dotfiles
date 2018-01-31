@@ -376,10 +376,10 @@ let g:deoplete#enable_at_startup = 1
 let g:deoplete#debug_enabled = 1
 let g:deoplete#enable_profile = 1
 
-let g:deoplete#enable_camel_case = 0
-let g:deoplete#enable_refresh_always = 0
-let g:deoplete#max_menu_width = 40
-let g:deoplete#auto_complete_delay = 0
+"let g:deoplete#enable_camel_case = 0
+"let g:deoplete#enable_refresh_always = 0
+"let g:deoplete#max_menu_width = 40
+"let g:deoplete#auto_complete_delay = 0
 
 let g:deoplete#ignore_sources = {}
 let g:deoplete#ignore_sources._ = [

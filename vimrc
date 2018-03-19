@@ -80,6 +80,7 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'pangloss/vim-javascript'
 Plug 'rust-lang/rust.vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
+Plug 'fatih/vim-go'
 
 "Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'elmcast/elm-vim'
@@ -295,8 +296,6 @@ nnoremap <leader>v V`]
 
 
 
-"Toggle spelling
-nmap <leader>s :set invspell<CR>:set spell?<CR>
 
 "Toggle wrap
 nmap <leader>W :set invwrap<CR>:set wrap?<CR>
@@ -471,6 +470,18 @@ let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
 let g:ale_sign_error = ''
 let g:ale_sign_warning = ''
 let g:airline#extensions#ale#enabled = 1
+let g:ale_linters =   {
+  \   'csh': ['shell'],
+  \   'go': ['gometalinter'],
+  \   'help': [],
+  \   'perl': ['perlcritic'],
+  \   'python': ['flake8', 'mypy', 'pylint'],
+  \   'rust': ['cargo'],
+  \   'spec': [],
+  \   'text': [],
+  \   'zsh': ['shell'],
+  \ }
+let g:ale_go_gometalinter_options = '--fast'
 "}}}
 "neoformat {{{
 let g:neoformat_javascript_prettier = {
@@ -488,6 +499,7 @@ let g:neoformat_reason_refmt = {
 			\ 'stdin': 1,
 			\ }
 let g:neoformat_enabled_reason = ['refmt']
+"let g:neoformat_enabled_go = ['gofmt']
 
 "let g:neoformat_basic_format_align = 1
 "let g:neoformat_basic_format_retab = 1
@@ -704,3 +716,11 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+
+"spelling
+nmap <leader>ss :set invspell<CR>:set spell?<CR>
+nmap <leader>sf 1z=
+nmap <leader>sa zg
+nmap <leader>sr zw
+nmap <leader>sn ]s
+nmap <leader>sN [s

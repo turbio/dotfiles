@@ -2,9 +2,6 @@
 # wm independent hotkeys
 #
 
-super + p
-	rofi -show window
-
 # terminal emulator
 super + Return
 	xfce4-terminal

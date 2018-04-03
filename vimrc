@@ -33,8 +33,9 @@ Plug 'tpope/vim-eunuch'
 "Plug 'gcmt/taboo.vim'
 "Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
-Plug 'bling/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+Plug 'itchyny/lightline.vim'
+"Plug 'bling/vim-airline'
+"Plug 'vim-airline/vim-airline-themes'
 "Plug 'justinmk/vim-syntax-extra'
 "Plug 'jceb/vim-orgmode'
 "Plug 'mhinz/vim-signify'
@@ -369,10 +370,10 @@ let g:LanguageClient_serverCommands = {
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
 
-let g:deoplete#debug_enabled = 1
-let g:deoplete#enable_profile = 1
+"let g:deoplete#debug_enabled = 1
+"let g:deoplete#enable_profile = 1
 
-"let g:deoplete#enable_camel_case = 0
+let g:deoplete#enable_camel_case = 0
 "let g:deoplete#enable_refresh_always = 0
 "let g:deoplete#max_menu_width = 40
 "let g:deoplete#auto_complete_delay = 0
@@ -439,9 +440,9 @@ let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
 
 "}}}
 "airline {{{
-let g:airline_powerline_fonts=1
-let g:airline_theme="powerlineish"
-let g:airline#extensions#tabline#enabled = 1
+"let g:airline_powerline_fonts=1
+"let g:airline_theme="powerlineish"
+"let g:airline#extensions#tabline#enabled = 1
 "}}}
 "syntastic {{{
 "Syntastic config
@@ -580,6 +581,8 @@ set noexpandtab
 "<c-w>l
 "endfunction
 "command OpenBars call OpenBars()
+
+let NERDTreeMinimalUI=1
 
 "nnoremap <A-h> <nop>
 "nnoremap <A-j> <nop>

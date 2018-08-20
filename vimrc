@@ -78,6 +78,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 "Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 "Plug 'Yggdroot/indentLine'
 
 Plug 'pangloss/vim-javascript'
@@ -368,7 +369,12 @@ nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 let g:LanguageClient_serverCommands = {
   \ 'reason': ['ocaml-language-server', '--stdio'],
   \ 'ocaml': ['ocaml-language-server', '--stdio'],
+  \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
 \ }
+let g:LanguageClient_loadSettings = 1
+let g:LanguageClient_settingsPath = '/home/mason/.vim/langServer.json'
+let g:LanguageClient_loggingLevel = 'DEBUG'
+let g:LanguageClient_loggingFile = '/tmp/lcll'
 "}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
@@ -490,7 +496,7 @@ let g:ale_go_gometalinter_options = '--fast'
 "neoformat {{{
 let g:neoformat_javascript_prettier = {
 			\ 'exe': 'prettier',
-			\ 'args': ['--stdin', '--single-quote', '--trailing-comma', 'all', '--bracket-spacing'],
+			\ 'args': ['--stdin', '--single-quote', '--trailing-comma', 'all', '--bracket-spacing', '--parser', 'babylon'],
 			\ 'replace': 0,
 			\ 'stdin': 1,
 			\ 'no_append': 1,

@@ -204,6 +204,9 @@ export PATH=~/.gem/ruby/2.3.0/bin:$PATH
 # ruby 2.4
 export PATH=~/.gem/ruby/2.4.0/bin:$PATH
 
+# ruby 2.5
+export PATH=~/.gem/ruby/2.5.0/bin:$PATH
+
 # go
 export PATH=~/git/gocode/bin:$PATH
 

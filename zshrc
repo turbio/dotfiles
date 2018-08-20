@@ -260,3 +260,6 @@ export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
 export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# OPAM configuration
+. /home/mason/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true

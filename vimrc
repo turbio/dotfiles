@@ -3,6 +3,7 @@ if !1 | finish | endif
 
 call plug#begin('~/.vim/plugged')
 
+Plug 'sebdah/vim-delve'
 Plug 'sbdchd/neoformat'
 Plug 'tpope/vim-obsession'
 Plug 'HerringtonDarkholme/yats.vim'
@@ -50,12 +51,15 @@ Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'copy/deoplete-ocaml'
 Plug 'carlitux/deoplete-ternjs'
-
+Plug 'steelsojka/deoplete-flow'
 Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
 
-Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
 Plug 'Shougo/echodoc.vim'
 
 "Plug 'Shougo/neocomplete.vim'
@@ -231,6 +235,16 @@ noremap <silent> <leader>6 :call HiInterestingWord(6)<cr>
 nnoremap YY ^y$
 
 "}}}
+"lightline {{{
+let g:lightline = {
+      \ 'component_function': {
+      \   'filename': 'LightlineFilename',
+      \ },
+      \ }
+function! LightlineFilename()
+  return expand('%:t') !=# '' ? expand('%') : '[No Name]'
+endfunction
+"}}}
 
 "visual mode search
 function! s:VSetSearch()
@@ -366,9 +380,10 @@ nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
 nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 
 let g:LanguageClient_serverCommands = {
-  \ 'reason': ['ocaml-language-server', '--stdio'],
-  \ 'ocaml': ['ocaml-language-server', '--stdio'],
-\ }
+    \ 'reason': ['ocaml-language-server', '--stdio'],
+    \ 'ocaml': ['ocaml-language-server', '--stdio'],
+    \ 'javascript': ['javascript-typescript-stdio'],
+    \ }
 "}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
@@ -432,6 +447,33 @@ noremap <leader>r :YcmCompleter RefactorRename<Space>
 "}}}
 "tagbar {{{
 "autocmd BufRead,BufNewFile *.js let g:tagbar_ctags_bin = "jsctags -f"
+let g:tagbar_type_go = {
+	\ 'ctagstype' : 'go',
+	\ 'kinds'     : [
+		\ 'p:package',
+		\ 'i:imports:1',
+		\ 'c:constants',
+		\ 'v:variables',
+		\ 't:types',
+		\ 'n:interfaces',
+		\ 'w:fields',
+		\ 'e:embedded',
+		\ 'm:methods',
+		\ 'r:constructor',
+		\ 'f:functions'
+	\ ],
+	\ 'sro' : '.',
+	\ 'kind2scope' : {
+		\ 't' : 'ctype',
+		\ 'n' : 'ntype'
+	\ },
+	\ 'scope2kind' : {
+		\ 'ctype' : 't',
+		\ 'ntype' : 'n'
+	\ },
+	\ 'ctagsbin'  : 'gotags',
+	\ 'ctagsargs' : '-sort -silent'
+	\ }
 "}}}
 "ulti snips {{{
 "ultisnips

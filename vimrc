@@ -51,7 +51,7 @@ Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'copy/deoplete-ocaml'
 Plug 'carlitux/deoplete-ternjs'
-Plug 'steelsojka/deoplete-flow'
+"Plug 'steelsojka/deoplete-flow'
 Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
@@ -515,7 +515,7 @@ let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
-let g:neomake_javascript_enabled_makers = ['eslint', 'flow']
+let g:neomake_javascript_enabled_makers = ['eslint']
 
 "}}}
 "ale {{{

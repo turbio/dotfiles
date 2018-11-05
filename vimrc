@@ -46,12 +46,12 @@ Plug 'itchyny/lightline.vim'
 "Plug 'Valloric/YouCompleteMe'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'tweekmonster/deoplete-clang2'
 Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'copy/deoplete-ocaml'
 Plug 'carlitux/deoplete-ternjs'
 Plug 'steelsojka/deoplete-flow'
+Plug 'ocaml/merlin'
 Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
@@ -82,7 +82,6 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 "Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
 "Plug 'Yggdroot/indentLine'
 
 Plug 'pangloss/vim-javascript'
@@ -384,7 +383,8 @@ let g:LanguageClient_serverCommands = {
   \ 'reason': ['ocaml-language-server', '--stdio'],
   \ 'ocaml': ['ocaml-language-server', '--stdio'],
   \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
-    \ 'javascript': ['javascript-typescript-stdio'],
+  \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
+  \ 'javascript': ['javascript-typescript-stdio'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '/home/mason/.vim/langServer.json'
@@ -596,6 +596,7 @@ filetype plugin indent on
 set nrformats-=octal
 set smarttab
 set autoread
+au CursorHold,CursorHoldI * checktime
 set sessionoptions-=options
 set spelllang=en
 set linebreak

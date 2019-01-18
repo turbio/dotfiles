@@ -107,7 +107,7 @@ export PATH=~/.gem/ruby/2.4.0/bin:$PATH
 export PATH=~/.gem/ruby/2.5.0/bin:$PATH
 
 # go
-export PATH=~/code/gocode/bin:$PATH
+export PATH=~/code/bin:$PATH
 
 # cargo
 export PATH=~/.cargo/bin:$PATH
@@ -141,10 +141,9 @@ bindkey '^Z' ctrlz
 bindkey -v
 bindkey -M viins 'jk' vi-cmd-mode
 
-export GOPATH=~/git/gocode
+export GOPATH=~/code
 
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
-export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

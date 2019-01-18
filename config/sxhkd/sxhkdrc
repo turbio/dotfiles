@@ -4,8 +4,8 @@
 
 # terminal emulator
 super + Return
-	xfce4-terminal
-	#alacritty
+	alacritty
+	#xfce4-terminal
 	#gnome-terminal
 
 # program launcher
@@ -47,7 +47,7 @@ super + z
 	bspc node @/ -R 90
 
 super + x
-	bspc node @/ -R -90
+	bspc node -R 90
 
 #
 # state/flags

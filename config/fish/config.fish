@@ -7,9 +7,7 @@ set fish_color_error red
 
 #path stuff
 if status --is-login
-    set PATH $PATH ~/.bin #local bin
-    #set SHELL /bin/zsh
-    set EDITOR nvim
+    set -x PATH $PATH ~/.bin ~/bin #local bin
 end
 
 #ls stuff
@@ -19,11 +17,6 @@ alias lsal='ls --color=auto -l -A'
 alias lsla='ls --color=auto -l -A'
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-
-#a bunch of aliases to speed things up
-alias pm="sudo pm-suspend-hybrid"
-alias net="wicd-curses"
-alias vol="alsamixer"
 
 #i cool idea i got from somewhere... forgot where
 #alias \.="cd .."
@@ -36,14 +29,13 @@ alias vol="alsamixer"
 #opening stuff
 alias ]="xdg-open"
 
-alias :3='cat'
-
 #some fancy git aliases
 alias gst="git status -sb"
 alias gdf="git diff"
 alias gdfc="git diff --cached"
 alias gcm="git commit -m"
 alias gad="git add -A"
+alias gp="git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)"
 
 alias calc="bc -l"
 
@@ -54,7 +46,11 @@ end
 
 fish_vi_key_bindings
 
+#gopath
+set -x GOPATH ~/code/gocode
+set -x PATH $PATH $GOPATH/bin
+set -x EDITOR nvim
+
 #welcome
 function fish_greeting
-    ~/.config/fish/welcome
 end

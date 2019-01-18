@@ -46,10 +46,8 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
-Plug 'copy/deoplete-ocaml'
 Plug 'carlitux/deoplete-ternjs'
 Plug 'steelsojka/deoplete-flow'
-Plug 'ocaml/merlin'
 Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
@@ -63,7 +61,7 @@ Plug 'Shougo/echodoc.vim'
 "Plug 'Shougo/neocomplete.vim'
 "Plug 'davidhalter/jedi-vim'
 "Plug 'm2mdas/phpcomplete-extended'
-"Plug 'SirVer/ultisnips'
+Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 "Plug '0x0dea/vim-molasses'
 "Plug 'xuhdev/vim-latex-live-preview'
@@ -377,8 +375,6 @@ nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
 nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 
 let g:LanguageClient_serverCommands = {
-  \ 'reason': ['ocaml-language-server', '--stdio'],
-  \ 'ocaml': ['ocaml-language-server', '--stdio'],
   \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'javascript': ['javascript-typescript-stdio'],

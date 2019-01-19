@@ -90,7 +90,7 @@ alias gco="git_branch_upsert"
 alias ]="xdg-open"
 alias calc="bc -l"
 
-export EDITOR=nvim
+export EDITOR=vim
 
 # local bin
 export PATH=~/bin:$PATH

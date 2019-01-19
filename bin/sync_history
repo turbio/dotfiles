@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cd ~/.config/zsh/
+git add history
+git commit -m "$(date +%s)"
+git push origin "master:$(hostname)"

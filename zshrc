@@ -90,7 +90,7 @@ alias gco="git_branch_upsert"
 alias ]="xdg-open"
 alias calc="bc -l"
 
-export EDITOR=nvim
+export EDITOR=vim
 
 export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/git/gocode/bin:~/.cargo/bin:$PATH
 

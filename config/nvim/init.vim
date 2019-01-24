@@ -380,7 +380,7 @@ let g:LanguageClient_serverCommands = {
   \ 'javascript': ['javascript-typescript-stdio'],
 \ }
 let g:LanguageClient_loadSettings = 1
-let g:LanguageClient_settingsPath = '~/.config/nvim/langServer.json'
+let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'
 let g:LanguageClient_loggingLevel = 'DEBUG'
 let g:LanguageClient_loggingFile = '/tmp/lcll'
 "}}}

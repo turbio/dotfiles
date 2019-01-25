@@ -1,12 +1,6 @@
-[submodule "config/zsh/opp.zsh"]
-	path = config/zsh/opp.zsh
-	url = ../../hchbaw/opp.zsh.git
 [submodule "config/zsh/zsh-syntax-highlighting"]
 	path = config/zsh/zsh-syntax-highlighting
 	url = ../../zsh-users/zsh-syntax-highlighting.git
 [submodule "config/zsh/zsh-history-substring-search"]
 	path = config/zsh/zsh-history-substring-search
 	url = ../../zsh-users/zsh-history-substring-search.git
-[submodule "config/zsh/zsh-autosuggestions"]
-	path = config/zsh/zsh-autosuggestions
-	url = ../../zsh-users/zsh-autosuggestions.git

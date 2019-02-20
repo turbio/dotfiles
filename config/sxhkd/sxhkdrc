@@ -1,6 +1,5 @@
 #
 # wm independent hotkeys
-#
 
 # terminal emulator
 super + Return
@@ -119,4 +118,16 @@ XF86AudioLowerVolume
 	pactl set-sink-volume 0 -5%
 
 XF86AudioMute
-	pactl set-sink-mute 0 toggle
+	pactl set-sink-mute 0 toggle && \
+	playerctl pause
+
+XF86AudioPlay
+	playerctl play-pause
+
+XF86MonBrightnessUp
+	light -A 10 && \
+	notify-send.sh -r 13371 -u low -t 500 "brightness $(light) / 100"
+
+XF86MonBrightnessDown
+	light -U 10 && \
+	notify-send.sh -r 13371 -u low -t 500 "brightness $(light) / 100"

@@ -704,8 +704,6 @@ endfunction
 noremap <silent> <leader>mw :call MarkWindowSwap()<CR>
 noremap <silent> <leader>pw :call DoWindowSwap()<CR>
 
-let $GOPATH = expand("~/git/gocode")
-
 command! CloseHiddenBuffers call s:CloseHiddenBuffers()
 function! s:CloseHiddenBuffers()
 	let open_buffers = []

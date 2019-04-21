@@ -44,11 +44,10 @@ Plug 'itchyny/lightline.vim'
 "Plug 'Valloric/YouCompleteMe'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'carlitux/deoplete-ternjs'
 Plug 'steelsojka/deoplete-flow'
-Plug 'mhartington/nvim-typescript'
+"Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
 
@@ -89,6 +88,7 @@ Plug 'fatih/vim-go'
 Plug 'elmcast/elm-vim'
 
 Plug 'turbio/bracey.vim'
+Plug 'vim-scripts/brainfuck-syntax'
 
 "Plug 'seletskiy/vim-autosurround'
 "inoremap  ( (<C-O>:call AutoSurround(")")<CR>
@@ -375,9 +375,11 @@ nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
 nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 
 let g:LanguageClient_serverCommands = {
+  \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
   \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'javascript': ['javascript-typescript-stdio'],
+  \ 'typescript': ['javascript-typescript-stdio'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'

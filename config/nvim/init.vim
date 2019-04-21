@@ -78,6 +78,7 @@ Plug 'sentientmachine/Pretty-Vim-Python'
 "Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 "Plug 'Yggdroot/indentLine'
+Plug 'vim-scripts/brainfuck-syntax'
 
 Plug 'pangloss/vim-javascript'
 Plug 'rust-lang/rust.vim'
@@ -372,7 +373,7 @@ let g:LanguageClient_autoStart = 1
 
 nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
 nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+nnoremap <silent> gr :call LanguageClient_textDocument_rename()<CR>
 
 let g:LanguageClient_serverCommands = {
   \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
@@ -380,11 +381,12 @@ let g:LanguageClient_serverCommands = {
   \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'javascript': ['javascript-typescript-stdio'],
   \ 'typescript': ['javascript-typescript-stdio'],
+  \ 'rust': ['rls'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'
 let g:LanguageClient_loggingLevel = 'DEBUG'
-let g:LanguageClient_loggingFile = '/tmp/lcll'
+"let g:LanguageClient_loggingFile = '~/lcll'
 "}}}
 "deoplete {{{
 let g:deoplete#enable_at_startup = 1
@@ -595,6 +597,8 @@ au CursorHold,CursorHoldI * checktime
 set sessionoptions-=options
 set spelllang=en
 set linebreak
+
+au BufRead,BufNewFile *.bf set filetype=brainfuck
 
 if exists('+breakindent')
 	set breakindent " preserves the indent level of wrapped lines

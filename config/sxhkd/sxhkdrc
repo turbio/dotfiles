@@ -16,7 +16,7 @@ super + space
 	rofi -show run
 
 # pass launcher
-super + /
+super + slash
 	rofi -show window
 
 # make sxhkd reload its configuration files:

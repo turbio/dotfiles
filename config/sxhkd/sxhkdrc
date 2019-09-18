@@ -15,6 +15,10 @@ super + semicolon
 super + space
 	rofi -show run
 
+# pass launcher
+super + /
+	rofi -show window
+
 # make sxhkd reload its configuration files:
 super + Escape
 	pkill -USR1 -x sxhkd
@@ -119,10 +123,12 @@ XF86AudioLowerVolume
 
 XF86AudioMute
 	pactl set-sink-mute 0 toggle && \
-	playerctl pause
+	playerctl pause && \
+	mpc pause
 
 XF86AudioPlay
-	playerctl play-pause
+	playerctl play-pause && \
+	mpc toggle
 
 XF86MonBrightnessUp
 	light -A 10 && \

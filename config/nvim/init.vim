@@ -48,7 +48,6 @@ Plug 'sebastianmarkow/deoplete-rust'
 Plug 'dag/vim-fish'
 Plug 'carlitux/deoplete-ternjs'
 Plug 'steelsojka/deoplete-flow'
-Plug 'mhartington/nvim-typescript'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
 
@@ -78,7 +77,9 @@ Plug 'tpope/vim-fugitive'
 Plug 'sentientmachine/Pretty-Vim-Python'
 "Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 "Plug 'Yggdroot/indentLine'
+Plug 'leafgarland/typescript-vim'
 
 Plug 'pangloss/vim-javascript'
 Plug 'rust-lang/rust.vim'
@@ -366,18 +367,20 @@ let g:indentLine_showFirstIndentLevel=1
 " }}}
 "fzf {{{
 noremap <C-p> :FZF<CR>
+noremap <C-_> :Ag<CR>
 "}}}
 "LanguageClient
 let g:LanguageClient_autoStart = 1
 
 nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
 nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+nnoremap gr :call LanguageClient_textDocument_rename()<CR>
 
 let g:LanguageClient_serverCommands = {
   \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
   \ 'javascript': ['javascript-typescript-stdio'],
+  \ 'typescript': ['javascript-typescript-stdio'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'

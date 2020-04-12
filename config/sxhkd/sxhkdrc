@@ -11,13 +11,24 @@ super + Return
 super + semicolon
 	rofi-pass
 
-# pass launcher
-super + space
-	rofi -show run
+super + r
+	bspc_rename
+
+super + g
+	bspc_goto
+
+super + d
+	bspc_del_desktop
+
+super + w
+	bspc_swap
 
 # pass launcher
-super + slash
-	rofi -show window
+super + space
+	alacritty -d 80 5 -e launcher
+
+#super + slash
+#	rofi -show window
 
 # make sxhkd reload its configuration files:
 super + Escape
@@ -81,14 +92,14 @@ super + {_,shift + }c
 	bspc node -f {next,prev}
 
 super + shift + o
-	bspc node -d next -f
+	bspc node -d next.local -f
 
 super + shift + i
-	bspc node -d prev -f
+	bspc node -d prev.local -f
 
 # focus the older or newer node in the focus history
 super + {i,o}
-	bspc desktop -f {prev,next}
+	bspc desktop -f {prev,next}.local
 
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}
@@ -124,9 +135,7 @@ XF86AudioLowerVolume
 	notify-send.sh -r 13372 -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
 
 XF86AudioMute
-	pactl set-sink-mute 0 toggle && \
-	playerctl pause && \
-	mpc pause
+	pactl set-sink-mute 0 toggle && pause-all
 
 XF86AudioPlay
 	playerctl play-pause && \

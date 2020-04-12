@@ -1,5 +1,5 @@
 {
   "initializationOptions": {
-    "cacheDirectory": "/tmp/cquery"
+    "cacheDirectory": "/home/mason/.cache/cquery"
   }
 }

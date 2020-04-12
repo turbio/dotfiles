@@ -1,6 +1,6 @@
 #include "/usr/share/rofi/themes//gruvbox-dark-soft.theme"
 
-rofi.font:                           xos4 Terminus Regular 9
+rofi.font:                           Terminus (TTF) Regular 9
 rofi.levenshtein-sort:               true
 rofi.matching:                       fuzzy
 rofi.lines:                          25

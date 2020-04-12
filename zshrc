@@ -152,3 +152,25 @@ if [ -f '/home/mason/google-cloud-sdk/path.zsh.inc' ]; then source '/home/mason/
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/home/mason/google-cloud-sdk/completion.zsh.inc' ]; then source '/home/mason/google-cloud-sdk/completion.zsh.inc'; fi
+
+function print_exit_status() {
+	st="$?"
+	if [[ "$st" != "0" ]]; then
+		echo -e "\x1b[43m exit $st \x1b[m"
+	fi
+}
+
+add-zsh-hook precmd print_exit_status
+
+export GTK_IM_MODULE=xim
+export XMODIFIERS=@im=ibus
+export QT_IM_MODULE=xim
+export MOZ_ENABLE_WAYLAND=1
+
+if [[ "$LAUNCH_SHELL" == "yes" ]]; then
+	preexec() {
+		(eval $3) &
+		disown
+		exit
+	}
+fi

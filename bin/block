@@ -1,4 +1,8 @@
 #!/bin/bash
-scrot /tmp/screenshot.png
+#scrot /tmp/screenshot.png
+#convert /tmp/screenshot.png -blur 0x5 /tmp/screenshotblur.png
+#i3lock -i /tmp/screenshotblur.png -u
+
+grim /tmp/screenshot.png
 convert /tmp/screenshot.png -blur 0x5 /tmp/screenshotblur.png
-i3lock -i /tmp/screenshotblur.png -u
+swaylock -i /tmp/screenshotblur.png -u

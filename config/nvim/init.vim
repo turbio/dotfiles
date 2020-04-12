@@ -46,7 +46,7 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'dag/vim-fish'
 Plug 'carlitux/deoplete-ternjs'
-Plug 'steelsojka/deoplete-flow'
+"Plug 'steelsojka/deoplete-flow'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
 
@@ -78,10 +78,10 @@ Plug 'sentientmachine/Pretty-Vim-Python'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 "Plug 'Yggdroot/indentLine'
-Plug 'leafgarland/typescript-vim'
+"Plug 'leafgarland/typescript-vim'
 Plug 'vim-scripts/brainfuck-syntax'
 
-Plug 'pangloss/vim-javascript'
+"Plug 'pangloss/vim-javascript'
 Plug 'rust-lang/rust.vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'fatih/vim-go'
@@ -196,8 +196,6 @@ noremap <leader>ut :UndotreeToggle \| UndotreeFocus<cr>
 "keep in center whenn searching
 nnoremap n nzzzv
 nnoremap N Nzzzv
-
-nnoremap * *<c-o>
 
 function! HiInterestingWord(n) "{{{
 	" Save our location.
@@ -502,7 +500,7 @@ let g:syntastic_warning_symbol = ''
 let g:syntastic_auto_jump = 0 " Jump to syntax errors
 let g:syntastic_auto_loc_list = 0 " Auto-open the error list
 
-let g:syntastic_javascript_checkers = ['eslint']
+"let g:syntastic_javascript_checkers = ['eslint']
 
 "}}}
 "neomake {{{
@@ -514,24 +512,24 @@ let g:neomake_info_sign = {'text': '', 'texthl': 'NeomakeInfoSign'}
 let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
-let g:neomake_javascript_enabled_makers = ['eslint']
+"let g:neomake_javascript_enabled_makers = ['eslint']
 
 "}}}
 "ale {{{
 let g:ale_sign_error = ''
 let g:ale_sign_warning = ''
 let g:airline#extensions#ale#enabled = 1
-let g:ale_linters =   {
-  \   'csh': ['shell'],
-  \   'go': ['gometalinter'],
-  \   'help': [],
-  \   'perl': ['perlcritic'],
-  \   'python': ['flake8', 'mypy', 'pylint'],
-  \   'rust': ['cargo'],
-  \   'spec': [],
-  \   'text': [],
-  \   'zsh': ['shell'],
-  \ }
+"let g:ale_linters =   {
+  "\   'csh': ['shell'],
+  "\   'go': ['gometalinter'],
+  "\   'help': [],
+  "\   'perl': ['perlcritic'],
+  "\   'python': ['flake8', 'mypy', 'pylint'],
+  "\   'rust': ['cargo'],
+  "\   'spec': [],
+  "\   'text': [],
+  "\   'zsh': ['shell'],
+  "\ }
 let g:ale_go_gometalinter_options = '--fast'
 "}}}
 "neoformat {{{
@@ -754,7 +752,7 @@ set novisualbell
 "let g:javascript_conceal_underscore_arrow_function = "🞅"
 "set conceallevel=1
 
-let g:javascript_plugin_flow = 1
+"let g:javascript_plugin_flow = 1
 
 
 "let g:jsx_ext_required = 0

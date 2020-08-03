@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+#escrotum -s /dev/stdout | xclip -selection clipboard -t image/png
+
+dim="$(slurp)"
+
+if [[ "$1" != "" ]]; then
+    sleep "$1"
+fi
+
+grim -g "$dim" clip.png
+mkdir -p ~/Pictures/clip
+cp clip.png ~/Pictures/clip/clip_$(date +%Y_%m_%d_%H:%M:%S).png
+cat clip.png | wl-copy

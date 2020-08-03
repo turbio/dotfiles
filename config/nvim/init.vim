@@ -45,7 +45,7 @@ Plug 'itchyny/lightline.vim'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'dag/vim-fish'
-Plug 'carlitux/deoplete-ternjs'
+"Plug 'carlitux/deoplete-ternjs'
 "Plug 'steelsojka/deoplete-flow'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
@@ -87,7 +87,7 @@ Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'fatih/vim-go'
 
 "Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
-Plug 'elmcast/elm-vim'
+"Plug 'elmcast/elm-vim'
 
 Plug 'turbio/bracey.vim'
 Plug 'vim-scripts/brainfuck-syntax'

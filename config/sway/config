@@ -10,7 +10,7 @@
 set $mod Mod4
 
 # Your preferred terminal emulator
-set $term alacritty
+set $term 'alacritty'
 
 # Your preferred application launcher
 set $menu alacritty -d 80 5 -e launcher
@@ -146,12 +146,23 @@ for_window [title=".*"] floating enable
 
 bindsym $mod+semicolon exec rofi-pass
 
-input 2:7:SynPS/2_Synaptics_TouchPad events disabled
+input 2:7:SynPS/2_Synaptics_TouchPad {
+	events disabled
+}
+
+input "9610:32:HAILUCK_CO.,LTD_USB_KEYBOARD_Touchpad" {
+	tap enabled
+}
 
 exec mako
+exec waybar
 exec gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
 exec gsettings set org.gnome.desktop.interface icon-theme 'Arc'
 exec gsettings set org.gnome.desktop.interface monospace-font-name 'Terminus (TTF) Medium 9'
 exec gsettings set org.gnome.desktop.interface font-name 'Terminus (TTF) Medium 9'
 
 bindsym $mod+u exec track
+
+#bar {
+#	status_command i3status
+#}

@@ -119,9 +119,9 @@ bindsym XF86AudioPrev exec playerctl previous
 bindsym XF86MonBrightnessUp   exec light -A 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"
 bindsym XF86MonBrightnessDown exec light -U 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"
 
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
-bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle && pause-all
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume '@DEFAULT_SINK@' +5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume '@DEFAULT_SINK@' -5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
+bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle && pause-all
 bindsym XF86AudioMicMute exec pactl set-source-mute 1 toggle
 
 bindsym $mod+y sticky toggle

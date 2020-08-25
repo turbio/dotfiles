@@ -399,12 +399,6 @@ let g:deoplete#enable_camel_case = 0
 "let g:deoplete#max_menu_width = 40
 "let g:deoplete#auto_complete_delay = 0
 
-let g:deoplete#ignore_sources = {}
-let g:deoplete#ignore_sources._ = [
-		\ 'around',
-	\ ]
-
-
 " rust
 let g:deoplete#sources#rust#racer_binary='/home/mason/.cargo/bin/racer'
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-wf-recorder -g "$(slurp)" -f rec.mp4
-mkdir -p ~/Videos/rec
-cp rec.mp4 ~/Videos/rec/rec_$(date +%Y_%m_%d_%H:%M:%S).mp4
-cat rec.mp4 | wl-copy
+
+if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+    wf-recorder -g "$(slurp)" -f ~/rec.mp4
+    mkdir -p ~/Videos/rec
+    cp ~/rec.mp4 ~/Videos/rec/rec_$(date +%Y_%m_%d_%H:%M:%S).mp4
+    cat ~/rec.mp4 | wl-copy
+else
+    echo "we don't have that kind of technology"
+    exit 1
+fi

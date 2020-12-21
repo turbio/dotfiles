@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-cd ~/.config/zsh/
-git checkout -b "$(hostname)" || git checkout "$(hostname)"
-git add history
-git commit -m "$(date +%s)"
-git push origin "$(hostname):$(hostname)"

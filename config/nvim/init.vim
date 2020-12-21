@@ -4,6 +4,7 @@ if !1 | finish | endif
 call plug#begin('~/.config/nvim/plugged')
 
 Plug 'sebdah/vim-delve'
+Plug 'sainnhe/gruvbox-material'
 Plug 'sbdchd/neoformat'
 Plug 'tpope/vim-obsession'
 Plug 'HerringtonDarkholme/yats.vim'
@@ -70,7 +71,6 @@ Plug 'Shougo/denite.nvim'
 "Plug 'Shougo/vimfiler.vim'
 "Plug 'Shougo/neossh.vim'
 "Plug 'benekastah/neomake'
-Plug 'w0rp/ale'
 Plug 'tpope/vim-fugitive'
 "Plug 'hdima/python-syntax'
 Plug 'sentientmachine/Pretty-Vim-Python'
@@ -382,6 +382,8 @@ let g:LanguageClient_serverCommands = {
   \ 'javascript': ['javascript-typescript-stdio'],
   \ 'typescript': ['javascript-typescript-stdio'],
   \ 'rust': ['rls'],
+  \ 'cpp': ['ccls'],
+  \ 'c': ['ccls'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'
@@ -508,23 +510,6 @@ let g:neomake_message_sign = {'text': '', 'texthl': 'NeomakeMessageSign'}
 let g:neomake_go_enabled_makers = ['go', 'golint', 'govet']
 "let g:neomake_javascript_enabled_makers = ['eslint']
 
-"}}}
-"ale {{{
-let g:ale_sign_error = ''
-let g:ale_sign_warning = ''
-let g:airline#extensions#ale#enabled = 1
-"let g:ale_linters =   {
-  "\   'csh': ['shell'],
-  "\   'go': ['gometalinter'],
-  "\   'help': [],
-  "\   'perl': ['perlcritic'],
-  "\   'python': ['flake8', 'mypy', 'pylint'],
-  "\   'rust': ['cargo'],
-  "\   'spec': [],
-  "\   'text': [],
-  "\   'zsh': ['shell'],
-  "\ }
-let g:ale_go_gometalinter_options = '--fast'
 "}}}
 "neoformat {{{
 let g:neoformat_javascript_prettier = {

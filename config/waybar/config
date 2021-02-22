@@ -2,8 +2,9 @@
   "layer": "top",
   "position": "top",
   "height": 30,
-
-  "modules-left": ["sway/workspaces"],
+  "modules-left": [
+    "sway/workspaces"
+  ],
   "modules-center": [],
   "modules-right": [
     "custom/yubi",
@@ -39,7 +40,13 @@
     "format-charging": "{capacity}% ",
     "format-plugged": "{capacity}% ",
     "format-alt": "{time} {icon}",
-    "format-icons": ["", "", "", "", ""]
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
   },
   "network": {
     "format-wifi": "{essid} ({signalStrength}%) ",
@@ -62,7 +69,11 @@
       "phone": "",
       "portable": "",
       "car": "",
-      "default": ["", "", ""]
+      "default": [
+        "",
+        "",
+        ""
+      ]
     },
     "on-click": "pavucontrol"
   },

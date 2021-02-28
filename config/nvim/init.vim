@@ -51,10 +51,10 @@ Plug 'dag/vim-fish'
 Plug 'reasonml-editor/vim-reason-plus'
 Plug 'reasonml/vim-reason-loader'
 
-Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+"Plug 'autozimu/LanguageClient-neovim', {
+"    \ 'branch': 'next',
+"    \ 'do': 'bash install.sh',
+"    \ }
 Plug 'Shougo/echodoc.vim'
 
 "Plug 'Shougo/neocomplete.vim'
@@ -92,6 +92,8 @@ Plug 'fatih/vim-go'
 Plug 'turbio/bracey.vim'
 Plug 'vim-scripts/brainfuck-syntax'
 
+Plug 'neovim/nvim-lspconfig'
+
 "Plug 'seletskiy/vim-autosurround'
 "inoremap  ( (<C-O>:call AutoSurround(")")<CR>
 "Plug 'lornix/vim-scrollbar'
@@ -106,6 +108,10 @@ Plug 'vim-scripts/brainfuck-syntax'
 "Plug 'ryanoasis/vim-devicons'
 
 call plug#end()
+
+lua << EOF
+require'lspconfig'.gopls.setup{}
+EOF
 
 "}}}
 "basic options {{{
@@ -371,9 +377,11 @@ noremap <C-_> :Ag<CR>
 "LanguageClient
 let g:LanguageClient_autoStart = 1
 
-nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-nnoremap <silent> gr :call LanguageClient_textDocument_rename()<CR>
+lua << EOF
+--buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', { noremap=true, silent=true })
+--buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', { noremap=true, silent=true })
+--buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.rename()<CR>', { noremap=true, silent=true })
+EOF
 
 let g:LanguageClient_serverCommands = {
   \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
@@ -384,6 +392,7 @@ let g:LanguageClient_serverCommands = {
   \ 'rust': ['rls'],
   \ 'cpp': ['ccls'],
   \ 'c': ['ccls'],
+  \ 'go': ['gopls'],
 \ }
 let g:LanguageClient_loadSettings = 1
 let g:LanguageClient_settingsPath = '~/.config/nvim/cquery_config.json'

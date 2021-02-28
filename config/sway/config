@@ -156,6 +156,8 @@ input "9610:32:HAILUCK_CO.,LTD_USB_KEYBOARD_Touchpad" {
 
 exec mako
 exec waybar
+exec lxsession
+exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 exec gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
 exec gsettings set org.gnome.desktop.interface icon-theme 'Arc'
 exec gsettings set org.gnome.desktop.interface monospace-font-name 'Terminus (TTF) Medium 9'

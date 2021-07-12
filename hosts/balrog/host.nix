@@ -1,13 +1,13 @@
-{ pkgs, stdenv, lib, ... }: 
+{ pkgs, stdenv, lib, ... }:
 
 let
   turbio-index = (pkgs.writeTextDir "index.html" ''
-      Hey!<br>
-      ====<br>
-      <br>
-      I'm Turbio<br>
-      🐧
-    '');
+    Hey!
+    ====
+    
+    I'm Turbio
+    🐧
+  '');
 in
 {
   security.acme.email = "letsencrypt@turb.io";
@@ -16,12 +16,17 @@ in
   services.nginx.enable = true;
   services.nginx.virtualHosts = {
     "turb.io" = {
-        addSSL = true;
-        enableACME = true;
-        root = "${turbio-index}";
-        extraConfig = ''
-          add_header Content-Type 'text/html; charset=utf-8';
-        '';
+      addSSL = true;
+      enableACME = true;
+      root = "${turbio-index}";
+      extraConfig = ''
+        add_header Content-Type 'text/plain; charset=utf-8';
+      '';
     };
+  };
+  services.nginx.gitweb = {
+    enable = true;
+    virtualHost = "git";
+    location = "/";
   };
 }

@@ -23,7 +23,7 @@ setopt INC_APPEND_HISTORY
 
 export HISTSIZE=10000000
 export SAVEHIST=10000000
-export HISTFILE=~/.config/zsh/history
+export HISTFILE=~/.zsh/history
 
 setopt PROMPTSUBST
 zstyle ':completion::complete:*' use-cache 1
@@ -36,7 +36,6 @@ setopt LIST_PACKED
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' \
 	'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
-source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_HIGHLIGHT_STYLES[globbing]='fg=yellow'
 ZSH_HIGHLIGHT_STYLES[path]='fg=cyan'
 ZSH_HIGHLIGHT_STYLES[function]='fg=blue'
@@ -52,7 +51,6 @@ ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=red'
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=magenta,bold'
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=magenta'
 
-source ~/.config/zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='fg=yellow,bold'
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND='fg=red,bold'
 

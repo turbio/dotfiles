@@ -129,8 +129,12 @@ in
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "docker" "audio" ];
     uid = 1000;
+
+    # probably a bad idea lmao
     hashedPassword = "$6$UnnB5IybU$cBw9zHoM7xTdwyXnAAbeXOGoqQQtzbYsuPqTDjpGF3J3H3WaarzAEtoBxXOImZlmmzY2amSqSgwUbEP0.ma3w0";
+
     shell = pkgs.zsh;
+    openssh.authorizedKeys.keys = [ "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBBa1RGmSWCA4xvw+sBZglCwjMbJ7QtYszwR3agccvse+VMq+tCOcPFUCNi5Wt36IJa9dBNbRHihE1KbaX5pGptwAAAAEc3NoOg== turbio@turb.io" ];
   };
   users.mutableUsers = false;
 
@@ -142,7 +146,12 @@ in
     pinentryFlavor = "gnome3";
   };
 
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    passwordAuthentication = false;
+  };
+
+  services.ntp.enable = true;
 
   home-manager.users.turbio = { pkgs, ... }: {
     home.packages = [ pkgs.atool pkgs.httpie ];

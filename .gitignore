@@ -7,3 +7,4 @@ vim/ycm_config.py
 vim/ycm_config.pyc
 /vim/.netrwhist
 */__pycache__/
+hostname.nix

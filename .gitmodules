@@ -1,6 +1,0 @@
-[submodule "config/zsh/zsh-syntax-highlighting"]
-	path = config/zsh/zsh-syntax-highlighting
-	url = ../../zsh-users/zsh-syntax-highlighting.git
-[submodule "config/zsh/zsh-history-substring-search"]
-	path = config/zsh/zsh-history-substring-search
-	url = ../../zsh-users/zsh-history-substring-search.git

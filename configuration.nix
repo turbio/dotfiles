@@ -54,24 +54,11 @@ in
 
   nixpkgs.config.allowUnfree = true; # we live in a society
 
-  nixpkgs.config.pulseaudio = true;
-  hardware.pulseaudio.enable = true;
-
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
   networking.hostName = hostname;
 
   time.timeZone = "America/Los_Angeles";
 
-  networking.interfaces.enp0s31f6.useDHCP = true;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
-
-  networking.networkmanager.enable = true;
-
   i18n.defaultLocale = "en_US.UTF-8";
-
 
   environment.systemPackages = with pkgs; [
     wget
@@ -79,6 +66,7 @@ in
     htop
     busybox
     zsh
+    ag
 
     gnumake
     clang
@@ -92,40 +80,8 @@ in
     rustup
   ] ++ (if config.isDesktop then desktopPackages else [ ]);
 
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-      ];
-      gtkUsePortal = true;
-    };
-  };
-
-  programs.light.enable = true;
-
-  virtualisation.virtualbox.host.enable = true;
-  #virtualisation.virtualbox.host.enableExtensionPack = true;
-  users.extraGroups.vboxusers.members = [ "turbio" ];
-
-  services.yubikey-agent.enable = true;
-  services.pcscd.enable = true;
-
-  fonts.fonts = with pkgs; [
-    terminus_font
-    terminus_font_ttf
-    font-awesome
-    noto-fonts
-    noto-fonts-emoji
-  ];
-
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-  };
-
-  services.pipewire.enable = true;
-
+  users.mutableUsers = false;
+  security.sudo.wheelNeedsPassword = false;
   users.users.turbio = {
     home = "/home/turbio";
     isNormalUser = true;
@@ -138,14 +94,12 @@ in
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [ "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBBa1RGmSWCA4xvw+sBZglCwjMbJ7QtYszwR3agccvse+VMq+tCOcPFUCNi5Wt36IJa9dBNbRHihE1KbaX5pGptwAAAAEc3NoOg== turbio@turb.io" ];
   };
-  users.mutableUsers = false;
 
   programs.mtr.enable = true;
 
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
-    pinentryFlavor = "gnome3";
   };
 
   services.openssh = {
@@ -156,7 +110,7 @@ in
   services.ntp.enable = true;
 
   home-manager.users.turbio = { pkgs, ... }: {
-    home.packages = [ pkgs.atool pkgs.httpie ];
+    home.packages = [];
     xdg.configFile = {
       "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
       "dunstrc".source = ./config/dunstrc;
@@ -211,10 +165,6 @@ in
 
     programs.nix-index.enable = true;
   };
-
-  security.sudo.wheelNeedsPassword = false;
-
-  virtualisation.docker.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

@@ -3,10 +3,52 @@
 { config, pkgs, lib, ... }:
 let
   hostname = import ./hostname.nix;
+  desktopPackages = with pkgs; [
+    nixpkgs-fmt
+    firefox-wayland
+    chromium
+    alacritty
+    pavucontrol
+    discord
+    blueberry
+    spotify
+    mako
+    pass
+    yubikey-manager
+    yubikey-agent
+    yubioath-desktop
+    arc-theme
+    lxappearance
+    gtk_engines
+    gtk-engine-murrine
+    gsettings-desktop-schemas
+    lsb-release
+
+    # waybar stuff
+    waybar
+    playerctl
+    python38
+    python38Packages.pygobject3
+    libappindicator
+
+    # gdbus
+    glib
+
+    docker-compose
+    vagrant
+    ansible
+
+    gnome.nautilus
+    gnome.file-roller
+
+    qemu
+  ];
 in
 {
   imports = [
+    ./common.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
+    (./hosts + "/${hostname}" + /host.nix)
     <home-manager/nixos>
   ];
 
@@ -30,65 +72,25 @@ in
 
   i18n.defaultLocale = "en_US.UTF-8";
 
+
   environment.systemPackages = with pkgs; [
-    nixpkgs-fmt
     wget
-    firefox-wayland
-    chromium
-    alacritty
     git
     htop
     busybox
     zsh
-    pavucontrol
-    discord
-    blueberry
-    spotify
-    mako
-    pass
-    yubikey-manager
-    yubikey-agent
-    yubioath-desktop
-    arc-theme
+
     gnumake
     clang
     gcc
     go
-
-    lxappearance
-    gtk_engines
-    gtk-engine-murrine
-    gsettings-desktop-schemas
-
-    lsb-release
-
-    # waybar stuff
-    waybar
-    playerctl
-    python38
-    python38Packages.pygobject3
-    libappindicator
-
-    # gdbus
-    glib
-
-    docker-compose
-    vagrant
-    ansible
-
-    gnome.nautilus
-    gnome.file-roller
-
-    cloc
     nodejs
 
+    cloc
     cargo
     rustc
     rustup
-    wasm-pack
-
-    qemu
-  ];
+  ] ++ (if config.isDesktop then desktopPackages else [ ]);
 
   xdg = {
     portal = {

@@ -1,4 +1,4 @@
-{ ... }: {
+{ pkgs, ... }: {
   isDesktop = true;
 
   nixpkgs.config.pulseaudio = true;

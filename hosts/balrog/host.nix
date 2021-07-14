@@ -4,7 +4,8 @@ let
   turbio-index = (pkgs.writeTextDir "index.html" ''
     Hey!
     ====
-    
+
+
     I'm Turbio
     🐧
   '');
@@ -23,10 +24,5 @@ in
         add_header Content-Type 'text/plain; charset=utf-8';
       '';
     };
-  };
-  services.nginx.gitweb = {
-    enable = true;
-    virtualHost = "git";
-    location = "/";
   };
 }

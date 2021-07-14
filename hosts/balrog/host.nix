@@ -9,9 +9,18 @@ let
     I'm Turbio
     🐧
   '');
-  pushgateway_addr = "127.0.0.1:9091";
+  prom = config.services.prometheus;
 in
 {
+  nixpkgs.overlays = [
+    (a: b: {
+      flippyflops =
+        (import (builtins.fetchTarball {
+          url = https://github.com/turbio/flippyflops/archive/master.tar.gz;
+        }));
+    })
+  ];
+
   security.acme.email = "letsencrypt@turb.io";
   security.acme.acceptTerms = true;
 
@@ -20,6 +29,7 @@ in
     "turb.io" = {
       addSSL = true;
       enableACME = true;
+
       root = "${turbio-index}";
       extraConfig = ''
         add_header Content-Type 'text/plain; charset=utf-8';
@@ -40,8 +50,35 @@ in
       enableACME = true;
 
       locations."/" = {
-        proxyPass = "http://${pushgateway_addr}";
+        proxyPass = "http://${prom.pushgateway.web.listen-address}";
       };
+    };
+
+    "dots.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:3001";
+      };
+
+      extraConfig = ''
+        proxy_http_version 1.1;
+        chunked_transfer_encoding off;
+        proxy_buffering off;
+        proxy_cache off;
+      '';
+    };
+  };
+
+  systemd.services.flippyflops = {
+    description = "flipdots as a service";
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      ExecStart = "${pkgs.flippyflops { port = 3001;
+      host = "127.0.0.1";
+    }}/bin/flippyflops";
     };
   };
 
@@ -61,17 +98,31 @@ in
 
     scrapeConfigs = [
       {
-        job_name = "exporter";
+        job_name = "pushgateway";
         static_configs = [{
-          targets = [ pushgateway_addr ];
+          targets = [ prom.pushgateway.web.listen-address ];
+        }];
+      }
+      {
+        job_name = "nodexporter";
+        static_configs = [{
+          targets = [ "127.0.0.1:${toString prom.exporters.node.port}" ];
         }];
       }
     ];
 
+    exporters = {
+      node = {
+        enable = true;
+        enabledCollectors = [ "systemd" ];
+        listenAddress = "127.0.0.1";
+        port = 9092;
+      };
+    };
   };
 
   services.prometheus.pushgateway = {
     enable = true;
-    web.listen-address = pushgateway_addr;
+    web.listen-address = "127.0.0.1:9091";
   };
 }

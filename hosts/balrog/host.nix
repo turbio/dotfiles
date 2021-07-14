@@ -34,6 +34,15 @@ in
         proxyPass = "http://unix:/${config.services.grafana.socket}";
       };
     };
+
+    "push.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+
+      locations."/" = {
+        proxyPass = "http://${pushgateway_addr}";
+      };
+    };
   };
 
   users.groups.grafana.members = [ "nginx" ];

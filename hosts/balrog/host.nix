@@ -9,6 +9,7 @@ let
     I'm Turbio
     🐧
   '');
+  pushgateway_addr = "127.0.0.1:9091";
 in
 {
   security.acme.email = "letsencrypt@turb.io";
@@ -41,5 +42,27 @@ in
     socket = "/run/grafana/grafana.sock";
     domain = "dash.turb.io";
     protocol = "socket";
+    rootUrl = "https://dash.turb.io/";
+  };
+
+  services.prometheus = {
+    enable = true;
+    port = 9090;
+    listenAddress = "127.0.0.1";
+
+    scrapeConfigs = [
+      {
+        job_name = "exporter";
+        static_configs = [{
+          targets = [ pushgateway_addr ];
+        }];
+      }
+    ];
+
+  };
+
+  services.prometheus.pushgateway = {
+    enable = true;
+    web.listen-address = pushgateway_addr;
   };
 }

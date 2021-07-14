@@ -35,11 +35,11 @@ in
     };
   };
 
+  users.groups.grafana.members = [ "nginx" ];
   services.grafana = {
     enable = true;
-    port = 3000;
-    addr = "127.0.0.1";
     socket = "/run/grafana/grafana.sock";
     domain = "dash.turb.io";
+    protocol = "socket";
   };
 }

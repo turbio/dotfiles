@@ -110,7 +110,7 @@ in
   services.ntp.enable = true;
 
   home-manager.users.turbio = { pkgs, ... }: {
-    home.packages = [];
+    home.packages = [ ];
     xdg.configFile = {
       "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
       "dunstrc".source = ./config/dunstrc;

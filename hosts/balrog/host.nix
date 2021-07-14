@@ -99,6 +99,7 @@ in
     scrapeConfigs = [
       {
         job_name = "pushgateway";
+        scrape_interval = "1s";
         static_configs = [{
           targets = [ prom.pushgateway.web.listen-address ];
         }];

@@ -24,6 +24,9 @@ let
     gsettings-desktop-schemas
     lsb-release
 
+    # wayland
+    wdisplays
+
     # waybar stuff
     waybar
     playerctl
@@ -45,13 +48,16 @@ let
 
     obs-studio
   ];
+  homemanager = builtins.fetchTarball {
+    url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";
+  };
 in
 {
   imports = [
     ./common.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
     (./hosts + "/${hostname}" + /host.nix)
-    <home-manager/nixos>
+    (import "${homemanager}/nixos")
   ];
 
   nixpkgs.config.allowUnfree = true; # we live in a society
@@ -166,6 +172,27 @@ in
     imports = [ ./vim.nix ];
 
     programs.nix-index.enable = true;
+
+    programs.git = {
+      enable = true;
+      userEmail = "git@turb.io";
+      userName = "turbio";
+    };
+
+    programs.firefox = {
+      enable = true;
+      profiles."lbgu1zmc.default".userChrome = ''
+        /* Hide tab bar in FF Quantum */
+        #TabsToolbar {
+          visibility: collapse !important;
+          margin-bottom: 21px !important;
+        }
+
+        #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] #sidebar-header {
+          visibility: collapse !important;
+        }
+      '';
+    };
   };
 
   # This value determines the NixOS release from which the default

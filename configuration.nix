@@ -42,6 +42,8 @@ let
     gnome.file-roller
 
     qemu
+
+    obs-studio
   ];
 in
 {

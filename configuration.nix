@@ -313,6 +313,10 @@ in
       theme.package = pkgs.arc-theme;
       theme.name = "Arc-Dark";
     };
+
+    home.sessionPath = [
+      "${./bin}"
+    ];
   };
 
   # This value determines the NixOS release from which the default

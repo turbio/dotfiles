@@ -1,5 +1,4 @@
 vim/plugged/
-config/*
 vim/tmp/*
 ncmpcpp/error.log
 bin/*

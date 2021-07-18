@@ -23,6 +23,7 @@
       font-awesome
       noto-fonts
       noto-fonts-emoji
+      roboto
     ];
 
     programs.sway = {
@@ -34,13 +35,24 @@
 
     programs.gnupg.agent.pinentryFlavor = "gnome3";
 
+    environment.variables.GTK_USE_PORTAL = "1";
+    environment.variables.GDK_BACKEND = "wayland";
+
+    systemd.user.services.xdg-desktop-portal.wantedBy = [ "default.target" ];
+    systemd.user.services.xdg-desktop-portal-wlr.wantedBy = [ "default.target" ];
+
+    systemd.user.services.xdg-desktop-portal.environment = {
+      XDG_DESKTOP_PORTAL_DIR = config.environment.variables.XDG_DESKTOP_PORTAL_DIR;
+    };
+
     xdg = {
       portal = {
         enable = true;
+        gtkUsePortal = true;
         extraPortals = with pkgs; [
           xdg-desktop-portal-wlr
+          xdg-desktop-portal-gtk
         ];
-        gtkUsePortal = true;
       };
     };
     virtualisation.docker.enable = true;

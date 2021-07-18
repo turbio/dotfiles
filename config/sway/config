@@ -18,7 +18,9 @@ set $menu alacritty -d 80 5 -e launcher
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/sway/)
-#output * bg ~/Pictures/walp.bmp fill
+
+# spooky: NIX_REPLACE_WALLPAPER will be replaced by nix
+output * bg NIX_REPLACE_WALLPAPER fill
 #
 # Example output configuration:
 #
@@ -157,13 +159,10 @@ input "9610:32:HAILUCK_CO.,LTD_USB_KEYBOARD_Touchpad" {
 exec mako
 exec waybar
 exec lxsession
-exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
-exec gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
-exec gsettings set org.gnome.desktop.interface icon-theme 'Arc'
-exec gsettings set org.gnome.desktop.interface monospace-font-name 'Terminus (TTF) Medium 9'
-exec gsettings set org.gnome.desktop.interface font-name 'Terminus (TTF) Medium 9'
 
-exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+
+exec systemctl --user import-environment WAYLAND_DISPLAY
 
 #bar {
 #	status_command i3status

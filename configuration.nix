@@ -304,7 +304,7 @@ in
       '';
     };
 
-    gtk = {
+    gtk = lib.mkIf config.isDesktop {
       enable = true;
       font.package = pkgs.terminus_font;
       font.name = "Terminus";

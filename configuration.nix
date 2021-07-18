@@ -2,6 +2,7 @@
 
 { config, pkgs, lib, ... }:
 let
+  stdenv = pkgs.stdenv;
   hostname = import ./hostname.nix;
   desktopPackages = with pkgs; [
     nixpkgs-fmt
@@ -17,21 +18,24 @@ let
     yubikey-manager
     yubikey-agent
     yubioath-desktop
-    arc-theme
+
     lxappearance
     gtk_engines
     gtk-engine-murrine
     gsettings-desktop-schemas
     lsb-release
 
+    arc-theme
+
     # wayland
     wdisplays
+    flashfocus
+    xdg-desktop-portal-wlr
+    gnome.dconf-editor
 
     # waybar stuff
-    waybar
+    (waybar.override { withMediaPlayer = true; })
     playerctl
-    python38
-    python38Packages.pygobject3
     libappindicator
 
     # gdbus
@@ -48,9 +52,51 @@ let
 
     obs-studio
     zoom-us
+    gimp
+
+    slurp
+    grim
+    wl-clipboard
+
+    aseprite
+    gnome.eog
+    mpv
   ];
   homemanager = builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";
+  };
+  wallpaperbin = stdenv.mkDerivation {
+    name = "wallpaper";
+    src = pkgs.fetchFromGitHub {
+      owner = "turbio";
+      repo = "live_wallpaper";
+      rev = "nixfix";
+      sha256 = "01m3gbzgb5vvipmcp0l3z7hg827yds4sz6vhqs5s262wkcr48qy3";
+    };
+    buildInputs = with pkgs; [ SDL2 SDL2_gfx pkg-config clang xxd ];
+    buildPhase = "cd build && make";
+    installPhase = ''
+      mkdir -p $out/bin
+      cp walp $out/bin
+      cp -r mods $out
+    '';
+  };
+  wallpaper = stdenv.mkDerivation {
+    name = "wallpaper-render";
+    phases = [ "buildPhase" "installPhase" ];
+
+    buildPhase = ''
+      ${wallpaperbin}/bin/walp \
+        -p ${wallpaperbin}/mods/cave_story_island.so \
+        --width 2560 \
+        --height 1440 \
+        --bmp out.bmp \
+        --once
+    '';
+
+    installPhase = ''
+      cp out.bmp $out
+    '';
   };
 in
 {
@@ -82,6 +128,9 @@ in
     gcc
     go
     nodejs
+    gdb
+
+    jq
 
     cloc
     cargo
@@ -119,24 +168,83 @@ in
   services.ntp.enable = true;
 
   home-manager.users.turbio = { pkgs, ... }: {
-    home.packages = [ ];
-    xdg.configFile = {
-      "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
-      "dunstrc".source = ./config/dunstrc;
-      "mako/config".source = ./config/mako/config;
-      "sway/config".source = ./config/sway/config;
-      "tmux/tmux.conf".source = ./config/tmux/tmux.conf;
-      "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
-      "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
+    home.packages = with pkgs; [
 
-      "waybar/config".source = ./config/waybar/config;
-      "waybar/mediaplayer.py".source = ./config/waybar/mediaplayer.py;
-      "waybar/style.css".source = ./config/waybar/style.css;
+      swaylock
+      swayidle
+      wl-clipboard
+      mako # notification daemon
+      alacritty # Alacritty is the default terminal in the config
+      dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+    ];
 
-      "nvim/tmp/undo/.keep".text = "";
-      "nvim/tmp/backup/.keep".text = "";
-      "nvim/tmp/swap/.keep".text = "";
-    };
+    xdg.configFile = lib.mkMerge [
+      {
+        "tmux/tmux.conf".source = ./config/tmux/tmux.conf;
+
+
+        "nvim/tmp/undo/.keep".text = "";
+        "nvim/tmp/backup/.keep".text = "";
+        "nvim/tmp/swap/.keep".text = "";
+      }
+      (lib.mkIf config.isDesktop {
+        "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
+        "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
+
+        "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
+        "dunstrc".source = ./config/dunstrc;
+        "mako/config".source = ./config/mako/config;
+        "sway/config".text = (
+          builtins.replaceStrings
+            [ "NIX_REPLACE_WALLPAPER" ]
+            [ (builtins.toString wallpaper) ]
+            (builtins.readFile ./config/sway/config)
+        );
+        "waybar/config".text =
+          builtins.replaceStrings
+            [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" ]
+            [
+              (builtins.toString (pkgs.writeShellScript "yubi-waybar-status"
+                ''
+                  last=xxxxxx
+                  ${pkgs.systemd}/bin/udevadm monitor \
+                    --udev \
+                    --subsystem-match=usb \
+                    --tag-match=security-device \
+                    | while read l; do
+                      if [[ "$l" == *"add"* ]]; then
+                        ykout="$(${pkgs.yubikey-manager}/bin/ykman list)";
+                        if [[ "$ykout" != "" ]]; then
+                          last="$(echo $l | awk '{print $4}')";
+                          text=$(echo -n "$ykout" | sed 's/^\(.\+\) (.* \([0-9]\+\)$/\1 \2/')
+                          echo '{"text": "'"$text"'", "alt": "key"}';
+                        fi
+                      elif [[ "$l" == *"remove"* ]] && [[ "$l" == *"$last"* ]]; then
+                        echo;
+                      fi
+                    done
+                ''
+              ))
+
+              (builtins.toString (pkgs.writeShellScript "yubi-waybar-click"
+                ''
+                  ${pkgs.alacritty}/bin/alacritty \
+                    --title 'Yubikey Oath Codes' \
+                    --command sh -c " \
+                      echo Yubikey Oath Codes; \
+                      printf %80s |tr ' ' '-'; \
+                      echo -en 'Loading codoes...\r'; \
+                      ${pkgs.yubikey-manager}/bin/ykman oath accounts code; \
+                      read";
+                ''
+              ))
+            ]
+            (builtins.readFile ./config/waybar/config)
+        ;
+        "waybar/mediaplayer.py".source = ./config/waybar/mediaplayer.py;
+        "waybar/style.css".source = ./config/waybar/style.css;
+      })
+    ];
 
     programs.zsh = {
       enable = true;
@@ -168,6 +276,7 @@ in
       EDITOR = "vim";
       MOZ_ENABLE_WAYLAND = "1";
       XDG_CURRENT_DESKTOP = "sway";
+      CLUTTER_BACKEND = "wayland";
     };
 
     imports = [ ./vim.nix ];
@@ -193,6 +302,16 @@ in
           visibility: collapse !important;
         }
       '';
+    };
+
+    gtk = {
+      enable = true;
+      font.package = pkgs.terminus_font;
+      font.name = "Terminus";
+      font.size = 9;
+
+      theme.package = pkgs.arc-theme;
+      theme.name = "Arc-Dark";
     };
   };
 

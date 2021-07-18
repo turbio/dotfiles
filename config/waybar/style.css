@@ -2,7 +2,8 @@
     border: none;
     border-radius: 0;
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: Roboto, Helvetica, Arial, sans-serif;
+    /*font-family: Roboto, Helvetica, Arial, sans-serif;*/
+    font-family: Terminus;
     font-size: 13px;
     min-height: 0;
 }
@@ -143,7 +144,7 @@ label:focus {
 
 #pulseaudio {
     background-color: #f1c40f;
-    color: #000000;
+    color: rgba(0, 0, 0, .8);
 }
 
 #pulseaudio.muted {
@@ -166,12 +167,10 @@ label:focus {
 }
 
 #custom-yubi {
-    background-color: #66cc99;
-    color: #2a5c45;
+    background-color: #dc95f7;
+    color: rgba(0, 0, 0, .6);
     min-width: 150px;
 }
-
-#custom-yubi.custom-yubi-disconnected {}
 
 #temperature {
     background-color: #f0932b;

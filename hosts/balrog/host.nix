@@ -9,18 +9,19 @@ let
     I'm Turbio
     🐧
   '');
+  flippyflops = rec {
+    port = 3001;
+    host = "127.0.0.1";
+    bin = "${
+      (import (builtins.fetchTarball {
+        url = https://github.com/turbio/flippyflops/archive/master.tar.gz;
+      })) { inherit port host; }
+    }/bin/flippyflops";
+  };
 in
 {
   imports = [
     ./grafana.nix
-  ];
-
-  nixpkgs.overlays = [
-    (_: _: {
-      flippyflops = (import (builtins.fetchTarball {
-        url = https://github.com/turbio/flippyflops/archive/master.tar.gz;
-      }));
-    })
   ];
 
   security.acme.email = "letsencrypt@turb.io";
@@ -61,7 +62,7 @@ in
       enableACME = true;
 
       locations."/" = {
-        proxyPass = "http://127.0.0.1:3001";
+        proxyPass = "http://${flippyflops.host}:${builtins.toString flippyflops.port}";
       };
 
       extraConfig = ''
@@ -78,7 +79,7 @@ in
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
-      ExecStart = "${pkgs.flippyflops { port = 3001; host = "127.0.0.1"; }}/bin/flippyflops";
+      ExecStart = flippyflops.bin;
     };
   };
 }

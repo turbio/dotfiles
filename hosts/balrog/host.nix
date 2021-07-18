@@ -1,6 +1,6 @@
-{ config, pkgs, stdenv, lib, ... }:
-
+{ config, pkgs, lib, ... }:
 let
+  stdenv = pkgs.stdenv;
   turbio-index = (pkgs.writeTextDir "index.html" ''
     Hey!
     ====
@@ -17,6 +17,36 @@ let
         url = https://github.com/turbio/flippyflops/archive/master.tar.gz;
       })) { inherit port host; }
     }/bin/flippyflops";
+  };
+  schemeclub = rec {
+    src = pkgs.fetchFromGitHub {
+      owner = "turbio";
+      repo = "schemeclub";
+      rev = "nix";
+      sha256 = "1id3m0pmgv5jj98b16i8jqkakz3hv5x0ikzrlnfsidfww959n3gg";
+    };
+
+    gems = (pkgs.bundlerEnv {
+      name = "schemeclub-env";
+      gemdir = src;
+      inherit (pkgs.ruby_2_6);
+    });
+
+    start = stdenv.mkDerivation rec {
+      name = "schemeclub";
+
+      buildInputs = [
+        gems
+        pkgs.ruby_2_6
+      ];
+
+      inherit src;
+
+      installPhase = ''
+        ls *
+      '';
+
+    };
   };
 in
 {
@@ -72,6 +102,22 @@ in
         proxy_cache off;
       '';
     };
+
+    "schemeclub.com" = {
+      addSSL = true;
+      enableACME = true;
+    };
+
+    "masonclayton.com" = {
+      addSSL = true;
+      enableACME = true;
+
+      locations."/" = {
+        extraConfig = ''
+          return 301 https://turb.io$request_uri;
+        '';
+      };
+    };
   };
 
   systemd.services.flippyflops = {
@@ -82,4 +128,13 @@ in
       ExecStart = flippyflops.bin;
     };
   };
+
+  #systemd.services.schemeclub = {
+  #  description = "webserver for schemeclub";
+  #  wantedBy = [ "multi-user.target" ];
+
+  #  serviceConfig = {
+  #    ExecStart = schemeclub.start;
+  #  };
+  #};
 }

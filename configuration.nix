@@ -61,6 +61,8 @@ let
     aseprite
     gnome.eog
     mpv
+
+    steam
   ];
   homemanager = builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";

@@ -289,6 +289,9 @@ in
       enable = true;
       userEmail = "git@turb.io";
       userName = "turbio";
+      extraConfig = {
+        pull = { ff = "only"; };
+      };
     };
 
     programs.firefox = {

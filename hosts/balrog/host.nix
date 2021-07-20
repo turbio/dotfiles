@@ -13,8 +13,11 @@ let
     port = 3001;
     host = "127.0.0.1";
     bin = "${
-      (import (builtins.fetchTarball {
-        url = https://github.com/turbio/flippyflops/archive/master.tar.gz;
+      (import (pkgs.fetchFromGitHub {
+        owner = "turbio";
+        repo = "flippyflops";
+        rev = "master";
+        sha256 = "1rjk5sf6qswnpawxz429qkpnrzd2iyilqdjf7k51zs0g56w3g86q";
       })) { inherit port host; }
     }/bin/flippyflops";
   };

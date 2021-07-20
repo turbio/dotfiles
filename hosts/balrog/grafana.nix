@@ -35,6 +35,13 @@ in
 
     scrapeConfigs = [
       {
+        job_name = "flippyflops";
+        scrape_interval = "5s";
+        static_configs = [{
+          targets = [ "127.0.0.1:3001" ];
+        }];
+      }
+      {
         job_name = "pushgateway";
         scrape_interval = "5s";
         static_configs = [{

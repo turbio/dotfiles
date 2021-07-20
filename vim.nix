@@ -58,6 +58,16 @@
           sha256 = "1rbh896sfidwgz3g6dxavx9q8145ynx5nsbj0nqrh14s2p6p1qxw";
         };
       })
+      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+        pname = "vim-openscad";
+        version = "1";
+        src = pkgs.fetchFromGitHub {
+          owner = "sirtaj";
+          repo = "vim-openscad";
+          rev = "81db508";
+          sha256 = "1wcdfayjpb9h0lzwdi5nda4c0ch263fdr0379l9k1gf47bgq9cx2";
+        };
+      })
     ];
     extraConfig = (builtins.readFile ./config/nvim/init.vim);
   };

@@ -63,6 +63,10 @@ let
     mpv
 
     steam
+    bspwm
+    sxhkd
+
+    openscad
   ];
   homemanager = builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";

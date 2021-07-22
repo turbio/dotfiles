@@ -149,7 +149,7 @@ in
   users.users.turbio = {
     home = "/home/turbio";
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "docker" "audio" ];
+    extraGroups = [ "wheel" "networkmanager" "docker" "audio" "video" ];
     uid = 1000;
 
     # probably a bad idea lmao

@@ -10,6 +10,7 @@
     "custom/yubi",
     "custom/media",
     "network",
+	"backlight",
     "pulseaudio",
     "battery",
     "clock",
@@ -47,6 +48,14 @@
       "",
       ""
     ]
+  },
+  "backlight": {
+    // "device": "acpi_video1",
+    "format": "{percent}% {icon}",
+    "on-scroll-up": "light -A 1",
+    "on-scroll-down": "light -U 1",
+    "states": [0,50],
+    "format-icons": ["", ""]
   },
   "network": {
     "format-wifi": "{essid} ({signalStrength}%) ",

@@ -14,6 +14,7 @@ let
     buildInputs = with pkgs; [
       go
       jansson
+      readline
     ];
 
     buildPhase = ''

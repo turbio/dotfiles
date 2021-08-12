@@ -156,4 +156,24 @@ in
       };
     };
   };
+
+  services.nginx.virtualHosts = {
+    "dash.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+
+      locations."/" = {
+        proxyPass = "http://unix:/${config.services.grafana.socket}";
+      };
+    };
+
+    "push.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+
+      locations."/" = {
+        proxyPass = "http://${config.services.prometheus.pushgateway.web.listen-address}";
+      };
+    };
+  };
 }

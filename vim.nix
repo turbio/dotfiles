@@ -22,25 +22,23 @@
       typescript-vim
       yats-vim # more typescript?
 
+      # fancy new neovim powered lsp
       lspsaga-nvim
       nvim-lspconfig
-      nvim-treesitter
+
+      nvim-treesitter # and ast based syntax highlighting
 
       vim-gitgutter
-      vim-fugitive
+      # vim-fugitive
 
       neoformat
 
-      nvim-web-devicons
-
-      vim-obsession
-      vim-endwise
-      tagbar
-      undotree
-      nerdtree
-      vim-sleuth
-      nerdcommenter
-      vim-misc
+      vim-endwise # auto adds end/endif/etc
+      undotree # time travel isn't linear
+      nerdtree # happy lil file tree
+      vim-sleuth # auto configures intentation based on what the file looks like
+      nerdcommenter # gives me some easy shortcuts to comment/uncomment
+      vim-misc # ?????
       echodoc-vim # print function signatures in command line
       fzf-vim # for ctrl-p and ctrl-/
       vim-go # snazzy go support

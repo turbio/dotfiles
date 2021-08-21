@@ -156,7 +156,14 @@ in
   users.users.turbio = {
     home = "/home/turbio";
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "docker" "audio" "video" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "docker"
+      "audio"
+      "video"
+      "dialout" # /dev/tty stuff
+    ];
     uid = 1000;
 
     # probably a bad idea lmao
@@ -290,6 +297,7 @@ in
       MOZ_ENABLE_WAYLAND = "1";
       XDG_CURRENT_DESKTOP = "sway";
       CLUTTER_BACKEND = "wayland";
+      _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 
     imports = [ ./vim.nix ];

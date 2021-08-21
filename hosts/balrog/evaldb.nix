@@ -31,12 +31,14 @@ let
 in
 {
 
-  systemd.services.evaldb = {
+  /*
+    systemd.services.evaldb = {
     description = "evaldb";
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
-      ExecStart = "${evaldb}/bin/gateway";
+    ExecStart = "${evaldb}/bin/gateway";
     };
-  };
+    };
+  */
 }

@@ -1,11 +1,24 @@
 {
-  description = "A very basic flake";
+  description = "My dotfiles uwu";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  };
 
   outputs = { self, nixpkgs }: {
 
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
-
-    defaultPackage.x86_64-linux = self.packages.x86_64-linux.hello;
-
+    nixosConfigurations = builtins.listToAttrs (map
+      (c: {
+        name = c;
+        value = nixpkgs.lib.nixosSystem
+          {
+            system = "x86_64-linux";
+            modules = [ ./configuration.nix ];
+            specialArgs = {
+              hostname = c;
+            };
+          };
+      })
+      (builtins.attrNames (builtins.readDir ./hosts)));
   };
 }

@@ -1,9 +1,8 @@
 #lib.fakeSha256;
 
-{ config, pkgs, lib, ... }:
+{ hostname ? import ./hostname.nix, config, pkgs, lib, ... }:
 let
   stdenv = pkgs.stdenv;
-  hostname = import ./hostname.nix;
   desktopPackages = with pkgs; [
     nixpkgs-fmt
     firefox-wayland
@@ -70,6 +69,7 @@ let
   ];
   homemanager = builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";
+    sha256 = "0xw1vgwfdn75rgamcsi5j1iqfl0j06x8xp92k24wr9hayfr5m400";
   };
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";

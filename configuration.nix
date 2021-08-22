@@ -1,7 +1,8 @@
 #lib.fakeSha256;
 
-{ hostname ? import ./hostname.nix, config, pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 let
+  hostname = import ./hostname.nix;
   stdenv = pkgs.stdenv;
   desktopPackages = with pkgs; [
     nixpkgs-fmt

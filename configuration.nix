@@ -31,6 +31,7 @@ let
     wdisplays
     flashfocus
     xdg-desktop-portal-wlr
+    xdg-utils
     gnome.dconf-editor
 
     # waybar stuff

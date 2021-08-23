@@ -7,10 +7,11 @@ let
       (import (pkgs.fetchFromGitHub {
         owner = "turbio";
         repo = "flippyflops";
-        rev = "master";
-        sha256 = "1d92zrc5gz8b14zjyy9380jajyn8ldz31q6y70yj3d6lhw40j4lr";
-      })) { inherit port host; }
+        rev = "f0f6acf315581aaabf0aeae207cd4cc04ca3c368";
+        sha256 = "sha256-rf8uI+JPG7gCw1BUhoksG+kje041DT/JjrKQm9Bt1mw=";
+      } + "/dots.turb.io")) {}
     }/bin/flippyflops";
+    wrapped = pkgs.writeShellScript "wrapped-flippys" "PORT=${toString port} HOST=${host} ${bin}";
   };
 in
 {
@@ -35,7 +36,7 @@ in
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
-      ExecStart = flippyflops.bin;
+      ExecStart = flippyflops.wrapped;
     };
   };
 }

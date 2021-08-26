@@ -13,6 +13,7 @@ in
   services.nginx.virtualHosts."turb.io" = {
     addSSL = true;
     enableACME = true;
+    default = true;
 
     root = "${html}";
     extraConfig = ''

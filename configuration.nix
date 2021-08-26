@@ -167,6 +167,7 @@ in
       "audio"
       "video"
       "dialout" # /dev/tty stuff
+      "rfkill" # gotta poke some devices
     ];
     uid = 1000;
 

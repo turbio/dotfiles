@@ -7,6 +7,12 @@
   config = lib.mkIf config.isDesktop {
     nixpkgs.config.pulseaudio = true;
     hardware.pulseaudio.enable = true;
+    services.xserver.enable = true;
+    services.xserver.displayManager.startx.enable = true;
+    programs.steam.enable = true;
+
+    hardware.opengl.enable = true;
+    hardware.opengl.driSupport = true;
 
     networking.networkmanager.enable = true;
 

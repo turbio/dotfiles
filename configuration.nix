@@ -34,6 +34,8 @@ let
     xdg-utils
     gnome.dconf-editor
 
+    wineWowPackages.staging
+
     # waybar stuff
     (waybar.override { withMediaPlayer = true; })
     playerctl

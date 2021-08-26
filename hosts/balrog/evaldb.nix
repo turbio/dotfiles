@@ -60,8 +60,8 @@ in
       mkdir -p ${dbstore}/dbs
       rm -rf ${dbroot}/client
       cp -r ${src}/client ${dbroot}
-      cp ${evalers}/luaval ${dbroot}
-      cp ${evalers}/duktape ${dbroot}
+      ln -sf ${evalers}/luaval ${dbroot}
+      ln -sf ${evalers}/duktape ${dbroot}
     '';
   };
 

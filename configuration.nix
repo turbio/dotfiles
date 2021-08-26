@@ -73,7 +73,7 @@ let
   ];
   homemanager = builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";
-    sha256 = "0xw1vgwfdn75rgamcsi5j1iqfl0j06x8xp92k24wr9hayfr5m400";
+    sha256 = "sha256:1m6sj5l43ij0jv0w3kzkq1rlj0ys3kps6lddjn8ybq8hcdvn7rk9";
   };
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";

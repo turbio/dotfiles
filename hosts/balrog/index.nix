@@ -16,7 +16,10 @@ in
 
     root = "${html}";
     extraConfig = ''
-      add_header Content-Type 'text/plain; charset=utf-8';
+      charset utf-8;
+      types {
+          text/plain  html;
+      }
     '';
   };
 }

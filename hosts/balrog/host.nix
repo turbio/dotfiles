@@ -5,7 +5,7 @@
     ./index.nix
     ./schemeclub.nix
     ./evaldb.nix
-    ./factorio.nix
+    #./factorio.nix
   ];
 
   security.acme.email = "letsencrypt@turb.io";

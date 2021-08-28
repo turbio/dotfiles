@@ -9,7 +9,7 @@ let
         repo = "flippyflops";
         rev = "f0f6acf315581aaabf0aeae207cd4cc04ca3c368";
         sha256 = "sha256-rf8uI+JPG7gCw1BUhoksG+kje041DT/JjrKQm9Bt1mw=";
-      } + "/dots.turb.io")) {}
+      } + "/dots.turb.io")) { inherit pkgs; }
     }/bin/flippyflops";
     wrapped = pkgs.writeShellScript "wrapped-flippys" "PORT=${toString port} HOST=${host} ${bin}";
   };

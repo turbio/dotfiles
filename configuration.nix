@@ -106,6 +106,13 @@ let
   };
 in
 {
+  nix.autoOptimiseStore = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
   imports = [
     ./common.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)

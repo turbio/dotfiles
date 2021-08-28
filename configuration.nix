@@ -153,6 +153,8 @@ in
     cargo
     rustc
     rustup
+
+    bind.dnsutils
   ] ++ (if config.isDesktop then desktopPackages else [ ]);
 
   users.mutableUsers = false;

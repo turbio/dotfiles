@@ -1,3 +1,5 @@
-{ ... }: {
-  imports = [ <nixpkgs/nixos/modules/virtualisation/google-compute-image.nix> ];
+{ modulesPath, ... }: {
+  imports = [
+    "${modulesPath}/virtualisation/google-compute-image.nix"
+  ];
 }

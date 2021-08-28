@@ -1,8 +1,8 @@
 #lib.fakeSha256;
 
-{ config, pkgs, lib, ... }:
+{ hostname, config, pkgs, lib, ... }:
 let
-  hostname = import ./hostname.nix;
+  #hostname = import ./hostname.nix;
   stdenv = pkgs.stdenv;
   desktopPackages = with pkgs; [
     nixpkgs-fmt
@@ -71,10 +71,6 @@ let
 
     openscad
   ];
-  homemanager = builtins.fetchTarball {
-    url = "https://github.com/nix-community/home-manager/archive/release-21.05.tar.gz";
-    sha256 = "sha256:1m6sj5l43ij0jv0w3kzkq1rlj0ys3kps6lddjn8ybq8hcdvn7rk9";
-  };
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";
     src = pkgs.fetchFromGitHub {
@@ -114,14 +110,13 @@ in
     ./common.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
     (./hosts + "/${hostname}" + /host.nix)
-    (import "${homemanager}/nixos")
   ];
 
   nix = {
     package = pkgs.nixUnstable;
-    #extraOptions = ''
-    #  experimental-features = nix-command flakes
-    #'';
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
   };
 
   nixpkgs.config.allowUnfree = true; # we live in a society
@@ -195,6 +190,8 @@ in
   services.ntp.enable = true;
 
   home-manager.users.turbio = { pkgs, ... }: {
+    home.stateVersion = "21.05";
+
     home.packages = with pkgs; [
 
       swaylock

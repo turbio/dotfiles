@@ -149,6 +149,8 @@ in
     rustc
     rustup
 
+    ncdu
+
     bind.dnsutils
   ] ++ (if config.isDesktop then desktopPackages else [ ]);
 

@@ -70,6 +70,15 @@ let
     sxhkd
 
     openscad
+
+    cargo
+    rustc
+    rustup
+    nodejs
+
+    clang
+    gcc
+    go
   ];
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";
@@ -143,18 +152,11 @@ in
     ag
 
     gnumake
-    clang
-    gcc
-    go
-    nodejs
     gdb
 
     jq
 
     cloc
-    cargo
-    rustc
-    rustup
 
     ncdu
 

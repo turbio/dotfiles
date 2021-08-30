@@ -11,6 +11,11 @@
   security.acme.email = "letsencrypt@turb.io";
   security.acme.acceptTerms = true;
 
+  services.nginx.appendHttpConfig = ''
+    error_log stderr;
+    access_log syslog:server=unix:/dev/log combined;
+  '';
+
   services.nginx.enable = true;
   services.nginx.virtualHosts = {
     "masonclayton.com" = {

@@ -3,6 +3,7 @@ if !1 | finish | endif
 
 lua << EOF
 require'lspconfig'.gopls.setup{}
+require'lspconfig'.rls.setup{}
 EOF
 
 "}}}

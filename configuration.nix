@@ -79,6 +79,10 @@ let
     clang
     gcc
     go
+
+    wev
+    xorg.xev
+    xdotool
   ];
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";
@@ -176,6 +180,7 @@ in
       "video"
       "dialout" # /dev/tty stuff
       "rfkill" # gotta poke some devices
+      "input" # spooky haxxxx for push to talk
     ];
     uid = 1000;
 

@@ -1,114 +1,132 @@
 {
-  "layer": "top",
-  "position": "top",
-  "height": 30,
-  "modules-left": [
-    "sway/workspaces"
-  ],
-  "modules-center": [],
-  "modules-right": [
-    "custom/yubi",
-    "custom/media",
-    "network",
-	"backlight",
-    "pulseaudio",
-    "battery",
-    "clock",
-    "tray"
-  ],
-  "sway/workspaces": {
-    "disable-scroll": true,
-    "all-outputs": false,
-    "format": "{name}",
-    "format-icons": {
-      "spotify": "",
-      "urgent": ""
-    }
-  },
-  "tray": {
-    "spacing": 10
-  },
-  "clock": {
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-    "format-alt": "{:%Y-%m-%d}"
-  },
-  "battery": {
-    "states": {
-      "warning": 30,
-      "critical": 15
-    },
-    "format": "{capacity}% {icon}",
-    "format-charging": "{capacity}% ",
-    "format-plugged": "{capacity}% ",
-    "format-alt": "{time} {icon}",
-    "format-icons": [
-      "",
-      "",
-      "",
-      "",
-      ""
-    ]
-  },
-  "backlight": {
-    // "device": "acpi_video1",
-    "format": "{percent}% {icon}",
-    "on-scroll-up": "light -A 1",
-    "on-scroll-down": "light -U 1",
-    "states": [0,50],
-    "format-icons": ["", ""]
-  },
-  "network": {
-    "format-wifi": "{essid} ({signalStrength}%) ",
-    "format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
-    "format-linked": "{ifname} (No IP) ",
-    "format-disconnected": "Disconnected ⚠",
-    "format-alt": "{ifname}: {ipaddr}/{cidr}"
-  },
-  "pulseaudio": {
-    "format": "{volume}% {icon} {format_source}",
-    "format-bluetooth": "{volume}% {icon} {format_source}",
-    "format-bluetooth-muted": " {icon} {format_source}",
-    "format-muted": " {format_source}",
-    "format-source": "{volume}% ",
-    "format-source-muted": "",
-    "format-icons": {
-      "headphone": "",
-      "hands-free": "",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": [
-        "",
-        "",
-        ""
-      ]
-    },
-    "on-click": "pavucontrol"
-  },
-  "custom/media": {
-    "format": "{icon} {}",
-    "return-type": "json",
-    "max-length": 40,
-    "format-icons": {
-      "spotify": "",
-      "firefox": "",
-      "default": "?"
-    },
-    "on-click": "playerctl play-pause",
-    "escape": true,
-    "exec": "waybar-mediaplayer.py 2> /dev/null",
-    "exec-if": "pgrep spotify"
-  },
-  "custom/yubi": {
-    "format": "{icon} {}",
-    "format-icons": {
-      "key": "",
-      "default": ""
-    },
-    "return-type": "json",
-    "exec": "NIX_WAYBAR_YUBI_EXEC",
-    "exec-if": "ykman -v",
-    "on-click": "NIX_WAYBAR_YUBI_ONCLICK"
-  }
+	"layer": "top",
+	"position": "top",
+	"height": 30,
+	"modules-left": [
+		"sway/workspaces",
+	],
+	"modules-center": [],
+	"modules-right": [
+		"custom/yubi",
+		"custom/media",
+		"network",
+		"bluetooth",
+		"idle_inhibitor",
+		"backlight",
+		"pulseaudio",
+		"battery",
+		"clock",
+		"tray"
+	],
+	"sway/workspaces": {
+		"disable-scroll": true,
+		"all-outputs": false,
+		"format": "{name}",
+		"format-icons": {
+			"spotify": "",
+			"urgent": ""
+		}
+	},
+	"bluetooth": {
+		"format": "{icon}",
+		"format-icons": {
+			"enabled": "",
+			"disabled": ""
+		},
+		"on-click": "blueberry",
+		"tooltip-format": "{}"
+	},
+	"tray": {
+		"spacing": 10
+	},
+	"clock": {
+		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+		"format-alt": "{:%Y-%m-%d}"
+	},
+	"battery": {
+		"states": {
+			"warning": 30,
+			"critical": 15
+		},
+		"format": "{capacity}% {icon}",
+		"format-charging": "{capacity}% ",
+		"format-plugged": "{capacity}% ",
+		"format-alt": "{time} {icon}",
+		"format-icons": [
+			"",
+			"",
+			"",
+			"",
+			""
+		]
+	},
+	"idle_inhibitor": {
+		"format": "{icon}",
+		"format-icons": {
+			"activated": "",
+			"deactivated": ""
+		}
+	},
+	"backlight": {
+		// "device": "acpi_video1",
+		"format": "{percent}% {icon}",
+		"on-scroll-up": "light -A 1",
+		"on-scroll-down": "light -U 1",
+		"states": [0,50],
+		"format-icons": ["", ""]
+	},
+	"network": {
+		"format-wifi": "{essid} ({signalStrength}%) ",
+		"format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
+		"format-linked": "{ifname} (No IP) ",
+		"format-disconnected": "Disconnected ⚠",
+		"format-alt": "{ifname}: {ipaddr}/{cidr}"
+	},
+	"pulseaudio": {
+		"format": "{volume}% {icon} {format_source}",
+		"format-bluetooth": "{volume}% {icon} {format_source}",
+		"format-bluetooth-muted": " {icon} {format_source}",
+		"format-muted": " {format_source}",
+		"format-source": "{volume}% ",
+		"format-source-muted": "",
+		"format-icons": {
+			"headphone": "",
+			"hands-free": "",
+			"headset": "",
+			"phone": "",
+			"portable": "",
+			"car": "",
+			"default": [
+				"",
+				"",
+				""
+			]
+		},
+		"on-click": "pavucontrol"
+	},
+	"custom/media": {
+		"format": "{icon} {}",
+		"return-type": "json",
+		"max-length": 40,
+		"format-icons": {
+			"spotify": "",
+			"firefox": "",
+			"default": "?"
+		},
+		"on-click": "playerctl play-pause",
+		"escape": true,
+		"exec": "waybar-mediaplayer.py 2> /dev/null",
+		"exec-if": "pgrep spotify"
+	},
+	"custom/yubi": {
+		"format": "{icon} {}",
+		"format-icons": {
+			"key": "",
+			"default": ""
+		},
+		"return-type": "json",
+		"exec": "NIX_WAYBAR_YUBI_EXEC",
+		"exec-if": "ykman -v",
+		"on-click": "NIX_WAYBAR_YUBI_ONCLICK"
+	}
 }

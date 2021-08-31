@@ -1,7 +1,7 @@
 # My Dotfiles!
 There are many like it but these are mine.
 
-Okay but hear me out, they're actually pretty nifty. These dotfiles configure all my computers, desktops and [servers](https://turb.io) alike. Mostly it's just a bunch of [nix](https://nixos.org/), the specific config is selected by `hostname.nix` (not checked in) with individual host configs under `/hosts`.
+Okay but hear me out, they're actually pretty nifty. These dotfiles configure all my computers, desktops and [servers](https://turb.io) alike. Mostly it's just a bunch of [nix](https://nixos.org/), the specific config is determined by the hostname (through the power of flakes!) with individual host configs under `/hosts`.
 
 <p float="left">
   <a href="/hosts/balrog"><img src="/hosts/balrog/balrog.png" width="48" /></a>

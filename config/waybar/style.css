@@ -74,6 +74,7 @@ window#waybar.chromium {
 #temperature,
 #backlight,
 #network,
+#bluetooth,
 #pulseaudio,
 #custom-media,
 #custom-yubi,
@@ -134,7 +135,7 @@ label:focus {
     background-color: #90b1b1;
 }
 
-#network {
+#network, #bluetooth {
     background-color: #2980b9;
 }
 

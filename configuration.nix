@@ -227,6 +227,7 @@ in
         "nvim/tmp/backup/.keep".text = "";
         "nvim/tmp/swap/.keep".text = "";
       }
+
       (lib.mkIf config.isDesktop {
         "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
         "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;

@@ -16,11 +16,11 @@ let
     ヾ(*ФωФ)βyё βyё☆彡
   '');
 
-  vhost404 = (pkgs.writeTextDir "index.txt" ''
+  vhost404 = (pkgs.writeTextDir "404.txt" ''
     404!
     ====
 
-    lol
+    uh oh
   '');
 in
 {
@@ -44,11 +44,14 @@ in
     enableACME = true;
     default = true;
 
-    locations."/" = { return = "404"; };
-
     root = "${vhost404}";
+    locations."/" = {
+      root = "${vhost404}";
+      index = "404.txt";
+    };
+
     extraConfig = ''
-      error_page 404 /index.txt;
+      error_page 404 /;
       charset utf-8;
     '';
   };

@@ -278,11 +278,6 @@ EOF
 
 let g:LanguageClient_serverCommands = {
   \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-  \ 'cpp': ['cquery', '--log-file=/tmp/logobio.log'],
-  \ 'c': ['cquery', '--log-file=/tmp/logobio.log'],
-  \ 'javascript': ['javascript-typescript-stdio'],
-  \ 'typescript': ['javascript-typescript-stdio'],
-  \ 'rust': ['rls'],
   \ 'cpp': ['ccls'],
   \ 'c': ['ccls'],
   \ 'go': ['gopls'],

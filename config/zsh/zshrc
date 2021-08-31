@@ -83,8 +83,6 @@ alias calc="bc -l"
 
 export EDITOR=vim
 
-export PATH=~/bin:~/.gem/ruby/2.3.0/bin:~/git/gocode/bin:~/.cargo/bin:$PATH
-
 # local bin
 export PATH=~/bin:$PATH
 
@@ -148,12 +146,6 @@ export GOPATH=~/code
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/home/mason/google-cloud-sdk/path.zsh.inc' ]; then source '/home/mason/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/home/mason/google-cloud-sdk/completion.zsh.inc' ]; then source '/home/mason/google-cloud-sdk/completion.zsh.inc'; fi
 
 function print_exit_status() {
 	st="$?"

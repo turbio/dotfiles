@@ -10,7 +10,6 @@
 		"custom/yubi",
 		"custom/media",
 		"network",
-		"bluetooth",
 		"idle_inhibitor",
 		"backlight",
 		"pulseaudio",
@@ -26,15 +25,6 @@
 			"spotify": "",
 			"urgent": ""
 		}
-	},
-	"bluetooth": {
-		"format": "{icon}",
-		"format-icons": {
-			"enabled": "",
-			"disabled": ""
-		},
-		"on-click": "blueberry",
-		"tooltip-format": "{}"
 	},
 	"tray": {
 		"spacing": 10

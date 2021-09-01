@@ -54,6 +54,8 @@ let
     qemu
 
     obs-studio
+    obs-wlrobs
+    obs-v4l2sink
     zoom-us
     gimp
 

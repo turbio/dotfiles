@@ -5,6 +5,9 @@
   };
 
   config = lib.mkIf config.isDesktop {
+
+    environment.systemPackages = (pkgs.callPackage ./packages.nix { }).desktop;
+
     nixpkgs.config.pulseaudio = true;
     hardware.pulseaudio.enable = true;
     services.xserver.enable = true;

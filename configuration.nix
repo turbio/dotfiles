@@ -5,6 +5,7 @@ in
 {
   imports = [
     ./desktop.nix
+    ./home.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
     (./hosts + "/${hostname}" + /host.nix)
   ];
@@ -70,8 +71,6 @@ in
   };
 
   services.ntp.enable = true;
-
-  home-manager.users.turbio = pkgs.callPackage ./home.nix { };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

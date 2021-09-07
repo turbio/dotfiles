@@ -102,5 +102,6 @@
     ncdu
 
     bind.dnsutils
+    linuxPackages.perf
   ];
 }

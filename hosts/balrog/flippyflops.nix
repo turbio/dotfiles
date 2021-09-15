@@ -37,6 +37,8 @@ in
 
     serviceConfig = {
       ExecStart = flippyflops.wrapped;
+      MemoryLimit = "512M";
+      RestartSec = "5s";
     };
   };
 }

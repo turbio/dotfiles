@@ -68,6 +68,7 @@ in
   services.nginx.virtualHosts."evaldb.turb.io" = {
     addSSL = true;
     enableACME = true;
+    default = true;
 
     locations."/" = {
       proxyPass = "http://127.0.0.1:${builtins.toString port}";

@@ -42,7 +42,6 @@ in
   services.nginx.virtualHosts."404.turb.io" = {
     addSSL = true;
     enableACME = true;
-    default = true;
 
     root = "${vhost404}";
     locations."/" = {

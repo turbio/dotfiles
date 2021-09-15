@@ -154,6 +154,7 @@ in
       userName = "turbio";
       extraConfig = {
         pull = { ff = "only"; };
+        init = { defaultBranch = "master"; };
       };
     };
 

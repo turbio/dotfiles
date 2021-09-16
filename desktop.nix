@@ -40,7 +40,7 @@
       wrapperFeatures.gtk = true;
     };
 
-    #services.pipewire.enable = true;
+    services.pipewire.enable = true;
 
     programs.gnupg.agent.pinentryFlavor = "gnome3";
 

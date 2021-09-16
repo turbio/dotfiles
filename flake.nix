@@ -2,7 +2,7 @@
   description = "My dotfiles uwu";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/release-21.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:rycee/home-manager/release-21.05";
       inputs.nixpkgs.follows = "nixpkgs";

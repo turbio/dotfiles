@@ -101,9 +101,9 @@ in
 
     qemu
 
+    obs-studio-plugins.wlrobs
     obs-studio
-    obs-wlrobs
-    obs-v4l2sink
+    linuxPackages.v4l2loopback
     zoom-us
     gimp
 

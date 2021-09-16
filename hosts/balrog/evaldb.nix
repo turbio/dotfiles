@@ -35,9 +35,11 @@ let
     version = "0.0.1";
 
     src = pkgs.stdenv.mkDerivation {
-      name = "rmvendor";
+      name = "tidy-evaldb-files";
       inherit src;
       buildPhase = ''
+        substitute cmd/gateway/main.go cmd/gateway/main.go \
+          --replace '":"' '"127.0.0.1:"'
         rm -rf vendor
       '';
       installPhase = ''

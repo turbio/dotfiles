@@ -8,8 +8,6 @@
 
     environment.systemPackages = (pkgs.callPackage ./packages.nix { }).desktop;
 
-    nixpkgs.config.pulseaudio = true;
-    hardware.pulseaudio.enable = true;
     services.xserver.enable = true;
     services.xserver.displayManager.startx.enable = true;
     programs.steam.enable = true;
@@ -40,7 +38,16 @@
       wrapperFeatures.gtk = true;
     };
 
-    services.pipewire.enable = true;
+    security.rtkit.enable = true;
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+
+      media-session.enable = true;
+    };
 
     programs.gnupg.agent.pinentryFlavor = "gnome3";
 
@@ -58,8 +65,9 @@
       portal = {
         enable = true;
         gtkUsePortal = true;
+        wlr.enable = true;
+
         extraPortals = with pkgs; [
-          xdg-desktop-portal-wlr
           xdg-desktop-portal-gtk
         ];
       };

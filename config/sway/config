@@ -162,7 +162,7 @@ exec lxsession
 
 exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 
-exec systemctl --user import-environment WAYLAND_DISPLAY
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 #  this is some retarded shit
 exec systemctl --user restart xdg-desktop-portal-gtk.service
 exec systemctl --user restart xdg-desktop-portal-wlr.service

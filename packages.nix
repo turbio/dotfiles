@@ -76,7 +76,6 @@ in
     # wayland
     wdisplays
     flashfocus
-    xdg-desktop-portal-wlr
     xdg-utils
     gnome.dconf-editor
     swaylock
@@ -135,6 +134,8 @@ in
     xdotool
 
     mars-ide
+
+    prusa-slicer
   ];
 
   core = with pkgs; [

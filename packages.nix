@@ -49,21 +49,10 @@ let
           };
         })
       { };
-  discord-override = pkgs.callPackage ./discord.nix rec {
-    pname = "discord";
-    binaryName = "Discord";
-    desktopName = "Discord";
-    version = "0.0.16";
-    src = fetchurl {
-      url = "https://dl.discordapp.net/apps/linux/${version}/discord-${version}.tar.gz";
-      sha256 = "UTVKjs/i7C/m8141bXBsakQRFd/c//EmqqhKhkr1OOk=";
-    };
-  };
 in
 {
   desktop = with pkgs; [
-    discord-override
-
+    discord
     nixpkgs-fmt
     firefox-wayland
     chromium

@@ -159,5 +159,7 @@ in
     bind.dnsutils
     linuxPackages.perf
     iptables
+
+    entr
   ];
 }

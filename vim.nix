@@ -21,7 +21,7 @@
       nvim-treesitter # and ast based syntax highlighting
 
       vim-gitgutter
-      # vim-fugitive (borked?)
+      vim-fugitive
 
       neoformat
 

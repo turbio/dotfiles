@@ -160,6 +160,7 @@ in
 
     programs.firefox = {
       enable = true;
+      package = pkgs.firefox-wayland;
       profiles."lbgu1zmc.default".userChrome = ''
         /* Hide tab bar in FF Quantum */
         #TabsToolbar {

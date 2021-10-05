@@ -65,13 +65,14 @@
       portal = {
         enable = true;
         gtkUsePortal = true;
-        wlr.enable = true;
+        #wlr.enable = true;
 
         extraPortals = with pkgs; [
           xdg-desktop-portal-gtk
         ];
       };
     };
+
     virtualisation.docker.enable = true;
   };
 }

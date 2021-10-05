@@ -83,9 +83,7 @@ in
     passwordAuthentication = false;
   };
 
-  services.ntp.enable = true;
-  users.users.ntp.group = "ntp";
-  users.groups.ntp = { };
+  services.chrony.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

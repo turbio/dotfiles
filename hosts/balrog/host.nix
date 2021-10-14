@@ -5,6 +5,7 @@
     ./index.nix
     ./schemeclub.nix
     ./evaldb.nix
+    ./protip.nix
     #./factorio.nix
   ];
 

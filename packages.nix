@@ -101,7 +101,7 @@ in
 
     qemu
 
-    obs-studio-plugins.wlrobs
+    obs-wlrobs
     obs-studio
     linuxPackages.v4l2loopback
     zoom-us

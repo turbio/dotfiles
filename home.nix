@@ -1,4 +1,4 @@
-{ pkgs, lib, config, repos, ... }:
+{ pkgs, lib, config, unstable, repos, ... }:
 let
   stdenv = pkgs.stdenv;
   wallpaperbin = stdenv.mkDerivation {
@@ -34,7 +34,7 @@ in
 
   home-manager.useGlobalPkgs = true;
 
-  home-manager.users.turbio = {
+  home-manager.users.turbio = { ... }: {
     home.stateVersion = "21.05";
 
     xdg.configFile = lib.mkMerge [
@@ -131,9 +131,8 @@ in
     };
 
     imports = [
-      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos; }))
+      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos, unstable; }))
     ];
-
 
     programs.nix-index.enable = true;
 
@@ -163,15 +162,17 @@ in
       '';
     };
 
-    gtk = lib.mkIf config.isDesktop {
-      enable = true;
-      font.package = pkgs.terminus_font;
-      font.name = "Terminus";
-      font.size = 9;
+    gtk = lib.mkIf
+      config.isDesktop
+      {
+        enable = true;
+        font.package = pkgs.terminus_font;
+        font.name = "Terminus";
+        font.size = 9;
 
-      theme.package = pkgs.arc-theme;
-      theme.name = "Arc-Dark";
-    };
+        theme.package = pkgs.arc-theme;
+        theme.name = "Arc-Dark";
+      };
 
     home.sessionPath = [
       "${./bin}"

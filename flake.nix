@@ -2,8 +2,10 @@
   description = "My dotfiles uwu";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.05";
+    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+
     home-manager = {
       url = "github:rycee/home-manager/release-21.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,9 +22,10 @@
     evaldb = { flake = false; url = "github:turbio/evaldb"; };
     schemeclub = { flake = false; url = "github:turbio/schemeclub/nix"; };
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
+
   };
 
-  outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, unstable, ... }@inputs:
     let system = "x86_64-linux"; in
     {
       nixosConfigurations = builtins.listToAttrs (map
@@ -38,6 +41,7 @@
                 ];
                 specialArgs = {
                   hostname = c;
+                  unstable = unstable.legacyPackages.x86_64-linux;
                   pkgs = import nixpkgs {
                     inherit system;
                     overlays = [ neovim-nightly-overlay.overlay ];

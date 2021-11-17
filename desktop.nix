@@ -33,6 +33,9 @@
       roboto
     ];
 
+    programs.adb.enable = true;
+    users.users.turbio.extraGroups = [ "adbusers" ];
+
     programs.sway = {
       enable = true;
       wrapperFeatures.gtk = true;

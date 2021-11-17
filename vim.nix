@@ -6,6 +6,7 @@
     withNodeJs = true;
     withRuby = true;
     withPython3 = true;
+    package = pkgs.neovim-nightly;
 
     plugins = with pkgs.vimPlugins; [
       vim-nix
@@ -56,6 +57,16 @@
           repo = "vim-openscad";
           rev = "81db508";
           sha256 = "1wcdfayjpb9h0lzwdi5nda4c0ch263fdr0379l9k1gf47bgq9cx2";
+        };
+      })
+      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+        pname = "copilot";
+        version = "1";
+        src = pkgs.fetchFromGitHub {
+          owner = "github";
+          repo = "copilot.vim";
+          rev = "release";
+          sha256 = "sha256-hKRkn/+6S2JfAlgN13X2HNl/1vIjeMM5YnSTEwVQDTg=";
         };
       })
     ];

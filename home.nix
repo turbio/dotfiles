@@ -37,9 +37,10 @@ let
 in
 {
 
+  home-manager.useGlobalPkgs = true;
+
   home-manager.users.turbio = {
     home.stateVersion = "21.05";
-
 
     xdg.configFile = lib.mkMerge [
       {

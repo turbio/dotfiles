@@ -8,6 +8,7 @@ in
     ./home.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
     (./hosts + "/${hostname}" + /host.nix)
+    ./cachix.nix
   ];
 
   #nix.nixPath = options.nix.nixPath.default ++ [ "nixpkgs-overlays=/etc/nixos/overlays-compat/" ];
@@ -22,8 +23,6 @@ in
   #        foldl' (flip extends) (_: super) overlays self
   #    ";
   #};
-
-  nixpkgs.config.allowUnfree = true; # we live in a society
 
   nix.autoOptimiseStore = true;
   nix.gc = {

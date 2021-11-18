@@ -48,7 +48,9 @@ notify_all "about to update. Intervene now if you don't want that"
 
 sleep 1m
 
-notify_all 'updating... `journalctl -u evergreen -f` to watch the logs'
+notify_all 'updating... `journalctl -u evergreen` to watch the logs'
 
 git merge --ff-only "$(git rev-parse --abbrev-ref master@{upstream})"
 nixos-rebuild switch
+
+notify_all 'update complete!'

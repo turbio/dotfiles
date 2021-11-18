@@ -2,19 +2,10 @@
 
 set -xeuo pipefail
 
-function notify_all() {
-  wall "$1"
-  for user in $(ls /run/user); do
-    export DBUS_ADDRESS="unix:path=/run/user/$user/bus"
-    export DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS"
-    sudo -E -u "#$user" notify-send -t 3600000 "Nixos Evergreen" "$1"
-  done
-}
-
 cd /etc/nixos/
 
 if ! git diff-index --quiet HEAD --; then
-  notify_all 'ohnes repo is looking dirty!'
+  alert 'Nixos Evergreen' 'ohnes repo is looking dirty!'
   exit 0
 fi
 
@@ -23,19 +14,19 @@ sudo -u turbio git fetch
 ahead_count="$(git rev-list --count @{u}..HEAD)"
 
 if [[ $? -ne 0 ]]; then
-  notify_all 'ohnes repo is looking dirty!'
+  alert 'Nixos Evergreen' 'ohnes repo is looking dirty!'
   exit 0
 fi
 
 if [[ $ahead_count -gt 0 ]]; then
-  notify_all "ohnes repo ahead of upstream"
+  alert 'Nixos Evergreen' 'ohnes repo ahead of upstream'
   exit 0
 fi
 
 behind_count="$(git rev-list --count HEAD..@{u})"
 
 if [[ $? -ne 0 ]]; then
-  notify_all 'ohnes repo is looking dirty!'
+  alert 'Nixos Evergreen' 'ohnes repo is looking dirty!'
   exit 0
 fi
 
@@ -44,13 +35,13 @@ if [[ $behind_count -eq 0 ]]; then
   exit 0
 fi
 
-notify_all "about to update. Intervene now if you don't want that"
+alert 'Nixos Evergreen' "about to update. Intervene now if you don't want that"
 
 sleep 1m
 
-notify_all 'updating... `journalctl -u evergreen` to watch the logs'
+alert 'Nixos Evergreen' 'updating...'
 
 git merge --ff-only "$(git rev-parse --abbrev-ref master@{upstream})"
 nixos-rebuild switch
 
-notify_all 'update complete!'
+alert 'Nixos Evergreen' 'update complete!'

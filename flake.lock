@@ -50,11 +50,11 @@
     "flippyflops": {
       "flake": false,
       "locked": {
-        "lastModified": 1633919281,
-        "narHash": "sha256-sYiFnHlQnA2dg+eV/78rT1t7J6x5JDiYrI5oiprtnpE=",
+        "lastModified": 1637208823,
+        "narHash": "sha256-r8HZ+iS1Iat8YRH6wn9eBVJTi9lTj6yC9//fzdkpDNE=",
         "owner": "turbio",
         "repo": "flippyflops",
-        "rev": "74524c35c01f93992c109a8e6ae232778c52bf33",
+        "rev": "f9bc99f78e5c1352bdc5ff30d4af3cdf43d86ad0",
         "type": "github"
       },
       "original": {

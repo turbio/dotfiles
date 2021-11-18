@@ -1,6 +1,6 @@
-font=terminus (ttf) 9
+font=Terminus 10
 background-color=#222222
 text-color=#888888
-border-size=4
+border-size=2
 border-color=#888888
 default-timeout=3000

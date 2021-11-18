@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, repos, ... }:
 {
   programs.neovim = {
     enable = true;
@@ -42,32 +42,17 @@
       (pkgs.vimUtils.buildVimPluginFrom2Nix {
         pname = "muble";
         version = "1";
-        src = pkgs.fetchFromGitHub {
-          owner = "turbio";
-          repo = "muble.vim";
-          rev = "master";
-          sha256 = "1rbh896sfidwgz3g6dxavx9q8145ynx5nsbj0nqrh14s2p6p1qxw";
-        };
+        src = repos.muble-vim;
       })
       (pkgs.vimUtils.buildVimPluginFrom2Nix {
         pname = "vim-openscad";
         version = "1";
-        src = pkgs.fetchFromGitHub {
-          owner = "sirtaj";
-          repo = "vim-openscad";
-          rev = "81db508";
-          sha256 = "1wcdfayjpb9h0lzwdi5nda4c0ch263fdr0379l9k1gf47bgq9cx2";
-        };
+        src = repos.openscad-vim;
       })
       (pkgs.vimUtils.buildVimPluginFrom2Nix {
         pname = "copilot";
         version = "1";
-        src = pkgs.fetchFromGitHub {
-          owner = "github";
-          repo = "copilot.vim";
-          rev = "release";
-          sha256 = "sha256-hKRkn/+6S2JfAlgN13X2HNl/1vIjeMM5YnSTEwVQDTg=";
-        };
+        src = repos.github-copilot-vim;
       })
     ];
     extraConfig = (builtins.readFile ./config/nvim/init.vim);

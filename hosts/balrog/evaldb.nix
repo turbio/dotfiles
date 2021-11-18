@@ -1,11 +1,6 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, repos, ... }:
 let
-  src = pkgs.fetchFromGitHub {
-    owner = "turbio";
-    repo = "evaldb";
-    rev = "master";
-    sha256 = "1pn6daazwxfcs3l9xlxhazdpl19rrxf1za60ab72absl9wqdzns1";
-  };
+  src = repos.evaldb;
 
   evalers = pkgs.stdenv.mkDerivation rec {
     name = "evaldb";

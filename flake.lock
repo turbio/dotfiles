@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "evaldb": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1618777341,
+        "narHash": "sha256-QdvfME9ULyXOUsCoH1zPOQV621ew057o0Mx1/pVqxt4=",
+        "owner": "turbio",
+        "repo": "evaldb",
+        "rev": "9d4aa5336b92f2957027e88cbb84db055e83cd29",
+        "type": "github"
+      },
+      "original": {
+        "owner": "turbio",
+        "repo": "evaldb",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -31,6 +47,38 @@
         "type": "github"
       }
     },
+    "flippyflops": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1633919281,
+        "narHash": "sha256-sYiFnHlQnA2dg+eV/78rT1t7J6x5JDiYrI5oiprtnpE=",
+        "owner": "turbio",
+        "repo": "flippyflops",
+        "rev": "74524c35c01f93992c109a8e6ae232778c52bf33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "turbio",
+        "repo": "flippyflops",
+        "type": "github"
+      }
+    },
+    "github-copilot-vim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1636074757,
+        "narHash": "sha256-TqDC+9FIZLuWMd79ucOtZQW5Mv8R3TFI0+u5Zre8Vck=",
+        "owner": "github",
+        "repo": "copilot.vim",
+        "rev": "cd7946808fd2f0eea8946d30b25b1220f8edd09b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "github",
+        "repo": "copilot.vim",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -49,6 +97,39 @@
         "owner": "rycee",
         "ref": "release-21.05",
         "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "livewallpaper": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1626580631,
+        "narHash": "sha256-w2NEMptcGKGLxnCbr4lu/gj04PmDgsvqjXuX9f56owY=",
+        "owner": "turbio",
+        "repo": "live_wallpaper",
+        "rev": "d94aed3408d06061abaf9edfd2da58c2055b58b8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "turbio",
+        "ref": "nixfix",
+        "repo": "live_wallpaper",
+        "type": "github"
+      }
+    },
+    "muble-vim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1522792895,
+        "narHash": "sha256-vONwzRWaBJixBXJpW7r1hQSEU9+qN/PGf7xFp01CcOU=",
+        "owner": "turbio",
+        "repo": "muble.vim",
+        "rev": "d422b0c4ca041cd52a0a0a59ef5b35d83b7b9b7f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "turbio",
+        "repo": "muble.vim",
         "type": "github"
       }
     },
@@ -128,11 +209,85 @@
         "type": "github"
       }
     },
+    "openscad-vim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1594187578,
+        "narHash": "sha256-orOE3zrEvTATTWeA3NwwAjLAiGq2xMY/BTCtK71yjfE=",
+        "owner": "sirtaj",
+        "repo": "vim-openscad",
+        "rev": "81db508b1888fdbea994d43ccef1acd86c8af3f7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sirtaj",
+        "repo": "vim-openscad",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
+        "evaldb": "evaldb",
+        "flippyflops": "flippyflops",
+        "github-copilot-vim": "github-copilot-vim",
         "home-manager": "home-manager",
+        "livewallpaper": "livewallpaper",
+        "muble-vim": "muble-vim",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_2",
+        "openscad-vim": "openscad-vim",
+        "schemeclub": "schemeclub",
+        "zsh-history-substring-search": "zsh-history-substring-search",
+        "zsh-syntax-highlighting": "zsh-syntax-highlighting"
+      }
+    },
+    "schemeclub": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1626606216,
+        "narHash": "sha256-7w2bSuLctaidpfnPCHrZcPypJpYomrBQkrLsVy+oo8U=",
+        "owner": "turbio",
+        "repo": "schemeclub",
+        "rev": "3f2c5f3f7262137bddf5c79ed1e96d30e05c9f7e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "turbio",
+        "ref": "nix",
+        "repo": "schemeclub",
+        "type": "github"
+      }
+    },
+    "zsh-history-substring-search": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1627971553,
+        "narHash": "sha256-8kiPBtgsjRDqLWt0xGJ6vBBLqCWEIyFpYfd+s1prHWk=",
+        "owner": "zsh-users",
+        "repo": "zsh-history-substring-search",
+        "rev": "4abed97b6e67eb5590b39bcd59080aa23192f25d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zsh-users",
+        "repo": "zsh-history-substring-search",
+        "type": "github"
+      }
+    },
+    "zsh-syntax-highlighting": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1636857900,
+        "narHash": "sha256-MeuPqDeJpbJi2hT7VUgyQNSmDPY/biUncvyY78IBfzM=",
+        "owner": "zsh-users",
+        "repo": "zsh-syntax-highlighting",
+        "rev": "c7caf57ca805abd54f11f756fda6395dd4187f8a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zsh-users",
+        "repo": "zsh-syntax-highlighting",
+        "type": "github"
       }
     }
   },

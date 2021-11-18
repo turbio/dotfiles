@@ -1,14 +1,9 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, repos, ... }:
 let
   stdenv = pkgs.stdenv;
 
   schemeclub = rec {
-    src = pkgs.fetchFromGitHub {
-      owner = "turbio";
-      repo = "schemeclub";
-      rev = "nix";
-      sha256 = "1id3m0pmgv5jj98b16i8jqkakz3hv5x0ikzrlnfsidfww959n3gg";
-    };
+    src = repos.schemeclub;
 
     gems = (pkgs.bundlerEnv {
       name = "schemeclub-env";

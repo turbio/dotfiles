@@ -1,14 +1,9 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, repos, ... }:
 let
   stdenv = pkgs.stdenv;
   wallpaperbin = stdenv.mkDerivation {
     name = "wallpaper";
-    src = pkgs.fetchFromGitHub {
-      owner = "turbio";
-      repo = "live_wallpaper";
-      rev = "nixfix";
-      sha256 = "01m3gbzgb5vvipmcp0l3z7hg827yds4sz6vhqs5s262wkcr48qy3";
-    };
+    src = repos.livewallpaper;
     buildInputs = with pkgs; [ SDL2 SDL2_gfx pkg-config clang xxd ];
     buildPhase = "cd build && make";
     installPhase = ''
@@ -117,21 +112,11 @@ in
       plugins = [
         {
           name = "zsh-syntax-highlighting";
-          src = pkgs.fetchFromGitHub {
-            owner = "zsh-users";
-            repo = "zsh-syntax-highlighting";
-            rev = "dffe304";
-            sha256 = "0dwgcfbi5390idvldnf54a2jg2r1dagc1rk7b9v3lqdawgm9qvnw";
-          };
+          src = repos.zsh-syntax-highlighting;
         }
         {
           name = "zsh-history-substring-search";
-          src = pkgs.fetchFromGitHub {
-            owner = "zsh-users";
-            repo = "zsh-history-substring-search";
-            rev = "master";
-            sha256 = "0y8va5kc2ram38hbk2cibkk64ffrabfv1sh4xm7pjspsba9n5p1y";
-          };
+          src = repos.zsh-history-substring-search;
         }
       ];
       initExtra = (builtins.readFile ./config/zsh/zshrc);
@@ -145,7 +130,10 @@ in
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 
-    imports = [ ./vim.nix ];
+    imports = [
+      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos; }))
+    ];
+
 
     programs.nix-index.enable = true;
 

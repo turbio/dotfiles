@@ -9,6 +9,8 @@
     #./factorio.nix
   ];
 
+  systemd.services.evergreen.startAt = "minutely";
+
   security.acme.email = "letsencrypt@turb.io";
   security.acme.acceptTerms = true;
 

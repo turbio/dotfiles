@@ -131,7 +131,7 @@ in
     };
 
     imports = [
-      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos, unstable; }))
+      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos unstable; }))
     ];
 
     programs.nix-index.enable = true;

@@ -1,4 +1,4 @@
-{ pkgs, fetchurl, ... }:
+{ pkgs, unstable, fetchurl, ... }:
 let
   mars-ide =
     pkgs.callPackage
@@ -101,8 +101,8 @@ in
 
     qemu
 
-    obs-wlrobs
-    obs-studio
+    unstable.obs-studio-plugins.wlrobs
+    unstable.obs-studio
     linuxPackages.v4l2loopback
     zoom-us
     gimp

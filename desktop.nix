@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, unstable, pkgs, ... }: {
   options.isDesktop = lib.mkOption {
     type = lib.types.bool;
     default = false;
@@ -6,7 +6,7 @@
 
   config = lib.mkIf config.isDesktop {
 
-    environment.systemPackages = (pkgs.callPackage ./packages.nix { }).desktop;
+    environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit unstable; }).desktop;
 
     services.xserver.enable = true;
     services.xserver.displayManager.startx.enable = true;
@@ -17,7 +17,7 @@
 
     networking.networkmanager.enable = true;
 
-    virtualisation.virtualbox.host.enable = true;
+    #virtualisation.virtualbox.host.enable = true;
     #virtualisation.virtualbox.host.enableExtensionPack = true;
     users.extraGroups.vboxusers.members = [ "turbio" ];
 
@@ -57,8 +57,8 @@
     environment.variables.GTK_USE_PORTAL = "1";
     environment.variables.GDK_BACKEND = "wayland";
 
-    systemd.user.services.xdg-desktop-portal.wantedBy = [ "default.target" ];
-    systemd.user.services.xdg-desktop-portal-wlr.wantedBy = [ "default.target" ];
+    #systemd.user.services.xdg-desktop-portal.wantedBy = [ "default.target" ];
+    #systemd.user.services.xdg-desktop-portal-wlr.wantedBy = [ "default.target" ];
 
     systemd.user.services.xdg-desktop-portal.environment = {
       XDG_DESKTOP_PORTAL_DIR = config.environment.variables.XDG_DESKTOP_PORTAL_DIR;
@@ -71,6 +71,7 @@
         #wlr.enable = true;
 
         extraPortals = with pkgs; [
+          xdg-desktop-portal-wlr
           xdg-desktop-portal-gtk
         ];
       };

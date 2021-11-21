@@ -1,6 +1,6 @@
-{ hostname, config, pkgs, ... }:
+{ hostname, config, unstable, pkgs, ... }:
 let
-  packageset = pkgs.callPackage ./packages.nix { };
+  packageset = pkgs.callPackage ./packages.nix { inherit unstable; };
 in
 {
   imports = [

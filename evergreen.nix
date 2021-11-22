@@ -7,6 +7,8 @@ let script = pkgs.writeShellScript "evergreener" ''
   export PATH=${pkgs.util-linux}/bin:$PATH
   export PATH=${pkgs.libnotify}/bin:$PATH
   export PATH=${pkgs.nixos-rebuild}/bin:$PATH
+  export PATH=${pkgs.curl}/bin:$PATH
+  export PATH=${pkgs.hostname}/bin:$PATH
   export PATH=${./bin}:$PATH
 
   ${./bin/evergreen}

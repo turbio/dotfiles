@@ -161,5 +161,8 @@ in
     iptables
 
     entr
+
+    man-pages
+    man-pages-posix
   ];
 }

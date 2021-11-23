@@ -1,5 +1,12 @@
 autoload -U colors && colors
-PS1="%F{white}%K{blue} %~ %k%f "
+
+PS1="%K{blue} %~ %k%f "
+
+if [[ -n "$SSH_TTY" ]]; then
+  PS1="%K{magenta} %m ${PS1}"
+fi
+
+PS1="%F{white}${PS1}"
 
 job_status(){
 	if [[ -z `jobs` ]]; then

@@ -81,6 +81,8 @@ in
     gnome.dconf-editor
     swaylock
     swayidle
+    # need pactl for sway stuff
+    pulseaudioLight
 
     wineWowPackages.staging
 

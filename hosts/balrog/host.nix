@@ -6,6 +6,7 @@
     ./schemeclub.nix
     ./evaldb.nix
     ./protip.nix
+    ./vibes.nix
     #./factorio.nix
   ];
 

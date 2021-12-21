@@ -139,6 +139,8 @@ in
     mars-ide
 
     prusa-slicer
+
+    openra
   ];
 
   core = with pkgs; [

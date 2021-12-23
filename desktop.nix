@@ -1,4 +1,4 @@
-{ config, lib, unstable, pkgs, ... }: {
+{ config, lib, unstable, localpkgs, pkgs, ... }: {
   options.isDesktop = lib.mkOption {
     type = lib.types.bool;
     default = false;
@@ -6,11 +6,13 @@
 
   config = lib.mkIf config.isDesktop {
 
-    environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit unstable; }).desktop;
+    environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit unstable localpkgs; }).desktop;
 
     services.xserver.enable = true;
-    services.xserver.displayManager.startx.enable = true;
     programs.steam.enable = true;
+
+    # services.xserver.displayManager.gdm.enable = true;
+    # services.xserver.desktopManager.gnome.enable = true;
 
     hardware.opengl.enable = true;
     hardware.opengl.driSupport = true;

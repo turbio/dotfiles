@@ -6,6 +6,8 @@
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
+    # localpkgs.url = "/home/turbio/code/nixpkgs";
+
     home-manager = {
       url = "github:rycee/home-manager/release-21.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -26,7 +28,8 @@
   };
 
   outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, unstable, ... }@inputs:
-    let system = "x86_64-linux"; in
+    let system = "x86_64-linux";
+    in
     {
       nixosConfigurations = builtins.listToAttrs (map
         (c: {
@@ -42,6 +45,7 @@
                 specialArgs = {
                   hostname = c;
                   unstable = unstable.legacyPackages.x86_64-linux;
+                  localpkgs = inputs.localpkgs.legacyPackages.x86_64-linux;
                   pkgs = import nixpkgs {
                     inherit system;
                     overlays = [ neovim-nightly-overlay.overlay ];

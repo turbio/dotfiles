@@ -11,6 +11,7 @@ let
       "net/http"
       "os"
       "path"
+      "strings"
     )
 
     var root string
@@ -29,31 +30,56 @@ let
       r.ParseForm()
 
       cat := r.Form.Get("cat")
-      if cat == "" || !isal(cat) {
-        fmt.Println("bad cat", cat)
-        http.Error(w, "not a cat", http.StatusBadRequest)
+
+      cats := strings.Split(cat, ",")
+
+      tagset := map[string]bool{}
+
+      for _, c := range cats {
+        pos := true
+        if len(c) > 0 && c[0] == '-' {
+          c = c[1:]
+          pos = false
+        }
+
+        if c == "" || !isal(c) {
+          fmt.Println("bad cat", c)
+          http.Error(w, "not a cat", http.StatusBadRequest)
+          return
+        }
+
+        catdir := path.Join(root, "cat", c)
+
+        ents, err := ioutil.ReadDir(catdir)
+        if err != nil {
+          fmt.Println("not a cat", err)
+          http.Error(w, "not a cat", http.StatusBadRequest)
+          return
+        }
+
+        for _, p := range ents {
+          if pos {
+            tagset[p.Name()] = true
+          } else {
+            tagset[p.Name()] = false
+          }
+        }
+      }
+
+      toarray := []string{}
+      for a, v := range tagset {
+        if v {
+          toarray = append(toarray, a)
+        }
+      }
+
+      if len(toarray) == 0 {
+        http.Error(w, "no tags", http.StatusBadRequest)
+        fmt.Println("no tags!")
         return
       }
 
-      catdir := path.Join(root, "cat", cat)
-
-      all, err := ioutil.ReadDir(catdir)
-      if err != nil {
-        fmt.Println("not a cat", err)
-        http.Error(w, "not a cat", http.StatusBadRequest)
-        return
-      }
-
-      n := all[rand.Int()%len(all)].Name()
-
-      to, err := os.Readlink(path.Join(catdir, n))
-      if err != nil {
-        fmt.Println("cant readlink", err)
-        http.Error(w, "not a cat", http.StatusBadRequest)
-        return
-      }
-
-      to = path.Base(to)
+      to := toarray[rand.Int()%len(toarray)]
 
       fmt.Fprintf(w, "/media/%s", to)
     }
@@ -129,12 +155,26 @@ let
     #cats > div:hover {
       filter: brightness(1.5);
     }
+
+    #pbtn {
+      font-size: 50vw;
+      display: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
       </style>
     </head>
     <body>
       <div id="c" class="crt">
-        <video class="screen" id="vid" autoplay showcontrols></video>
+        <video class="screen" id="vid" autoplay></video>
         <div class="overlay">AV-1</div>
+        <div id="pbtn">&blacktriangleright;</div>
       </div>
       <div id="cats">
         <div class="cat" cat="bop">👍</div>
@@ -150,8 +190,18 @@ let
       cat = location.search.slice(5);
     }
 
-    vid.muted = true;
     let cvid = "";
+
+    vid.play()
+      .then(() => {})
+      .catch(err => {
+        console.log("cant play", err);
+        document.getElementById('pbtn').style.display = "flex";
+        document.getElementById('pbtn').onclick = () => {
+          vid.play();
+          document.getElementById('pbtn').style.display = "none";
+        };
+      });
 
     async function setcat(cat) {
       const r = await fetch("/c/cat?cat="+cat+"&vid="+cvid);
@@ -163,6 +213,9 @@ let
         console.log(e);
         e.addEventListener('click', () => {
           setcat(e.attributes.cat.value);
+          if (e.attributes.cat.value == 'flop') {
+            loadnext();
+          }
         })
       });
 

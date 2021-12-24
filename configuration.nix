@@ -3,8 +3,6 @@ let
   packageset = pkgs.callPackage ./packages.nix { inherit unstable localpkgs; };
 in
 {
-  services.flatpak.enable = true;
-
   imports = [
     ./evergreen.nix
     ./desktop.nix

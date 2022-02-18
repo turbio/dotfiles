@@ -1,4 +1,4 @@
-{ config, lib, unstable, localpkgs, pkgs, ... }: {
+{ config, lib, localpkgs, pkgs, ... }: {
   options.isDesktop = lib.mkOption {
     type = lib.types.bool;
     default = false;
@@ -6,7 +6,7 @@
 
   config = lib.mkIf config.isDesktop {
 
-    environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit unstable localpkgs; }).desktop;
+    environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit localpkgs; }).desktop;
 
     services.xserver.enable = true;
     programs.steam.enable = true;

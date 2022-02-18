@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.05";
-    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    unstable.url = "github:nixos/nixpkgs/master";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     # localpkgs.url = "/home/turbio/code/nixpkgs";
@@ -28,7 +28,12 @@
   };
 
   outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, unstable, ... }@inputs:
-    let system = "x86_64-linux";
+    let
+      system = "x86_64-linux";
+      unstablepkgs = import unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations = builtins.listToAttrs (map
@@ -44,11 +49,20 @@
                 ];
                 specialArgs = {
                   hostname = c;
-                  unstable = unstable.legacyPackages.x86_64-linux;
                   localpkgs = inputs.localpkgs.legacyPackages.x86_64-linux;
                   pkgs = import nixpkgs {
                     inherit system;
-                    overlays = [ neovim-nightly-overlay.overlay ];
+                    overlays = [
+                      neovim-nightly-overlay.overlay
+
+                      # pick some unstable stuff
+                      (self: super: with unstablepkgs; {
+                        inherit discord obs-studio mars-mips;
+
+                        obs-studio-plugins = unstablepkgs.obs-studio-plugins;
+                        vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
+                      })
+                    ];
                     config.allowUnfree = true; # owo sowwy daddy stallman
                   };
 

@@ -1,4 +1,4 @@
-{ pkgs, unstable, localpkgs, fetchurl, ... }:
+{ pkgs, localpkgs, fetchurl, ... }:
 {
   desktop = with pkgs; [
     discord
@@ -52,8 +52,8 @@
 
     qemu
 
-    unstable.obs-studio-plugins.wlrobs
-    unstable.obs-studio
+    obs-studio-plugins.wlrobs
+    obs-studio
     linuxPackages.v4l2loopback
     zoom-us
     gimp
@@ -85,7 +85,7 @@
     xorg.xev
     xdotool
 
-    unstable.mars-mips
+    mars-mips
 
     prusa-slicer
 

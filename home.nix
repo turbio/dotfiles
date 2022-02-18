@@ -1,4 +1,4 @@
-{ pkgs, lib, config, unstable, repos, ... }:
+{ pkgs, lib, config, repos, ... }:
 let
   stdenv = pkgs.stdenv;
   wallpaperbin = stdenv.mkDerivation {
@@ -131,7 +131,7 @@ in
     };
 
     imports = [
-      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos unstable; }))
+      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos; }))
     ];
 
     programs.nix-index.enable = true;

@@ -1,4 +1,4 @@
-{ config, pkgs, unstable, repos, lib, ... }:
+{ config, pkgs, repos, lib, ... }:
 {
   programs.neovim = {
     enable = true;
@@ -22,7 +22,7 @@
       nvim-treesitter # and ast based syntax highlighting
 
       vim-gitgutter
-      unstable.vimPlugins.vim-fugitive
+      vim-fugitive
 
       neoformat
 

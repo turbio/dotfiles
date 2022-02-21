@@ -125,5 +125,7 @@
 
     man-pages
     man-pages-posix
+
+    tmux
   ];
 }

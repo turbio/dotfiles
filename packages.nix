@@ -127,5 +127,6 @@
     man-pages-posix
 
     tmux
+    wireguard
   ];
 }

@@ -10,20 +10,8 @@ in
     (./hosts + "/${hostname}" + /hardware-configuration.nix)
     (./hosts + "/${hostname}" + /host.nix)
     ./cachix.nix
+    ./vpn.nix
   ];
-
-  #nix.nixPath = options.nix.nixPath.default ++ [ "nixpkgs-overlays=/etc/nixos/overlays-compat/" ];
-  #environment.etc = {
-  #  "nixos/overlays-compat/overlays.nix".text = "self: super:
-  #      with super.lib;
-  #      let
-  #        # Load the system config and get the `nixpkgs.overlays` option
-  #        overlays = (import <nixpkgs/nixos> { }).config.nixpkgs.overlays;
-  #      in
-  #        # Apply all overlays to the input of the current 'main' overlay
-  #        foldl' (flip extends) (_: super) overlays self
-  #    ";
-  #};
 
   nix.autoOptimiseStore = true;
 

@@ -86,8 +86,8 @@ Content-Type: text/html; charset=UTF-8\r
     }
 }
 
-// const TARGET_TEMP: f64 = 73.0;
-const TARGET_TEMP: f64 = 1.0;
+const TARGET_TEMP: f64 = 72.0;
+// const TARGET_TEMP: f64 = 1.0;
 
 fn main() {
     let mut temp_samps: HashMap<String, Vec<f64>> = HashMap::new();

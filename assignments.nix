@@ -14,6 +14,10 @@
       ip = "10.100.0.2";
       pubkey = "z1UuGW920g/LWz0NjlmpFdZIk5l4cV9AM1x6758kkFg=";
     };
+    itoh = {
+      ip = "10.100.0.4";
+      pubkey = "n6kLi/GHTRo8w+TNLcT7YxBxAkIJss1QYfn6VHt5dGI=";
+    };
   };
 
   sshkeys = {

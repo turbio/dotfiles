@@ -1,6 +1,6 @@
 { pkgs, hostname, ... }:
 let
-  assignments = import ./hosts/assignments.nix;
+  assignments = import ./assignments.nix;
   self = assignments.vpn.${hostname};
 in
 with builtins;

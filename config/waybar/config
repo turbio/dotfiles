@@ -15,7 +15,8 @@
 		"pulseaudio",
 		"battery",
 		"clock",
-		"tray"
+		"tray",
+		"custom/lock"
 	],
 	"sway/workspaces": {
 		"disable-scroll": true,
@@ -118,5 +119,13 @@
 		"exec": "NIX_WAYBAR_YUBI_EXEC",
 		"exec-if": "ykman -v",
 		"on-click": "NIX_WAYBAR_YUBI_ONCLICK"
+	},
+
+	"custom/lock": {
+		"format": "{icon}",
+		"format-icons": {
+			"default": ""
+		},
+		"on-click": "block"
 	}
 }

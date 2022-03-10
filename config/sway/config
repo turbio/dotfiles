@@ -99,12 +99,6 @@ bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-# Layout stuff:
-bindsym $mod+Control+h split horizontal
-bindsym $mod+Control+j splitv
-bindsym $mod+Control+k splitv
-bindsym $mod+Control+l splith
-
 bindsym $mod+comma layout stacking
 bindsym $mod+period layout tabbed
 bindsym $mod+slash layout toggle split
@@ -117,6 +111,8 @@ bindsym $mod+p focus parent
 bindsym XF86AudioPlay exec playerctl play-pause && mpc toggle
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
+
+bindsym $mod+Control+l exec block
 
 bindsym XF86MonBrightnessUp   exec light -A 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"
 bindsym XF86MonBrightnessDown exec light -U 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"

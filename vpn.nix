@@ -15,7 +15,7 @@ with builtins;
       peers = map
         ({ ip, pubkey, endpoint ? null }: {
           publicKey = pubkey;
-          allowedIPs = [ "10.100.0.0/24" ];
+          allowedIPs = [ "${ip}/32" ];
           endpoint = if endpoint == null then null else "${endpoint}:51820";
         })
         (attrValues (removeAttrs assignments.vpn [ hostname ]));

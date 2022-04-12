@@ -69,6 +69,8 @@ alias lsal='ls --color=auto -l -A'
 alias lsla='ls --color=auto -l -A'
 alias ls='ls --color=auto'
 
+alias ip='ip --color=auto'
+
 alias grep='grep --color=auto'
 
 alias gst="git status -sb"

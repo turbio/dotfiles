@@ -143,6 +143,7 @@ in
       extraConfig = {
         pull = { ff = "only"; };
         init = { defaultBranch = "master"; };
+        safe = { directory = "/etc/nixos"; };
       };
     };
 

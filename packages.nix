@@ -1,6 +1,9 @@
 { pkgs, localpkgs, fetchurl, ... }:
 {
   desktop = with pkgs; [
+    uhubctl
+    fwupd
+
     discord
     nixpkgs-fmt
     firefox-wayland

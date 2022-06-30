@@ -101,6 +101,7 @@
         };
     })
 
+    wireshark
   ];
 
   core = with pkgs; [
@@ -109,6 +110,7 @@
     htop
     busybox
     zsh
+    fish
     ag
 
     gnumake

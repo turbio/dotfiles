@@ -25,6 +25,12 @@
     schemeclub = { flake = false; url = "github:turbio/schemeclub/nix"; };
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
 
+    hyprland = {
+      url = "github:vaxerski/Hyprland";
+      # build with your own instance of nixpkgs
+      inputs.nixpkgs.follows = "unstable";
+    };
+
   };
 
   outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, unstable, ... }@inputs:
@@ -46,6 +52,8 @@
                 modules = [
                   ./configuration.nix
                   (home-manager.nixosModules.home-manager)
+                  (inputs.hyprland.nixosModules.default)
+                  ({ programs.hyprland.enable = true; })
                 ];
                 specialArgs = {
                   hostname = c;
@@ -57,7 +65,7 @@
 
                       # pick some unstable stuff
                       (self: super: with unstablepkgs; {
-                        inherit discord obs-studio mars-mips;
+                        inherit discord obs-studio mars-mips fish;
 
                         obs-studio-plugins = unstablepkgs.obs-studio-plugins;
                         vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };

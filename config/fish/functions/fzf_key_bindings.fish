@@ -1,1 +1,0 @@
-/home/mason/.fzf/shell/key-bindings.fish

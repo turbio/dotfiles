@@ -48,6 +48,11 @@ in
       }
 
       (lib.mkIf config.isDesktop {
+        # fish
+        "fish/config.fish".source = ./config/fish/config.fish;
+        "fish/functions/fish_prompt.fish".source = ./config/fish/functions/fish_prompt.fish;
+
+        # bspwm
         "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
         "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
 
@@ -191,6 +196,10 @@ in
       })
     ];
 
+    programs.fish = {
+      enable = true;
+    };
+
     programs.zsh = {
       enable = true;
       enableAutosuggestions = true;
@@ -218,6 +227,8 @@ in
     imports = [
       (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos; }))
     ];
+
+    programs.neovim.enable = true;
 
     programs.nix-index.enable = true;
 

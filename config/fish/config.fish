@@ -37,19 +37,21 @@ alias gcm="git commit -m"
 alias gad="git add -A"
 alias gp="git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)"
 
-alias calc="bc -l"
-
-alias vim="nvim"
-
 function fish_mode_prompt
 end
 
 fish_vi_key_bindings
 
-#gopath
-set -x GOPATH ~/code/gocode
-set -x PATH $PATH $GOPATH/bin
-set -x EDITOR nvim
+bind \cj down-or-search
+bind -M insert \cj down-or-search
+
+bind \ck up-or-search
+bind -M insert \ck up-or-search
+
+bind -M insert jk "if commandline -P; commandline -f cancel; else; set fish_bind_mode default; commandline -f backward-char force-repaint; end"
+
+bind -M insert \cz fg
+bind \cz fg
 
 function fish_greeting
     echo -ne "

@@ -240,6 +240,8 @@ in
         pull = { ff = "only"; };
         init = { defaultBranch = "master"; };
         safe = { directory = "/etc/nixos"; };
+        commit = { gpgsign = true; };
+        user = { signingkey = "55705E7B92DF1B37"; };
       };
     };
 

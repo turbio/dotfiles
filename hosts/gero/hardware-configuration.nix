@@ -14,7 +14,7 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/nvme0n1p3";
+    { device = "/dev/disk/by-uuid/1ad0b8db-5c9b-46c1-8dad-17adec51b4ba";
       fsType = "btrfs";
     };
 

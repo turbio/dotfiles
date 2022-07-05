@@ -43,6 +43,9 @@
     playerctl
     libappindicator
 
+    polkit
+    polkit_gnome
+
     # gdbus
     glib
 

@@ -61,8 +61,8 @@ in
         "mako/config".source = ./config/mako/config;
         "sway/config".text = (
           builtins.replaceStrings
-            [ "NIX_REPLACE_WALLPAPER" ]
-            [ (builtins.toString wallpaper) ]
+            [ "NIX_REPLACE_WALLPAPER" "NIX_REPLACE_GNOME_POLKIT" ]
+            [ (builtins.toString wallpaper) ("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1") ]
             (builtins.readFile ./config/sway/config)
         );
         "hypr/hyprland.conf".text =

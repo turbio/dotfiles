@@ -163,6 +163,8 @@ exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 exec systemctl --user restart xdg-desktop-portal-gtk.service
 exec systemctl --user restart xdg-desktop-portal-wlr.service
 
+exec NIX_REPLACE_GNOME_POLKIT
+
 #bar {
 #	status_command i3status
 #}

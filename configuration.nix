@@ -4,7 +4,7 @@ let
 in
 {
   imports = [
-    ./evergreen.nix
+    # ./evergreen.nix maybe later
     ./desktop.nix
     ./home.nix
     (./hosts + "/${hostname}" + /hardware-configuration.nix)

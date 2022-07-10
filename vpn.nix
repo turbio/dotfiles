@@ -1,16 +1,28 @@
-{ pkgs, hostname, ... }:
+{ pkgs, hostname, lib, ... }:
 let
   assignments = import ./assignments.nix;
   self = assignments.vpn.${hostname};
+  is_server = hasAttr "endpoint" self;
 in
 with builtins;
 {
+  boot.kernel.sysctl."net.ipv4.ip_forward" =
+    lib.mkIf is_server 1;
+
   networking.wireguard.interfaces = {
     wg0 = {
       ips = [ "${self.ip}/24" ];
       listenPort = 51820;
 
       privateKeyFile = "/home/turbio/.wgpkey";
+
+      postSetup = lib.mkIf is_server ''
+        ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.100.0.0/24 -o wg0 -j MASQUERADE
+      '';
+      postShutdown = lib.mkIf is_server ''
+        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.100.0.0/24 -o wg0 -j MASQUERADE
+      '';
+
 
       peers =
         if hasAttr "endpoint" self then

@@ -1,10 +1,10 @@
 { pkgs, hostname, lib, ... }:
+with builtins;
 let
   assignments = import ./assignments.nix;
   self = assignments.vpn.${hostname};
   is_server = hasAttr "endpoint" self;
 in
-with builtins;
 {
   boot.kernel.sysctl."net.ipv4.ip_forward" =
     lib.mkIf is_server 1;

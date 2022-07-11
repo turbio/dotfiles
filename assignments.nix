@@ -18,6 +18,10 @@
       ip = "10.100.0.4";
       pubkey = "n6kLi/GHTRo8w+TNLcT7YxBxAkIJss1QYfn6VHt5dGI=";
     };
+    malco = {
+      ip = "10.100.0.5";
+      pubkey = "7jaOhTtxY+ir0YCf+FaYv1w6RIh7TtUtF0rnvhl1BFE=";
+    };
   };
 
   sshkeys = {

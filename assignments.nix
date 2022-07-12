@@ -1,27 +1,31 @@
 # idk dynamic shit is scary. I just want everyone to talk.
 {
   vpn = {
-    balrog = {
-      ip = "10.100.0.1";
-      pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
-      endpoint = "turb.io";
+    hosts = {
+      balrog = {
+        ip = "10.100.0.1";
+        pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
+        endpoint = "turb.io";
+      };
+      gero = {
+        ip = "10.100.0.3";
+        pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
+      };
+      panda = {
+        ip = "10.100.0.2";
+        pubkey = "z1UuGW920g/LWz0NjlmpFdZIk5l4cV9AM1x6758kkFg=";
+      };
+      itoh = {
+        ip = "10.100.0.4";
+        pubkey = "n6kLi/GHTRo8w+TNLcT7YxBxAkIJss1QYfn6VHt5dGI=";
+      };
+      malco = {
+        ip = "10.100.0.5";
+        pubkey = "7jaOhTtxY+ir0YCf+FaYv1w6RIh7TtUtF0rnvhl1BFE=";
+      };
     };
-    gero = {
-      ip = "10.100.0.3";
-      pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
-    };
-    panda = {
-      ip = "10.100.0.2";
-      pubkey = "z1UuGW920g/LWz0NjlmpFdZIk5l4cV9AM1x6758kkFg=";
-    };
-    itoh = {
-      ip = "10.100.0.4";
-      pubkey = "n6kLi/GHTRo8w+TNLcT7YxBxAkIJss1QYfn6VHt5dGI=";
-    };
-    malco = {
-      ip = "10.100.0.5";
-      pubkey = "7jaOhTtxY+ir0YCf+FaYv1w6RIh7TtUtF0rnvhl1BFE=";
-    };
+
+    subnet = "10.100.0.0/24";
   };
 
   sshkeys = {

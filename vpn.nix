@@ -2,7 +2,7 @@
 with builtins;
 let
   assignments = import ./assignments.nix;
-  self = assignments.vpn.${hostname};
+  self = assignments.vpn.hosts.${hostname};
   is_server = hasAttr "endpoint" self;
 in
 {
@@ -25,23 +25,23 @@ in
 
 
       peers =
-        if hasAttr "endpoint" self then
+        if is_server then
           (map
             ({ ip, pubkey, endpoint ? null }: {
               publicKey = pubkey;
               allowedIPs = [ "${ip}/32" ];
               endpoint = if endpoint == null then null else "${endpoint}:51820";
             })
-            (attrValues (removeAttrs assignments.vpn [ hostname ])))
+            (attrValues (removeAttrs assignments.vpn.hosts [ hostname ])))
         else
           (map
             ({ ip, pubkey, endpoint }: {
               publicKey = pubkey;
-              allowedIPs = [ "${ip}/32" ];
+              allowedIPs = [ assignments.vpn.subnet ];
               endpoint = "${endpoint}:51820";
               persistentKeepalive = 25;
             })
-            (filter (hasAttr "endpoint") (attrValues (removeAttrs assignments.vpn [ hostname ]))));
+            (filter (hasAttr "endpoint") (attrValues (removeAttrs assignments.vpn.hosts [ hostname ]))));
     };
   };
 }

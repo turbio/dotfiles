@@ -13,7 +13,7 @@ in
     ./vpn.nix
   ];
 
-  nix.autoOptimiseStore = true;
+  #nix.autoOptimiseStore = true;
 
   nix = {
     package = pkgs.nixUnstable;

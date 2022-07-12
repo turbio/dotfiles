@@ -12,7 +12,7 @@ in
   networking.wireguard.interfaces = {
     wg0 = {
       ips = [ "${self.ip}/24" ];
-      listenPort = 51820;
+      listenPort = lib.mkIf is_server 51820;
 
       privateKeyFile = "/home/turbio/.wgpkey";
 

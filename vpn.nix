@@ -9,6 +9,7 @@ in
   boot.kernel.sysctl."net.ipv4.ip_forward" =
     lib.mkIf is_server 1;
 
+  networking.interfaces.wg0.mtu = 1300;
   networking.wireguard.interfaces = {
     wg0 = {
       ips = [ "${self.ip}/24" ];

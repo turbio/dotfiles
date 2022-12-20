@@ -3,6 +3,8 @@ let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
 in
 {
+  time.timeZone = "America/Los_Angeles";
+
   imports = [
     # ./evergreen.nix maybe later
     ./desktop.nix

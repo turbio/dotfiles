@@ -6,7 +6,7 @@
     withNodeJs = true;
     withRuby = true;
     withPython3 = true;
-    package = pkgs.neovim-nightly;
+    #package = pkgs.neovim-nightly;
 
     plugins = with pkgs.vimPlugins; [
       vim-nix

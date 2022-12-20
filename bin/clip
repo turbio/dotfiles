@@ -7,10 +7,10 @@ if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
         sleep "$1"
     fi
 
-    grim -g "$dim" clip.png
+    grim -g "$dim" ~/clip.png
     mkdir -p ~/Pictures/clip
-    cp clip.png ~/Pictures/clip/clip_$(date +%Y_%m_%d_%H:%M:%S).png
-    cat clip.png | wl-copy
+    cp ~/clip.png ~/Pictures/clip/clip_$(date +%Y_%m_%d_%H:%M:%S).png
+    cat ~/clip.png | wl-copy
 else
     r=$RANDOM
     scrot -s /tmp/clip_$r.png

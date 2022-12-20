@@ -49,7 +49,6 @@ in
 
       (lib.mkIf config.isDesktop {
         # fish
-        "fish/config.fish".source = ./config/fish/config.fish;
         "fish/functions/fish_prompt.fish".source = ./config/fish/functions/fish_prompt.fish;
 
         # bspwm
@@ -198,6 +197,65 @@ in
 
     programs.fish = {
       enable = true;
+      shellAliases = {
+        lsa = "ls --color=auto -A";
+        lsl = "ls --color=auto -l";
+        lsal = "ls --color=auto -l -A";
+        lsla = "ls --color=auto -l -A";
+        ls = "ls --color=auto";
+
+        grep = "grep --color=auto";
+
+        gst = "git status -sb";
+        gdf = "git diff";
+        gdfc = "git diff --cached";
+        gcm = "git commit -m";
+        gad = "git add -A";
+        gp = "git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)";
+      };
+
+      shellInit = ''
+        set fish_color_autosuggestion black --bold
+        set fish_color_command green
+        set fish_color_error red
+
+        function fish_mode_prompt
+        end
+
+        fish_vi_key_bindings
+        bind \cj down-or-search
+        bind -M insert \cj down-or-search
+
+        bind \ck up-or-search
+        bind -M insert \ck up-or-search
+
+        bind -M insert jk "if commandline -P; commandline -f cancel; else; set fish_bind_mode default; commandline -f backward-char force-repaint; end"
+
+        bind -M insert \cz fg
+        bind \cz fg
+
+        function fish_greeting
+            echo -ne "\
+         ┌──────────────────────────────────┐
+         │ Curse your sudden but inevitable │
+         │ betrayal.                        │
+         └────╮─────────────────────────────┘
+              \e[0m│\e[0;32m                        .       .
+              \e[0m│\e[0;32m                       / \`.   .' \"
+              \e[0m│\e[0;32m               .---.  <    > <    >  .---.
+              \e[0m│\e[0;32m               |    \\  \\ - ~ ~ - /  /    |
+              \e[0m│\e[1;30m   _____\e[0;32m        \\  ..-~             ~-..-~
+              \e[0m╰\e[1;30m  |     |\e[0;32m   \\~~~\\.'                    \`./~~~/
+               \e[1;30m ---------\e[0;32m   \\__/                        \\__/
+               .'  O    \\     /               /       \\  \"
+              (_____,    `._.'               |         }  \\/~~~/
+               `----.          /       }     |        /    \\__/
+                     `-.      |       /      |       /      \`. ,~~|
+                         ~-.__|      /_ - ~ ^|      /- _      \`..-'
+                              |     /        |     /     ~-.     \`-._  _  _
+                              |_____|        |_____|         ~ - . _ _ _ _ _>\e[0m\n"
+        end
+      '';
     };
 
     programs.zsh = {

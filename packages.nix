@@ -1,6 +1,8 @@
-{ pkgs, localpkgs, fetchurl, ... }:
+{ pkgs, localpkgs, ... }:
 {
   desktop = with pkgs; [
+    urbit
+
     uhubctl
     fwupd
 
@@ -95,16 +97,11 @@
 
     prusa-slicer
 
-    (appimageTools.wrapType2 {
-      name = "openra";
-      src = fetchurl
-        {
-          url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
-          sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
-        };
-    })
+    arduino
 
     wireshark
+
+    openra
   ];
 
   core = with pkgs; [

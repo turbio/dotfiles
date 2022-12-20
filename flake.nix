@@ -25,11 +25,11 @@
     schemeclub = { flake = false; url = "github:turbio/schemeclub/nix"; };
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
 
-    hyprland = {
-      url = "github:vaxerski/Hyprland";
-      # build with your own instance of nixpkgs
-      inputs.nixpkgs.follows = "unstable";
-    };
+    #hyprland = {
+    #  url = "github:vaxerski/Hyprland";
+    #  # build with your own instance of nixpkgs
+    #  inputs.nixpkgs.follows = "unstable";
+    #};
 
   };
 
@@ -52,8 +52,8 @@
                 modules = [
                   ./configuration.nix
                   (home-manager.nixosModules.home-manager)
-                  (inputs.hyprland.nixosModules.default)
-                  ({ programs.hyprland.enable = true; })
+                  #(inputs.hyprland.nixosModules.default)
+                  #({ programs.hyprland.enable = true; })
                 ];
                 specialArgs = {
                   hostname = c;
@@ -61,7 +61,7 @@
                   pkgs = import nixpkgs {
                     inherit system;
                     overlays = [
-                      neovim-nightly-overlay.overlay
+                      #neovim-nightly-overlay.overlay
 
                       # pick some unstable stuff
                       (self: super: with unstablepkgs; {
@@ -70,6 +70,22 @@
                         obs-studio-plugins = unstablepkgs.obs-studio-plugins;
                         vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
                       })
+
+                      (self: super: {
+                        openra = (super.appimageTools.wrapType2 {
+                          name = "openra";
+                          src = super.fetchurl
+                            {
+                              url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
+                              sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
+                            };
+                        });
+                      })
+
+
+                      #(self: super: {
+                      #  urbit = super.callPackage ./urbit.nix { };
+                      #})
                     ];
                     config.allowUnfree = true; # owo sowwy daddy stallman
                   };

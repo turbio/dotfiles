@@ -23,8 +23,8 @@
 
     networking.networkmanager.enable = true;
 
-    #virtualisation.virtualbox.host.enable = true;
-    #virtualisation.virtualbox.host.enableExtensionPack = true;
+    virtualisation.virtualbox.host.enable = true;
+    virtualisation.virtualbox.host.enableExtensionPack = true;
     users.extraGroups.vboxusers.members = [ "turbio" ];
 
     services.yubikey-agent.enable = true;

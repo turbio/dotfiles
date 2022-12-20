@@ -4,8 +4,12 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
+
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" "armv7l-linux" ];
+
   imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
+    [
+      (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
@@ -14,18 +18,19 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/1ad0b8db-5c9b-46c1-8dad-17adec51b4ba";
+    {
+      device = "/dev/disk/by-uuid/1ad0b8db-5c9b-46c1-8dad-17adec51b4ba";
       fsType = "btrfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/A463-D3F3";
+    {
+      device = "/dev/disk/by-uuid/A463-D3F3";
       fsType = "vfat";
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/9554db1f-6a7f-4154-9bb6-ab220241a705"; }
-    ];
+    [{ device = "/dev/disk/by-uuid/9554db1f-6a7f-4154-9bb6-ab220241a705"; }];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 }

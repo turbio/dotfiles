@@ -45,12 +45,12 @@ in
         "nvim/tmp/undo/.keep".text = "";
         "nvim/tmp/backup/.keep".text = "";
         "nvim/tmp/swap/.keep".text = "";
+
+        # fish
+        "fish/functions/fish_prompt.fish".source = ./config/fish/functions/fish_prompt.fish;
       }
 
       (lib.mkIf config.isDesktop {
-        # fish
-        "fish/functions/fish_prompt.fish".source = ./config/fish/functions/fish_prompt.fish;
-
         # bspwm
         "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
         "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;

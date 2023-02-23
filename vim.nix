@@ -20,6 +20,7 @@
       nvim-lspconfig
 
       nvim-treesitter # and ast based syntax highlighting
+      nvim-cmp
 
       vim-gitgutter
       vim-fugitive
@@ -34,7 +35,7 @@
       vim-misc # ?????
       echodoc-vim # print function signatures in command line
       fzf-vim # for ctrl-p and ctrl-/
-      vim-go # snazzy go support
+      # vim-go # snazzy go support TODO: no arm support???
       popup-nvim # [wip] pop api from vim in neovim
       plenary-nvim # window managment stuff??
       telescope-nvim # alternative fzf

@@ -9,6 +9,11 @@ in
   boot.kernel.sysctl."net.ipv4.ip_forward" =
     lib.mkIf is_server 1;
 
+  networking.extraHosts = lib.concatStrings
+    (lib.mapAttrsToList
+      (name: { ip, ... }: "${ip} ${name}\n")
+      assignments.vpn.hosts);
+
   networking.interfaces.wg0.mtu = 1300;
   networking.wireguard.interfaces = {
     wg0 = {

@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     unstable.url = "github:nixos/nixpkgs/master";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
@@ -33,67 +34,71 @@
 
   };
 
-  outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, unstable, ... }@inputs:
-    let
-      system = "x86_64-linux";
-      unstablepkgs = import unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-    in
-    {
-      nixosConfigurations = builtins.listToAttrs (map
-        (c: {
+  outputs = { self, nixpkgs, home-manager, neovim-nightly-overlay, nixos-hardware, unstable, ... }@inputs: rec {
+    nixosConfigurations = builtins.listToAttrs (map
+      (c:
+        let
+          system = if c == "pando" then "aarch64-linux" else "x86_64-linux";
+          unstablepkgs = import unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        {
           name = c;
           value =
-            nixpkgs.lib.nixosSystem
-              {
-                inherit system;
-                modules = [
-                  ./configuration.nix
-                  (home-manager.nixosModules.home-manager)
-                  #(inputs.hyprland.nixosModules.default)
-                  #({ programs.hyprland.enable = true; })
-                ];
-                specialArgs = {
-                  hostname = c;
-                  localpkgs = inputs.localpkgs.legacyPackages.x86_64-linux;
-                  pkgs = import nixpkgs {
-                    inherit system;
-                    overlays = [
-                      #neovim-nightly-overlay.overlay
+            nixpkgs.lib.nixosSystem {
+              inherit system;
+              modules = [
+                ./configuration.nix
+                (home-manager.nixosModules.home-manager)
+                #(inputs.hyprland.nixosModules.default)
+                #({ programs.hyprland.enable = true; })
+              ] ++
+              (if c == "pando" then [
+                "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+                #nixos-hardware.nixosModules.raspberry-pi-4
+              ] else [ ]);
+              specialArgs = {
+                hostname = c;
+                localpkgs = inputs.localpkgs.legacyPackages.x86_64-linux;
+                pkgs = import nixpkgs {
+                  inherit system;
+                  overlays = [
+                    #neovim-nightly-overlay.overlay
 
-                      # pick some unstable stuff
-                      (self: super: with unstablepkgs; {
-                        inherit discord obs-studio mars-mips fish;
+                    # pick some unstable stuff
+                    (self: super: with unstablepkgs; {
+                      inherit discord obs-studio mars-mips fish;
 
-                        obs-studio-plugins = unstablepkgs.obs-studio-plugins;
-                        vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
-                      })
+                      obs-studio-plugins = unstablepkgs.obs-studio-plugins;
+                      vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
+                    })
 
-                      (self: super: {
-                        openra = (super.appimageTools.wrapType2 {
-                          name = "openra";
-                          src = super.fetchurl
-                            {
-                              url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
-                              sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
-                            };
-                        });
-                      })
+                    (self: super: {
+                      openra = (super.appimageTools.wrapType2 {
+                        name = "openra";
+                        src = super.fetchurl
+                          {
+                            url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
+                            sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
+                          };
+                      });
+                    })
 
 
-                      #(self: super: {
-                      #  urbit = super.callPackage ./urbit.nix { };
-                      #})
-                    ];
-                    config.allowUnfree = true; # owo sowwy daddy stallman
-                  };
-
-                  repos = inputs;
+                    #(self: super: {
+                    #  urbit = super.callPackage ./urbit.nix { };
+                    #})
+                  ];
+                  config.allowUnfree = true; # owo sowwy daddy stallman
                 };
+
+                repos = inputs;
               };
+            };
         })
-        (builtins.attrNames (builtins.readDir ./hosts)));
-    };
+      (builtins.attrNames (builtins.readDir ./hosts)));
+    images.pando = nixosConfigurations.pando.config.system.build.sdImage;
+  };
 }

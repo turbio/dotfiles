@@ -44,6 +44,10 @@ in
       "dialout" # /dev/tty stuff
       "rfkill" # gotta poke some devices
       "input" # spooky haxxxx for push to talk
+
+      # raspi stuff
+      "gpio"
+      "i2c"
     ];
     uid = 1000;
 

@@ -50,6 +50,8 @@ set nowrap
 filetype plugin indent on
 set noshowmode
 
+set completeopt=menu,menuone,noselect
+
 "because i use space for leader
 let mapleader=" "
 
@@ -309,7 +311,6 @@ let g:deoplete#sources#ternjs#case_insensitive = 1
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "}}}
 "ycm {{{
-set completeopt-=preview
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_collect_identifiers_from_tags_files = 0
 let g:ycm_seed_identifiers_with_syntax = 1

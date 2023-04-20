@@ -184,10 +184,12 @@ let
 
       <script>
     const vid = document.getElementById('vid');
-    let cat = "bop"
+    let cat;
 
     if (location.search.startsWith('?cat=')) {
       cat = location.search.slice(5);
+    } else {
+      cat = "bop,-flop";
     }
 
     let cvid = "";

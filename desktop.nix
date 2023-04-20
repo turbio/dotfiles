@@ -6,6 +6,8 @@
 
   config = lib.mkIf config.isDesktop {
 
+    programs.browserpass.enable = true;
+
     environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit localpkgs; }).desktop;
 
     programs.steam.enable = true;

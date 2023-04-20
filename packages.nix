@@ -8,7 +8,8 @@
 
     discord
     nixpkgs-fmt
-    firefox-wayland
+    #firefox-wayland
+    firefox
     chromium
     alacritty
     pavucontrol

@@ -5,17 +5,9 @@ in
 {
   time.timeZone = "America/Los_Angeles";
 
-  imports = [
-    # ./evergreen.nix maybe later
-    ./desktop.nix
-    ./home.nix
-    (./hosts + "/${hostname}" + /hardware-configuration.nix)
-    (./hosts + "/${hostname}" + /host.nix)
-    ./cachix.nix
-    ./vpn.nix
-  ];
-
   #nix.autoOptimiseStore = true;
+
+  nixpkgs.config.allowUnfree = true;
 
   nix = {
     package = pkgs.nixUnstable;

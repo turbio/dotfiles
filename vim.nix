@@ -50,11 +50,11 @@
         version = "1";
         src = repos.openscad-vim;
       })
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
-        pname = "copilot";
-        version = "1";
-        src = repos.github-copilot-vim;
-      })
+      #(pkgs.vimUtils.buildVimPluginFrom2Nix {
+      #pname = "copilot";
+      #version = "1";
+      #src = repos.github-copilot-vim;
+      #})
     ];
     extraConfig = (builtins.readFile ./config/nvim/init.vim);
   };

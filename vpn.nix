@@ -20,7 +20,7 @@ in
       ips = [ "${self.ip}/24" ];
       listenPort = lib.mkIf is_server 51820;
 
-      privateKeyFile = "/home/turbio/.wgpkey";
+      privateKeyFile = "/home/turbio/.wgpkey"; # TODO lol
 
       postSetup = lib.mkIf is_server ''
         ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.100.0.0/24 -o wg0 -j MASQUERADE

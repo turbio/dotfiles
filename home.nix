@@ -212,6 +212,7 @@ in
         gcm = "git commit -m";
         gad = "git add -A";
         gp = "git push --set-upstream origin (git rev-parse --abbrev-ref HEAD)";
+        mkdirdate = ''mkdir "$(date +"%Y_%m_%d")"'';
       };
 
       shellInit = ''
@@ -330,6 +331,16 @@ in
         theme.package = pkgs.arc-theme;
         theme.name = "Arc-Dark";
       };
+
+    home.pointerCursor = lib.mkIf config.isDesktop {
+      name = "Adwaita";
+      package = pkgs.gnome.adwaita-icon-theme;
+      x11 = {
+        enable = true;
+        defaultCursor = "Adwaita";
+      };
+    };
+
 
     home.sessionPath = [
       "${./bin}"

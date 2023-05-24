@@ -1,7 +1,7 @@
 { pkgs, localpkgs, ... }:
 {
   desktop = with pkgs; [
-    urbit
+    #urbit
 
     uhubctl
     fwupd
@@ -37,7 +37,7 @@
     swaylock
     swayidle
     # need pactl for sway stuff
-    pulseaudioLight
+    pulseaudio
 
     wineWowPackages.staging
 
@@ -112,7 +112,7 @@
     busybox
     zsh
     fish
-    ag
+    silver-searcher
 
     gnumake
     gdb
@@ -133,6 +133,6 @@
     man-pages-posix
 
     tmux
-    wireguard
+    wireguard-tools
   ];
 }

@@ -152,11 +152,18 @@ input "9610:32:HAILUCK_CO.,LTD_USB_KEYBOARD_Touchpad" {
 	tap enabled
 }
 
+input '2:10:TPPS/2_Elan_TrackPoint' {
+	pointer_accel 0.8
+	scroll_factor 2.5
+}
+
 exec mako
 exec waybar
 exec lxsession
 
 exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+
+seat seat0 xcursor_theme Adwaita
 
 exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 #  this is some retarded shit

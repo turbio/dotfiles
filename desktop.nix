@@ -1,10 +1,41 @@
-{ config, lib, localpkgs, pkgs, ... }: {
+{ config, lib, localpkgs, pkgs, ... }:
+let
+  webcam_log = pkgs.writeScriptBin "webcam-log" ''
+    log_to="$HOME/Pictures/webcam_log"
+    mkdir -p "$log_to"
+    out_file="$log_to/$(date "+%Y_%m_%d_%H:%M:%S").jpg"
+
+    ${pkgs.fswebcam}/bin/fswebcam -r 640x480 --jpeg 85 -D 1 --no-banner "$out_file"
+  '';
+in
+{
   options.isDesktop = lib.mkOption {
     type = lib.types.bool;
     default = false;
   };
 
   config = lib.mkIf config.isDesktop {
+    systemd.timers."webcam-log" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "1m";
+        OnUnitActiveSec = "1m";
+        Unit = "webcam-log.service";
+      };
+    };
+
+    systemd.services."webcam-log" = {
+      script = "${webcam_log}/bin/webcam-log";
+      serviceConfig = {
+        Type = "oneshot";
+        User = "turbio";
+      };
+    };
+
+
+    services.journald.extraConfig = ''
+      MaxRetentionSec=1week
+    '';
 
     programs.browserpass.enable = true;
 
@@ -56,8 +87,6 @@
       alsa.support32Bit = true;
       pulse.enable = true;
       jack.enable = true;
-
-      media-session.enable = true;
     };
 
     programs.gnupg.agent.pinentryFlavor = "gnome3";

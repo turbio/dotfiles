@@ -23,7 +23,7 @@
     evaldb = { flake = false; url = "github:turbio/evaldb"; };
     schemeclub = { flake = false; url = "github:turbio/schemeclub/nix"; };
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
-    ctrl.url = "path:./hosts/pando/ctrl";
+    dash.url = "path:/home/turbio/code/home";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 

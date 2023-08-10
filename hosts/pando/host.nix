@@ -117,7 +117,7 @@
   };
 
   systemd.services = {
-    ctrl = {
+    dash = {
       description = "the actual point of this device";
       wantedBy = [ "multi-user.target" ];
 
@@ -125,9 +125,14 @@
       after = [ "network-online.target" ];
 
       serviceConfig = {
-        ExecStart = (pkgs.writeShellScript "start-ctrl" ''
-          ${pkgs.bash}/bin/bash ${./ctrl/setupgpio.sh}
-          ${repos.ctrl.packages.${pkgs.system}.ctrl}/bin/ctrl
+        ExecStart = (pkgs.writeShellScript "start-dash" ''
+          dtoverlay -d /boot/firmware/overlays/ w1-gpio gpiopin=4 pullup=0
+          ${pkgs.bash}/bin/bash ${./setupgpio.sh}
+          if [ -f /home/turbio/dev/dash/target/debug/dash ]; then
+                  /home/turbio/dev/dash/target/debug/dash
+          else
+                  ${repos.dash.packages.${pkgs.system}.dash}/bin/dash
+          fi
         '');
         MemoryLimit = "512M";
         RestartSec = "60s";

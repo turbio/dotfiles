@@ -1,17 +1,18 @@
 {
   "nodes": {
-    "ctrl": {
+    "dash": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "narHash": "sha256-g62priJ0NgM5DEvlWtfz7V+zgIBZVJfNzqFP6Jiu8LE=",
-        "path": "./hosts/pando/ctrl",
+        "lastModified": 1690163448,
+        "narHash": "sha256-WcC/9UCpv8hrnm+j1oRS7Dc3wI0YmJKnCmMeYw15E/U=",
+        "path": "/home/turbio/code/home",
         "type": "path"
       },
       "original": {
-        "path": "./hosts/pando/ctrl",
+        "path": "/home/turbio/code/home",
         "type": "path"
       }
     },
@@ -329,7 +330,7 @@
     },
     "root": {
       "inputs": {
-        "ctrl": "ctrl",
+        "dash": "dash",
         "evaldb": "evaldb",
         "flippyflops": "flippyflops",
         "home-manager": "home-manager",

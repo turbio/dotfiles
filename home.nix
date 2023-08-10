@@ -58,6 +58,100 @@ in
         "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
         "dunstrc".source = ./config/dunstrc;
         "mako/config".source = ./config/mako/config;
+        "wofi/config".text = ''
+          term=alacritty
+          location=top
+          yoffset=180
+          width=30%
+          lines=11
+
+          prompt=
+          show=drun
+          insensitive=true
+          allow_images=true
+          hide_scroll=true
+
+          aways_parse_args=true
+          show_all=true
+        '';
+        "wofi/style.css".text = ''
+                    window {
+              margin: 0px;
+              border: 5px solid #1e1e2e;
+              background-color: #cdd6f4;
+              border-radius: 15px;
+          }
+
+          #input {
+              padding: 4px;
+              margin: 4px;
+              padding-left: 20px;
+              border: none;
+              color: #cdd6f4;
+              font-weight: bold;
+              background-color: #1e1e2e;
+             	outline: none;
+              border-radius: 15px;
+              margin: 10px;
+              margin-bottom: 2px;
+          }
+          #input:focus {
+              border: 0px solid #1e1e2e;
+              margin-bottom: 0px;
+          }
+
+          #inner-box {
+              margin: 4px;
+              border: 10px solid #1e1e2e;
+              color: #cdd6f4;
+              font-weight: bold;
+              background-color: #1e1e2e;
+              border-radius: 15px;
+          }
+
+          #outer-box {
+              margin: 0px;
+              border: none;
+              border-radius: 15px;
+              background-color: #1e1e2e;
+          }
+
+          #scroll {
+              margin-top: 5px;
+              border: none;
+              border-radius: 15px;
+              margin-bottom: 5px;
+              /* background: rgb(255,255,255); */
+          }
+
+          #img:selected {
+              background-color: #89b4fa;
+              border-radius: 15px;
+          }
+
+          #text:selected {
+              color: #cdd6f4;
+              margin: 0px 0px;
+              border: none;
+              border-radius: 15px;
+              background-color: #89b4fa;
+          }
+
+          #entry {
+              margin: 0px 0px;
+              border: none;
+              border-radius: 15px;
+              background-color: transparent;
+          }
+
+          #entry:selected {
+              margin: 0px 0px;
+              border: none;
+              border-radius: 15px;
+              background-color: #89b4fa;
+          }
+
+        '';
         "sway/config".text = (
           builtins.replaceStrings
             [ "NIX_REPLACE_WALLPAPER" "NIX_REPLACE_GNOME_POLKIT" ]

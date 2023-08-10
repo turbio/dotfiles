@@ -50,6 +50,8 @@ set nowrap
 filetype plugin indent on
 set noshowmode
 
+set virtualedit=block
+
 set completeopt=menu,menuone,noselect
 
 "because i use space for leader

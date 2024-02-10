@@ -10,7 +10,7 @@
     #./factorio.nix
   ];
 
-  security.acme.email = "letsencrypt@turb.io";
+  security.acme.defaults.email = "letsencrypt@turb.io";
   security.acme.acceptTerms = true;
 
   services.nginx.appendHttpConfig = ''

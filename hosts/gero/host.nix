@@ -6,15 +6,17 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.interfaces.enp0s31f6.useDHCP = true;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
+  networking.interfaces.wlp1s0.useDHCP = true;
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
   programs.light.enable = true;
 
-  systemd.services.keyboard-backlight = {
+  services.logind.lidSwitch = "hybrid-sleep";
+
+  /*
+    systemd.services.keyboard-backlight = {
     description = "i just want my keys to glow";
     script = ''
       echo 2 | tee /sys/class/leds/tpacpi::kbd_backlight/brightness
@@ -35,5 +37,6 @@
       "hybrid-sleep.target"
       "suspend-then-hibernate.target"
     ];
-  };
+    };
+  */
 }

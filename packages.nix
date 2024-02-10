@@ -19,7 +19,6 @@
     pass
     yubikey-manager
     yubikey-agent
-    yubioath-desktop
 
     lxappearance
     gtk_engines
@@ -103,6 +102,7 @@
     wireshark
 
     openra
+    saleae-logic-2
   ];
 
   core = with pkgs; [

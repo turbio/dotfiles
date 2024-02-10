@@ -20,12 +20,12 @@ let
 in
 {
   users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafan's socket
-  services.grafana = {
+  services.grafana.settings.server = {
     enable = true;
     socket = "/run/grafana/grafana.sock";
     domain = "dash.turb.io";
     protocol = "socket";
-    rootUrl = "https://dash.turb.io/";
+    root_url = "https://dash.turb.io/";
   };
 
   services.prometheus = {
@@ -165,7 +165,7 @@ in
       enableACME = true;
 
       locations."/" = {
-        proxyPass = "http://unix:/${config.services.grafana.socket}";
+        proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
       };
     };
 

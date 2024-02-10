@@ -31,7 +31,7 @@
 		"spacing": 10
 	},
 	"clock": {
-		"format": "{:%H:%M}",
+		"format": "{:%H:%M %Z}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
 		"format-alt": "{:%H:%M %Y-%m-%d %Z}"
 	},
@@ -127,6 +127,6 @@
 		"format-icons": {
 			"default": ""
 		},
-		"on-click": "block"
+		"on-click": "NIX_LOCK_BIN"
 	}
 }

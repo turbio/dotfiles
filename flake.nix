@@ -2,13 +2,13 @@
   description = "My dotfiles uwu";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     unstable.url = "github:nixos/nixpkgs/master";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     home-manager = {
-      url = "github:rycee/home-manager/release-22.11";
+      url = "github:rycee/home-manager/release-23.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -72,6 +72,7 @@
 
                   specialArgs = {
                     hostname = c;
+                    unstablepkgs = unstablepkgs;
 
                     # kinda fucky, probably incorrect... sometimes usefull when
                     # we really don't want anyone to fuck w our nixpkgs

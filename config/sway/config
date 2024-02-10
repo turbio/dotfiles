@@ -142,6 +142,10 @@ for_window [title=".*"] floating enable
 
 bindsym $mod+semicolon exec rofi-pass
 
+input "type:keyboard" {
+	xkb_options ctrl:nocaps
+}
+
 input 2:7:SynPS/2_Synaptics_TouchPad {
 	events disabled
 }
@@ -155,6 +159,22 @@ input '2:10:TPPS/2_Elan_TrackPoint' {
 	scroll_factor 2.5
 }
 
+output eDP-1 scale 1.0
+
+input "2362:628:PIXA3854:00_093A:0274_Touchpad" {
+	accel_profile adaptive
+	click_method clickfinger
+	drag enabled
+	tap enabled
+	middle_emulation enabled
+	scroll_method two_finger
+
+	# palm rejection
+	dwt disabled
+
+	pointer_accel 0.2
+}
+
 exec mako
 exec waybar
 exec lxsession
@@ -163,12 +183,16 @@ exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output 
 
 seat seat0 xcursor_theme Adwaita
 
-exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+#exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 #  this is some retarded shit
-exec systemctl --user restart xdg-desktop-portal-gtk.service
-exec systemctl --user restart xdg-desktop-portal-wlr.service
+#exec systemctl --user restart xdg-desktop-portal-gtk.service
+#exec systemctl --user restart xdg-desktop-portal-wlr.service
 
-exec NIX_REPLACE_GNOME_POLKIT
+#exec NIX_REPLACE_GNOME_POLKIT
+
+exec dbus-sway-environment
+exec configure-gtk
+
 
 #bar {
 #	status_command i3status

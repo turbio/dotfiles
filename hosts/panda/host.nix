@@ -1,17 +1,19 @@
 { config, pkgs, ... }:
 let
-  slurpgps = pkgs.runCommandCC "surpgps" {
-    buildInputs = [ pkgs.rustc ];
-  } ''
+  slurpgps = pkgs.runCommandCC "surpgps"
+    {
+      buildInputs = [ pkgs.rustc ];
+    } ''
     rustc ${./slurpgps/slurpgps.rs} -o slurpgps
     mkdir -p $out/bin/
     cp slurpgps $out/bin/
   '';
 
   vanio_prom_addr = "127.0.0.1:9093";
-  vanio = pkgs.runCommandCC "vanio" {
-    buildInputs = [ pkgs.rustc ];
-  } ''
+  vanio = pkgs.runCommandCC "vanio"
+    {
+      buildInputs = [ pkgs.rustc ];
+    } ''
     rustc ${./vanio/vanio.rs} -o vanio
     mkdir -p $out/bin/
     cp vanio $out/bin/
@@ -52,7 +54,7 @@ in
         ${vanio}/bin/vanio --prom-addr ${vanio_prom_addr} --adruino-tty ${arduino_addr}
       '';
       Restart = "on-failure";
-      RestartSec="5s";
+      RestartSec = "5s";
     };
   };
 
@@ -89,19 +91,19 @@ in
   };
 
   users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafan's socket
-  services.grafana = {
+  services.grafana.settings.server = {
     enable = true;
     socket = "/run/grafana/grafana.sock";
     domain = "graph.turb.io";
     protocol = "socket";
-    rootUrl = "http://graph.turb.io/";
+    root_url = "http://graph.turb.io/";
   };
 
   services.nginx.enable = true;
   services.nginx.virtualHosts = {
     "graph.turb.io" = {
       locations."/" = {
-        proxyPass = "http://unix:/${config.services.grafana.socket}";
+        proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
       };
     };
   };

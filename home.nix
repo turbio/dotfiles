@@ -245,7 +245,7 @@ in
             '';
         "waybar/config".text =
           builtins.replaceStrings
-            [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" ]
+            [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" "NIX_LOCK_BIN" ]
             [
               (builtins.toString (pkgs.writeShellScript "yubi-waybar-status"
                 ''
@@ -281,6 +281,10 @@ in
                       read";
                 ''
               ))
+
+              (
+                "${./bin/block}"
+              )
             ]
             (builtins.readFile ./config/waybar/config)
         ;
@@ -393,8 +397,6 @@ in
         pull = { ff = "only"; };
         init = { defaultBranch = "master"; };
         safe = { directory = "/etc/nixos"; };
-        commit = { gpgsign = true; };
-        user = { signingkey = "55705E7B92DF1B37"; };
       };
     };
 

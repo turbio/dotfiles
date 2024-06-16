@@ -40,17 +40,17 @@
       plenary-nvim # window managment stuff??
       telescope-nvim # alternative fzf
     ] ++ [
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+      (pkgs.vimUtils.buildVimPlugin {
         pname = "muble";
         version = "1";
         src = repos.muble-vim;
       })
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+      (pkgs.vimUtils.buildVimPlugin {
         pname = "vim-openscad";
         version = "1";
         src = repos.openscad-vim;
       })
-      #(pkgs.vimUtils.buildVimPluginFrom2Nix {
+      #(pkgs.vimUtils.buildVimPlugin {
       #pname = "copilot";
       #version = "1";
       #src = repos.github-copilot-vim;

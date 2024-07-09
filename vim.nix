@@ -6,7 +6,6 @@
     withNodeJs = true;
     withRuby = true;
     withPython3 = true;
-    #package = pkgs.neovim-nightly;
 
     plugins = with pkgs.vimPlugins; [
       vim-nix
@@ -21,11 +20,10 @@
 
       nvim-treesitter # and ast based syntax highlighting
       nvim-cmp
+      cmp-nvim-lsp
 
       vim-gitgutter
       vim-fugitive
-
-      neoformat
 
       vim-endwise # auto adds end/endif/etc
       undotree # time travel isn't linear
@@ -50,11 +48,11 @@
         version = "1";
         src = repos.openscad-vim;
       })
-      #(pkgs.vimUtils.buildVimPlugin {
-      #pname = "copilot";
-      #version = "1";
-      #src = repos.github-copilot-vim;
-      #})
+      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+        pname = "copilot";
+        version = "1";
+        src = repos.github-copilot-vim;
+      })
     ];
     extraConfig = (builtins.readFile ./config/nvim/init.vim);
   };

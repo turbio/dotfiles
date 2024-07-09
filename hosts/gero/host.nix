@@ -13,7 +13,20 @@
 
   programs.light.enable = true;
 
-  services.logind.lidSwitch = "hybrid-sleep";
+  boot.initrd.kernelModules = [ "amdgpu" ];
+
+  #hardware.opengl.extraPackages = with pkgs; [
+    #rocmPackages.clr.icd
+  #];
+
+  services.logind = {
+    lidSwitch = "suspend";
+    extraConfig = ''
+      HandlePowerKey=ignore
+      HandleSuspendKey=ignore
+      HandleHibernateKey=ignore
+    '';
+  };
 
   /*
     systemd.services.keyboard-backlight = {

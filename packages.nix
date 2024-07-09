@@ -88,6 +88,7 @@
     clang
     gcc
     go
+    rust-analyzer
 
     wev
     xorg.xev
@@ -103,6 +104,9 @@
 
     openra
     saleae-logic-2
+
+    darktable
+    ocl-icd
   ];
 
   core = with pkgs; [

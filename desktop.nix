@@ -52,6 +52,11 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    # automount attached storage
+    services.gvfs.enable = true;
+    services.udisks2.enable = true;
+    services.devmon.enable = true;
+
     hardware.saleae-logic.enable = true;
 
     services.tzupdate.enable = true;

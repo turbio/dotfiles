@@ -5,14 +5,13 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     unstable.url = "github:nixos/nixpkgs/master";
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     home-manager = {
       url = "github:rycee/home-manager/release-23.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    #github-copilot-vim = { flake = false; url = "github:github/copilot.vim"; };
+    github-copilot-vim = { flake = false; url = "github:github/copilot.vim"; };
     openscad-vim = { flake = false; url = "github:sirtaj/vim-openscad"; };
     muble-vim = { flake = false; url = "github:turbio/muble.vim"; };
 
@@ -38,7 +37,6 @@
     { self
     , nixpkgs
     , home-manager
-    , neovim-nightly-overlay
     , nixos-hardware
     , unstable
     , ...

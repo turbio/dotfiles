@@ -8,8 +8,6 @@
 
     discord
     nixpkgs-fmt
-    #firefox-wayland
-    firefox
     chromium
     alacritty
     pavucontrol
@@ -44,6 +42,7 @@
     (waybar.override { withMediaPlayer = true; })
     playerctl
     libappindicator
+    wofi
 
     polkit
     polkit_gnome

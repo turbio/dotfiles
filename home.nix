@@ -408,17 +408,32 @@ in
     programs.firefox = {
       enable = true;
       package = pkgs.firefox-wayland;
-      profiles."lbgu1zmc.default".userChrome = ''
-        /* Hide tab bar in FF Quantum */
-        #TabsToolbar {
-          visibility: collapse !important;
-          margin-bottom: 21px !important;
-        }
+      profiles."lbgu1zmc.default" = {
+        extensions = with config.nur.repos.rycee.firefox-addons; [
+          tree-style-tab
+          onepassword-password-manager
+          metamask
+          ublock-origin
+        ];
+        settings = {
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+          "browser.toolbars.bookmarks.visibility" = "never";
+          "browser.uiCustomization.state" = ''
+            {"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["ublock0_raymondhill_net-browser-action","webextension_metamask_io-browser-action"],"nav-bar":["back-button","forward-button","stop-reload-button","urlbar-container","downloads-button","fxa-toolbar-menu-button","treestyletab_piro_sakura_ne_jp-browser-action","_d634138d-c276-4fc8-924b-40a0ea21d284_-browser-action","unified-extensions-button"],"toolbar-menubar":["menubar-items"],"TabsToolbar":["firefox-view-button","tabbrowser-tabs","new-tab-button","alltabs-button"],"PersonalToolbar":["import-button","personal-bookmarks"]},"seen":["save-to-pocket-button","developer-button","treestyletab_piro_sakura_ne_jp-browser-action","_d634138d-c276-4fc8-924b-40a0ea21d284_-browser-action","ublock0_raymondhill_net-browser-action","webextension_metamask_io-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","unified-extensions-area","toolbar-menubar","TabsToolbar"],"currentVersion":20,"newElementCount":7}
+          '';
+        };
+        userChrome = ''
+          /* Hide tab bar in FF Quantum */
+          #TabsToolbar {
+            visibility: collapse !important;
+            margin-bottom: 21px !important;
+          }
 
-        #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] #sidebar-header {
-          visibility: collapse !important;
-        }
-      '';
+          #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] #sidebar-header {
+            visibility: collapse !important;
+          }
+        '';
+      };
     };
 
     gtk = lib.mkIf

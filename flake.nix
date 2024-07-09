@@ -5,6 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     unstable.url = "github:nixos/nixpkgs/master";
+    nur.url = "github:nix-community/NUR";
 
     home-manager = {
       url = "github:rycee/home-manager/release-23.05";
@@ -39,6 +40,7 @@
     , home-manager
     , nixos-hardware
     , unstable
+    , nur
     , ...
     }@inputs: rec {
       nixosConfigurations = builtins.listToAttrs
@@ -64,6 +66,7 @@
                     (./hosts + "/${c}" + /host.nix)
                     ./cachix.nix
                     ./vpn.nix
+                    nur.nixosModules.nur
                     # ./evergreen.nix maybe later
                     (home-manager.nixosModules.home-manager)
                   ];

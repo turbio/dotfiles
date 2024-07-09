@@ -250,6 +250,21 @@
         "type": "github"
       }
     },
+    "nur": {
+      "locked": {
+        "lastModified": 1720556912,
+        "narHash": "sha256-qOrIsGLZhniFg/pzBsSQ2EozNoWH9gqsmyoxBIPvJwU=",
+        "owner": "nix-community",
+        "repo": "NUR",
+        "rev": "f8388f87ef85f0e2b7028f5af9e290bf324fa814",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "NUR",
+        "type": "github"
+      }
+    },
     "openscad-vim": {
       "flake": false,
       "locked": {
@@ -303,6 +318,7 @@
         "muble-vim": "muble-vim",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
+        "nur": "nur",
         "openscad-vim": "openscad-vim",
         "raspberry-pi-nix": "raspberry-pi-nix",
         "schemeclub": "schemeclub",

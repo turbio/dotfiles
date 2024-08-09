@@ -96,6 +96,7 @@
     mars-mips
 
     prusa-slicer
+    orca-slicer
 
     arduino
 

@@ -52,4 +52,13 @@
     ];
     };
   */
+
+  fileSystems."/nfs/photography" = {
+    device = "10.100.0.4:/photography";
+    fsType = "nfs";
+    options = [
+      "rw"
+      "noatime"
+    ];
+  };
 }

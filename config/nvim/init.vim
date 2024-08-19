@@ -61,6 +61,9 @@ vim.keymap.set('n', 'gb', ':Lspsaga show_cursor_diagnostics<cr>')
 vim.keymap.set('n', 'gc', ':Lspsaga code_action<cr>')
 vim.keymap.set('n', 'gJ', ':Lspsaga lsp_finder<cr>')
 
+vim.keymap.set('n', '<C-p>', ':FZF<CR>')
+vim.keymap.set('n', '<C-/>', ':Ag<CR>')
+
 vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3

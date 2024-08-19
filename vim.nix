@@ -48,7 +48,7 @@
         version = "1";
         src = repos.openscad-vim;
       })
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+      (pkgs.vimUtils.buildVimPlugin {
         pname = "copilot";
         version = "1";
         src = repos.github-copilot-vim;

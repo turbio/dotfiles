@@ -115,7 +115,7 @@ in
     services.yubikey-agent.enable = true;
     services.pcscd.enable = true;
 
-    fonts.fonts = with pkgs; [
+    fonts.packages = with pkgs; [
       terminus_font
       terminus_font_ttf
       font-awesome

@@ -1,4 +1,4 @@
-{ pkgs, localpkgs, ... }:
+{ pkgs, ... }:
 {
   desktop = with pkgs; [
     #urbit
@@ -106,6 +106,7 @@
     saleae-logic-2
 
     darktable
+    kdenlive
     ocl-icd
   ];
 

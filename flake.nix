@@ -2,13 +2,13 @@
   description = "My dotfiles uwu";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     unstable.url = "github:nixos/nixpkgs/master";
     nur.url = "github:nix-community/NUR";
 
     home-manager = {
-      url = "github:rycee/home-manager/release-23.05";
+      url = "github:rycee/home-manager/release-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -23,7 +23,6 @@
     evaldb = { flake = false; url = "github:turbio/evaldb"; };
     schemeclub = { flake = false; url = "github:turbio/schemeclub/nix"; };
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
-    dash.url = "path:/home/turbio/code/home";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 

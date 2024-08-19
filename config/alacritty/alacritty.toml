@@ -1,0 +1,82 @@
+[bell]
+animation = "EaseOutExpo"
+duration = 0
+
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[colors.bright]
+black = "0x5C5C5C"
+blue = "0x62ADE3"
+cyan = "0x66D9EF"
+green = "0xA6E22E"
+magenta = "0xAE81FF"
+red = "0xFF5995"
+white = "0xCCCCCC"
+yellow = "0xE6DB74"
+
+[colors.cursor]
+cursor = "0xffffff"
+text = "0x000000"
+
+[colors.dim]
+black = "0x333333"
+blue = "0x6699cc"
+cyan = "0x66cccc"
+green = "0x99cc99"
+magenta = "0xcc99cc"
+red = "0xf2777a"
+white = "0xdddddd"
+yellow = "0xffcc66"
+
+[colors.normal]
+black = "0x272822"
+blue = "0x268BD2"
+cyan = "0x56C2D5"
+green = "0x82B414"
+magenta = "0x8C54FE"
+red = "0xF92672"
+white = "0xffffff"
+yellow = "0xFD971F"
+
+[colors.primary]
+background = "0x272822"
+foreground = "0xffffff"
+
+[font]
+size = 7
+
+[font.bold]
+family = "Terminus"
+style = "Bold"
+
+[font.glyph_offset]
+x = 0
+y = 0
+
+[font.italic]
+family = "Terminus"
+style = "Bold"
+
+[font.normal]
+family = "Terminus"
+style = "normal"
+
+[font.offset]
+x = 0
+y = 0
+
+[[mouse.bindings]]
+action = "PasteSelection"
+mouse = "Middle"
+
+[selection]
+semantic_escape_chars = ",?`|:\"' ()[]{}<>"
+
+[window.dimensions]
+columns = 80
+lines = 24
+
+[window.padding]
+x = 2
+y = 2

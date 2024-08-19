@@ -55,7 +55,7 @@ in
         "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
         "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
 
-        "alacritty/alacritty.yml".source = ./config/alacritty/alacritty.yml;
+        "alacritty/alacritty.toml".source = ./config/alacritty/alacritty.toml;
         "dunstrc".source = ./config/dunstrc;
         "mako/config".source = ./config/mako/config;
         "wofi/config".text = ''

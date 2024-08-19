@@ -52,6 +52,8 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    services.automatic-timezoned.enable = true;
+
     # automount attached storage
     services.gvfs.enable = true;
     services.udisks2.enable = true;
@@ -139,7 +141,7 @@ in
       jack.enable = true;
     };
 
-    programs.gnupg.agent.pinentryFlavor = "gnome3";
+    #programs.gnupg.agent.pinentryFlavor = "gnome3";
 
     #environment.variables.GTK_USE_PORTAL = "1";
     #environment.variables.GDK_BACKEND = "wayland";
@@ -167,6 +169,14 @@ in
         ];
       };
     };
+
+    # services.xserver = {
+    #   enable = true;
+    #   displayManager.gdm.enable = true;
+    #   displayManager.gdm.wayland = false;
+    #   desktopManager.gnome.enable = true;
+    # };
+
 
     #virtualisation.docker.enable = true;
   };

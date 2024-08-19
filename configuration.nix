@@ -6,6 +6,8 @@ in
   nixpkgs.overlays = [
     (final: prev: {
       openra = unstablepkgs.openra;
+      #bambu-studio = unstablepkgs.bambu-studio;
+      #orca-slicer = unstablepkgs.orca-slicer;
     })
 
     (final: prev: {
@@ -91,14 +93,12 @@ in
     })
   ];
 
-  #time.timeZone = "America/Los_Angeles";
-
   #nix.autoOptimiseStore = true;
 
   nixpkgs.config.allowUnfree = true;
 
   nix = {
-    package = pkgs.nixUnstable;
+    package = pkgs.nixVersions.latest;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';

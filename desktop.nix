@@ -54,6 +54,9 @@ in
   config = lib.mkIf config.isDesktop {
     services.automatic-timezoned.enable = true;
 
+    programs.wireshark.enable = true;
+    programs.wireshark.package = pkgs.wireshark;
+
     # automount attached storage
     services.gvfs.enable = true;
     services.udisks2.enable = true;
@@ -108,8 +111,8 @@ in
 
     networking.networkmanager.enable = true;
 
-    #virtualisation.virtualbox.host.enable = true;
-    #virtualisation.virtualbox.host.enableExtensionPack = true;
+    virtualisation.virtualbox.host.enable = true;
+    virtualisation.virtualbox.host.enableExtensionPack = true;
     users.extraGroups.vboxusers.members = [ "turbio" ];
 
     services.yubikey-agent.enable = true;

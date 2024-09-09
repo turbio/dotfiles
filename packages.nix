@@ -100,8 +100,6 @@
 
     arduino
 
-    wireshark
-
     openra
     saleae-logic-2
 

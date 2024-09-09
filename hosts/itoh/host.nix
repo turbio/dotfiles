@@ -2,8 +2,7 @@
   isDesktop = true;
 
   # boot.kernelPackages = pkgs.linuxPackages_5_14;
-
-  services.octoprint.enable = true;
+  #services.octoprint.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -31,4 +30,17 @@
     /nfs/exports 192.168.86.0/24(rw,fsid=0,no_subtree_check,crossmnt) 10.100.0.0/24(rw,fsid=0,no_subtree_check,crossmnt)
     /nfs/exports/photography 192.168.86.0/24(rw,nohide,insecure,no_subtree_check,crossmnt) 10.100.0.0/24(rw,nohide,insecure,no_subtree_check,crossmnt)
   '';
+
+  /*
+  services.home-assistant = {
+    enable = true;
+    config = {
+      http.server_port = 8123;
+      http.server_host = ["0.0.0.0"];
+      homeassistant.unit_system = "imperial";
+      homeassistant.temperature_unit = "F";
+      homeassistant.name = "Potomac";
+    };
+  };
+  */
 }

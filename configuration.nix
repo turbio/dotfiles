@@ -121,6 +121,7 @@ in
       "docker"
       "audio"
       "video"
+      "wireshark"
       "dialout" # /dev/tty stuff
       "rfkill" # gotta poke some devices
       "input" # spooky haxxxx for push to talk

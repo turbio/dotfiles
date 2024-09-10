@@ -5,7 +5,7 @@ in
 {
   nixpkgs.overlays = [
     (final: prev: {
-      openra = unstablepkgs.openra;
+      #openra = unstablepkgs.openra;
       #bambu-studio = unstablepkgs.bambu-studio;
       #orca-slicer = unstablepkgs.orca-slicer;
     })

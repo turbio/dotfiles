@@ -41,75 +41,123 @@
     , unstable
     , nur
     , ...
-    }@inputs: rec {
-      nixosConfigurations = builtins.listToAttrs
-        (map
-          (c:
-            let
-              system = if c == "pando" then "aarch64-linux" else "x86_64-linux";
-              unstablepkgs = import unstable {
-                inherit system;
-                config.allowUnfree = true;
-              };
-            in
-            {
-              name = c;
-              value =
-                nixpkgs.lib.nixosSystem {
-                  inherit system;
-                  modules = [
-                    ./configuration.nix
-                    ./desktop.nix
-                    ./home.nix
-                    (./hosts + "/${c}" + /hardware-configuration.nix)
-                    (./hosts + "/${c}" + /host.nix)
-                    ./cachix.nix
-                    ./vpn.nix
-                    nur.nixosModules.nur
-                    # ./evergreen.nix maybe later
-                    (home-manager.nixosModules.home-manager)
-                  ];
+  }@inputs:
+    let
+    arch = hostname: if hostname == "pando" then "aarch64-linux" else "x86_64-linux";
+    mksystem = modules: hostname: nixpkgs.lib.nixosSystem {
+      system = arch hostname;
+      modules = [
+        ./configuration.nix
+        ./desktop.nix
+        ./home.nix
+        (./hosts + "/${hostname}" + /configuration.nix)
+        (./hosts + "/${hostname}" + /hardware-configuration.nix)
+        ./cachix.nix
+        ./vpn.nix
+        nur.nixosModules.nur
+        # ./evergreen.nix maybe later
+        (home-manager.nixosModules.home-manager)
+      ] ++ modules;
 
-                  specialArgs = {
-                    hostname = c;
-                    unstablepkgs = unstablepkgs;
+      specialArgs = {
+        inherit hostname;
+        #unstablepkgs = unstablepkgs;
+        #
+        # kinda fucky, probably incorrect... sometimes usefull when
+        # we really don't want anyone to fuck w our nixpkgs
+        #pkgs = import nixpkgs {
+        #  inherit system;
+        #  overlays = [
+        #    # pick some unstable stuff
+        #    (self: super: with unstablepkgs; {
+        #      inherit discord obs-studio mars-mips fish;
 
-                    # kinda fucky, probably incorrect... sometimes usefull when
-                    # we really don't want anyone to fuck w our nixpkgs
-                    #pkgs = import nixpkgs {
-                    #  inherit system;
-                    #  overlays = [
-                    #    # pick some unstable stuff
-                    #    (self: super: with unstablepkgs; {
-                    #      inherit discord obs-studio mars-mips fish;
+        #      obs-studio-plugins = unstablepkgs.obs-studio-plugins;
+        #      vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
+        #    })
 
-                    #      obs-studio-plugins = unstablepkgs.obs-studio-plugins;
-                    #      vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
-                    #    })
+        #    # cause openra is fucked in upstream
+        #    (self: super: {
+        #      openra = (super.appimageTools.wrapType2 {
+        #        name = "openra";
+        #        src = super.fetchurl
+        #          {
+        #            url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
+        #            sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
+        #          };
+        #      });
+        #    })
 
-                    #    # cause openra is fucked in upstream
-                    #    (self: super: {
-                    #      openra = (super.appimageTools.wrapType2 {
-                    #        name = "openra";
-                    #        src = super.fetchurl
-                    #          {
-                    #            url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
-                    #            sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
-                    #          };
-                    #      });
-                    #    })
+        #  ];
+        #  config.allowUnfree = true; # owo sowwy daddy stallman
+        #};
 
-                    #  ];
-                    #  config.allowUnfree = true; # owo sowwy daddy stallman
-                    #};
-
-                    repos = inputs;
-                  };
-                };
-            })
-          (builtins.attrNames (builtins.readDir ./hosts)));
-
-      # can build this to make a flashable raspi image
-      images.pando = nixosConfigurations.pando.config.system.build.sdImage;
+        repos = inputs;
+      };
     };
+
+    mapEachHost = fn: builtins.listToAttrs (map (c: { name = c; value = fn c; }) (builtins.attrNames (builtins.readDir ./hosts)));
+    pxeExecScript = system: nixpkgs.legacyPackages.x86_64-linux.writers.writeBash "pixiecore" ''
+      exec ${nixpkgs.legacyPackages.x86_64-linux.pixiecore}/bin/pixiecore \
+        boot ${system.config.system.build.kernel}/bzImage ${system.config.system.build.netbootRamdisk}/initrd \
+        --cmdline "init=${system.config.system.build.toplevel} loglevel=4"
+        --debug --dhcp-no-bind \
+        --port 64172 --status-port 64172 "$@"
+    '';
+    pxeModules = [
+      ({ modulesPath, ... }: {
+        imports = [
+          (modulesPath + "/installer/netboot/netboot-minimal.nix")
+        ];
+      })
+    ];
+    imageModules = [
+      ({ config, lib, pkgs, modulesPath, ... }: {
+
+          imports = [ "${modulesPath}/image/repart.nix" ];
+
+          boot.loader.grub.enable = false;
+
+          image.repart = {
+            name = "image";
+            partitions = {
+              "esp" = {
+                contents = {
+                  "/EFI/BOOT/BOOT${lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI".source =
+                    "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi";
+
+                  "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
+                      "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
+                };
+                repartConfig = {
+                  Type = "esp";
+                  Format = "vfat";
+                  SizeMinBytes = "512M";
+                  Label = "boot";
+                };
+              };
+              "root" = {
+                storePaths = [ config.system.build.toplevel ];
+                repartConfig = {
+                  Type = "root";
+                  Format = "ext4";
+                  Label = "nixos";
+                  Minimize = "guess";
+                };
+              };
+            };
+        };
+
+      })
+    ];
+    pxeSystemScript = hostname: (pxeExecScript (mksystem pxeModules hostname));
+  in
+  rec {
+    nixosConfigurations = mapEachHost (mksystem []);
+    pxeScript = mapEachHost pxeSystemScript;
+    image = mapEachHost (hostname: (mksystem imageModules hostname).config.system.build.image);
+
+    # output a flashable raspi image
+    images.pando = nixosConfigurations.pando.config.system.build.sdImage;
+  };
 }

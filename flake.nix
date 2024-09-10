@@ -116,8 +116,6 @@
 
           imports = [ "${modulesPath}/image/repart.nix" ];
 
-          boot.loader.grub.enable = false;
-
           image.repart = {
             name = "image";
             partitions = {

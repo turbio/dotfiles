@@ -138,8 +138,7 @@ in
     #shell = pkgs.zsh;
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
-      "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBBa1RGmSWCA4xvw+sBZglCwjMbJ7QtYszwR3agccvse+VMq+tCOcPFUCNi5Wt36IJa9dBNbRHihE1KbaX5pGptwAAAAEc3NoOg== turbio@turb.io"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3m+nLA4XaGQ2QNjyC4X+B4iiktKfTg++QOzoUtj4Xn"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio"
     ];
   };
 

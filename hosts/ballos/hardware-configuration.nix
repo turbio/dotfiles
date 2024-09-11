@@ -8,7 +8,7 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  filesystems = {
+  fileSystems = {
     "/" = {
       device = "/dev/disk/by-label/nixos";
     };

@@ -4,7 +4,7 @@
     hosts = {
       ballos = {
         ip = "10.100.0.10";
-        pubkey = "todo";
+        pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
       };
       balrog = {
         ip = "10.100.0.1";

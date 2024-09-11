@@ -1,12 +1,30 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }: {
   boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  #boot.loader.systemd-boot.enable = true;
+  #boot.loader.efi.efiSysMountPoint = "/efi";
+
+  #boot.uki.settings.UKI.Cmdline = "init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}";
+  #boot.loader.external = let arch = pkgs.stdenv.hostPlatform.efiArch; in {
+  #  enable = true;
+  #  installHook = pkgs.writeScript "install-bootloader" ''
+  #    cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${arch}.efi /efi/EFI/BOOT/BOOT${lib.toUpper arch}.EFI
+
+
+  #  ''
+
+  #    #echo ${config.system.build.uki}
+  #    #cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} /efi/EFI/Linux/${config.system.boot.loader.ukiFile}
+  #  ;
+  #};
+
 
   # Use the GRUB 2 boot loader.
   #boot.loader.grub.enable = true;
   #boot.loader.grub.version = 2;
   # boot.loader.grub.efiSupport = true;
   # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
   # Define on which hard drive you want to install Grub.
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 

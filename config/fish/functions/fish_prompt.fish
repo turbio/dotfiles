@@ -12,7 +12,7 @@ function fish_prompt
 
     # hostname
     set_color normal -b green
-    echo -n ' '$USER'@'$HOSTNAME' '
+    echo -n ' '(prompt_hostname)' '
 
     # pwd
     set_color normal -b blue

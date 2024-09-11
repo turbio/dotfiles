@@ -116,35 +116,36 @@
 
           imports = [ "${modulesPath}/image/repart.nix" ];
 
-          image.repart = {
-            name = "image";
-            partitions = {
-              "esp" = {
-                contents = {
-                  "/EFI/BOOT/BOOT${lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI".source =
-                    "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi";
+          boot.loader.grub.enable = false;
 
-                  "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
-                      "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-                };
-                repartConfig = {
-                  Type = "esp";
-                  Format = "vfat";
-                  SizeMinBytes = "512M";
-                  Label = "boot";
-                };
+          image.repart.name = "image";
+          image.repart.partitions = {
+            "10-esp" = {
+              contents = {
+                "/EFI/BOOT/BOOT${lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI".source =
+                  "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi";
+
+                "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
+                    "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
               };
-              "root" = {
-                storePaths = [ config.system.build.toplevel ];
-                repartConfig = {
-                  Type = "root";
-                  Format = "ext4";
-                  Label = "nixos";
-                  Minimize = "guess";
-                };
+              repartConfig = {
+                Type = "esp";
+                Format = "vfat";
+                SizeMinBytes = "512M";
+                Label = "boot";
               };
             };
-        };
+            "20-store" = {
+              storePaths = [ config.system.build.toplevel ];
+              stripNixStorePrefix = true;
+              repartConfig = {
+                Type = "linux-generic";
+                Format = "ext4";
+                Label = "nix-store";
+                Minimize = "guess";
+              };
+            };
+          };
 
       })
     ];
@@ -153,7 +154,21 @@
   rec {
     nixosConfigurations = mapEachHost (mksystem []);
     pxeScript = mapEachHost pxeSystemScript;
-    image = mapEachHost (hostname: (mksystem imageModules hostname).config.system.build.image);
+
+    image.ballos = (mksystem imageModules "ballos").config.system.build.image;
+
+    activate-uki.ballos =
+      let
+        system = (mksystem imageModules "ballos");
+        pkgs = system.pkgs;
+        config = system.config;
+      in
+        nixpkgs.legacyPackages.x86_64-linux.writeScript "activate-uki" ''
+          cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi \
+            /boot/EFI/BOOT/BOOT${system.lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI
+          cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
+            /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
+        '';
 
     # output a flashable raspi image
     images.pando = nixosConfigurations.pando.config.system.build.sdImage;

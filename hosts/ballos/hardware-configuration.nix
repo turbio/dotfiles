@@ -1,26 +1,45 @@
 { config, lib, pkgs, modulesPath, ... }: {
-  imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+  boot.loader.grub.enable = false;
 
   boot.initrd.availableKernelModules = [ "ahci" "ehci_pci" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" = {
+  filesystems = {
+    "/" = {
       device = "/dev/disk/by-label/nixos";
-      fsType = "ext4";
+    };
+    "/boot" = {
+      device = "/dev/disk/by-label/boot";
+      fsType = "vfat";
+      options = [ "fmask=0022" "dmask=0022" ];
+    };
   };
+
+  swapDevices = [
+    { device = "/dev/disk/by-label/swap"; }
+  ];
 
   /*
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/boot";
-    fsType = "vfat";
+  fileSystems = {
+    "/" = {
+      device = "tmproot";
+      fsType = "tmpfs";
+      options = [ "defaults" "mode=755" "size=50%" ];
+    };
+    "/nix/store" = {
+      device = "/dev/disk/by-label/nix-store";
+    };
+    "/boot" = {
+      device = "/dev/disk/by-label/BOOT";
+    };
   };
-  */
 
   swapDevices = [ ];
+  */
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

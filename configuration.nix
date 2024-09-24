@@ -3,6 +3,8 @@ let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
 in
 {
+  services.fwupd.enable = true;
+
   nixpkgs.overlays = [
     (final: prev: {
       #openra = unstablepkgs.openra;

@@ -3,7 +3,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 8123 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   #security.acme.defaults.email = "letsencrypt@turb.io";
   #security.acme.acceptTerms = true;
@@ -17,11 +17,13 @@
   users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafan's socket
   services.grafana = {
     enable = true;
-    socket = "/run/grafana/grafana.sock";
-    domain = "graf.turb.io";
-    protocol = "socket";
-    #root_url = "https://graf.turb.io/";
-    rootUrl = "http://graf.turb.io/";
+
+    settings.server = {
+      socket = "/run/grafana/grafana.sock";
+      root_url = "https://graf.turb.io/";
+      domain = "graf.turb.io";
+      protocol = "socket";
+    };
   };
 
   virtualisation.oci-containers = {
@@ -138,6 +140,22 @@
         doCheck = false;
       };
     })
+
+    (final: { buildGoModule, fetchFromGitHub, ... }: {
+      lvm-exporter = buildGoModule rec {
+        pname = "prometheus-lvm-exporter";
+        version = "v0.3.3";
+
+        src = fetchFromGitHub {
+          owner = "hansmi";
+          repo = pname;
+          rev = version;
+          hash = "sha256-mA84Bnq5JF0BGfqHhcCzTef5nDotLgQuiyg3/zOPqTE=";
+        };
+        vendorHash = "sha256-vqxsg70ShMo4OVdzhqYDj/HT3RTpCUBGHze/EkbBJig=";
+        doCheck = false;
+      };
+    })
   ];
 
   systemd.services.prometheus-comed-exporter = {
@@ -148,9 +166,19 @@
     };
   };
 
+  systemd.services.prometheus-lvm-exporter = {
+    enable = true;
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.lvm-exporter}/bin/prometheus-lvm-exporter --web.listen-address 127.0.0.1:9012 --command=${pkgs.lvm2.bin}/bin/lvm";
+    };
+  };
+
   services.apcupsd = {
     enable = true;
   };
+
+  services.nginx.statusPage = true;
 
   services.prometheus = {
     enable = true;
@@ -182,6 +210,12 @@
         job_name = "comed";
         static_configs = [
           { targets = [ "127.0.0.1:9010" ]; }
+        ];
+      }
+      {
+        job_name = "lvm";
+        static_configs = [
+          { targets = [ "127.0.0.1:9012" ]; }
         ];
       }
       {
@@ -223,9 +257,18 @@
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.smartctl.port}" ]; }
         ];
       }
+      {
+        job_name = "nginx";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.nginx.port}" ]; }
+        ];
+      }
     ];
 
     exporters = {
+      nginx = {
+        enable = true;
+      };
       smartctl = {
         enable = true;
       };
@@ -293,8 +336,14 @@
   };
 
   services.udev.extraRules = ''
-    KERNEL=="ipmi*", MODE="660", GROUP="${config.services.prometheus.exporters.ipmi.group}" USER=${config.services.prometheus.exporters.ipmi.user}
+    KERNEL=="ipmi*", MODE="660", GROUP="${config.services.prometheus.exporters.ipmi.group}"
   '';
+
+  fileSystems."/mnt" = {
+    device = "/dev/group/five";
+    fsType = "ext4";
+    options = [ "nofail" "user" ];
+  };
 
   #boot.loader.systemd-boot.enable = true;
   #boot.loader.efi.efiSysMountPoint = "/efi";

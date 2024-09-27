@@ -4,7 +4,7 @@ let
 in
 {
   services.fwupd.enable = true;
-  nix.trustedUsers = [ "turbio" ];
+  nix.settings.trusted-users = [ "turbio" ];
 
   nixpkgs.overlays = [
     (final: prev: {

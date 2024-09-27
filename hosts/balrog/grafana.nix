@@ -20,6 +20,7 @@ let
 in
 {
   users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafan's socket
+  services.grafana.enable = true;
   services.grafana.settings.server = {
     enable = true;
     socket = "/run/grafana/grafana.sock";
@@ -63,6 +64,12 @@ in
         enabledCollectors = [ "systemd" ];
         listenAddress = "127.0.0.1";
         port = 9092;
+      };
+      wireguard = {
+        enable = true;
+      };
+      nginxlog = {
+        enable = true;
       };
     };
   };
@@ -166,6 +173,10 @@ in
 
       locations."/" = {
         proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
+        extraConfig = ''
+          proxy_set_header Host $host;
+        '';
+
       };
     };
 

@@ -7,6 +7,8 @@
     ./evaldb.nix
     ./protip.nix
     ./vibes.nix
+    ./photoprism.nix
+    ./progress.nix
     #./factorio.nix
   ];
 
@@ -27,6 +29,56 @@
       locations."/" = {
         extraConfig = ''
           return 301 https://turb.io$request_uri;
+        '';
+      };
+    };
+
+    "dggx.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+      locations."/" = {
+        proxyPass = "http://localhost:8080";
+      };
+      locations."/live" = {
+        proxyPass = "http://localhost:8080";
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 86400;
+        '';
+      };
+    };
+
+    "graph.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+      acmeFallbackHost = "10.100.0.6";
+      locations."/" = {
+          proxyPass = "http://10.100.0.6";
+          extraConfig = ''
+            proxy_set_header Host $host;
+          '';
+      };
+    };
+
+    "ctrl.turb.io" = {
+      addSSL = true;
+      enableACME = true;
+      acmeFallbackHost = "10.100.0.6";
+      locations."/" = {
+          proxyPass = "http://10.100.0.6";
+      };
+
+      locations."/ws" = {
+        proxyPass = "http://10.100.0.6";
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 86400;
         '';
       };
     };

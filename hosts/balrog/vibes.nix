@@ -173,12 +173,13 @@ let
     <body>
       <div id="c" class="crt">
         <video class="screen" id="vid" autoplay></video>
-        <div class="overlay">AV-1</div>
+        <div class="overlay" id="name">AV-1</div>
         <div id="pbtn">&blacktriangleright;</div>
       </div>
       <div id="cats">
         <div class="cat" cat="bop">👍</div>
         <div class="cat" cat="flop">👎</div>
+        <div class="cat" cat="anime">🌸</div>
         <div class="cat" cat="lewd">🍆</div>
       </div>
 
@@ -189,7 +190,7 @@ let
     if (location.search.startsWith('?cat=')) {
       cat = location.search.slice(5);
     } else {
-      cat = "bop,-flop";
+      cat = "bop,-flop,-lewd";
     }
 
     let cvid = "";
@@ -230,6 +231,15 @@ let
       }
       const n = await r.text();
       console.log(n);
+
+      document.getElementById('name').textContent = 'AV-' + n
+        .split('/').slice(-1).join()
+        .split('.')[0]
+        .slice(-5);
+      document.getElementById('name').style.animation = 'none';
+      document.getElementById('name').offsetHeight;
+      document.getElementById('name').style.animation = null;
+
       cvid = n;
       vid.src = n;
     }

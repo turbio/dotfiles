@@ -6,15 +6,14 @@ let
   is_server = hasAttr "endpoint" self;
 in
 {
-  boot.kernel.sysctl."net.ipv4.ip_forward" =
-    lib.mkIf is_server 1;
+  boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkIf is_server 1;
 
   networking.extraHosts = lib.concatStrings
     (lib.mapAttrsToList
       (name: { ip, ... }: "${ip} ${name}\n")
       assignments.vpn.hosts);
 
-  systemd.network.wait-online.ignoredInterfaces = [ "wg0" ];
+  networking.firewall.allowedUDPPorts = [ 51820 ];
 
   networking.interfaces.wg0.mtu = 1300;
   networking.wireguard.interfaces = {

@@ -14,6 +14,8 @@ in
       (name: { ip, ... }: "${ip} ${name}\n")
       assignments.vpn.hosts);
 
+  systemd.network.wait-online.ignoredInterfaces = [ "wg0" ];
+
   networking.interfaces.wg0.mtu = 1300;
   networking.wireguard.interfaces = {
     wg0 = {
@@ -28,7 +30,6 @@ in
       postShutdown = lib.mkIf is_server ''
         ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.100.0.0/24 -o wg0 -j MASQUERADE
       '';
-
 
       peers =
         if is_server then

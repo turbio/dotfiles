@@ -9,7 +9,7 @@
       balrog = {
         ip = "10.100.0.1";
         pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
-        endpoint = "turb.io";
+        endpoint = "gateway.turb.io";
       };
       gero = {
         ip = "10.100.0.3";
@@ -21,7 +21,7 @@
       };
       itoh = {
         ip = "10.100.0.4";
-        pubkey = "n6kLi/GHTRo8w+TNLcT7YxBxAkIJss1QYfn6VHt5dGI=";
+        pubkey = "nl9gri7OsWGYWj+LbbtUBv8dKxFVOz4wlunm7dUhAgk=";
       };
       malco = {
         ip = "10.100.0.5";

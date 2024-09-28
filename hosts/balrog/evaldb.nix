@@ -34,7 +34,7 @@ let
       inherit src;
       buildPhase = ''
         substitute cmd/gateway/main.go cmd/gateway/main.go \
-          --replace '":"' '"127.0.0.1:"'
+          --replace-fail '":"' '"127.0.0.1:"'
         rm -rf vendor
       '';
       installPhase = ''
@@ -43,9 +43,10 @@ let
       '';
     };
 
-    vendorSha256 = "sha256-/jwrbJfDqo95JPrf7OzVIOavN0yOOJkWqAAGyMDyLvU=";
-    runVend = true;
-    doCheck = false;
+    #vendorHash = "sha256-/jwrbJfDqo95JPrf7OzVIOavN0yOOJkWqAAGyMDyLvU=";
+    vendorHash = "";
+    #runVend = true;
+    #doCheck = false;
   };
   dbroot = "/evaldb";
   dbstore = "${dbroot}/store";

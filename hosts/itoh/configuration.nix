@@ -7,8 +7,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.interfaces.enp0s31f6.useDHCP = true;
-  networking.firewall.enable = false;
+  networking.interfaces.enp23s0.useDHCP = true;
+  networking.firewall.enable = true;
+
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   swapDevices = [
     {

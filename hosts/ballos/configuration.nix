@@ -1,12 +1,52 @@
 { config, pkgs, lib, ... }: {
+  imports = [
+    ../../services/turbio-index.nix
+    ../../services/flippyflops.nix
+  ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.firewall.enable = true;
+  networking.firewall.enable = false;
   networking.firewall.allowedTCPPorts = [ 80 443 ];
 
-  #security.acme.defaults.email = "letsencrypt@turb.io";
-  #security.acme.acceptTerms = true;
+  networking.nftables = {
+    enable = true;
+    ruleset = ''
+    '';
+  };
+
+  security.acme.defaults.email = "acme@turb.io";
+  security.acme.acceptTerms = true;
+
+  services.nfs.server = {
+    enable = true;
+    exports = ''
+      /mnt/sync 192.168.86.0/24(rw)
+    '';
+  };
+
+  # vpn internal traffic to us
+  services.nginx.virtualHosts."ballos" = {
+    locations."/" = {
+      proxyPass = "http://${config.services.syncthing.guiAddress}";
+      extraConfig = ''
+        allow 10.100.0.0/25;
+        deny all;
+      '';
+    };
+  };
+
+  services.syncthing = {
+    enable = true;
+    openDefaultPorts = true;
+    configDir = "/mnt/sync/config";
+    dataDir = "/mnt/sync";
+    settings.folders = {
+      "photos" = { enable = true; path = "/mnt/sync/photos"; };
+      "code" = { enable = true; path = "/mnt/sync/code"; };
+    };
+  };
 
   services.nginx.appendHttpConfig = ''
     error_log stderr;
@@ -14,7 +54,7 @@
   '';
   services.nginx.enable = true;
 
-  users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafan's socket
+  users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafana's socket
   services.grafana = {
     enable = true;
 
@@ -26,7 +66,7 @@
     };
   };
 
-  virtualisation.oci-containers = {
+  virtualisation.oci-containers = lib.mkIf false {
     backend = "podman";
     containers.homeassistant = {
       volumes = [ "home-assistant:/config" ];
@@ -38,14 +78,14 @@
     };
   };
 
-  services.matter-server = {
-    #enable = true;
+  services.matter-server = lib.mkIf false {
+    enable = true;
   };
 
   services.nginx.virtualHosts = {
     "graf.turb.io" = {
-      #addSSL = true;
-      #enableACME = true;
+      forceSSL = true;
+      enableACME = true;
 
       locations."/" = {
         proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
@@ -236,21 +276,21 @@
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.apcupsd.port}" ]; }
         ];
       }
-      {
-        job_name = "idrac";
-        scrape_timeout = "1m";
-        scrape_interval = "2m";
-        static_configs = [{
-          # F
-          targets = [ "idrac-6970JH2.local" ];
-          #targets = [ "192.168.3.203" ];
-        }];
-        relabel_configs = [
-          { source_labels = [ "__address__" ]; target_label = "__param_target"; }
-          { source_labels = [ "__param_target" ]; target_label = "instance"; }
-          { target_label = "__address__"; replacement = "127.0.0.1:${toString config.services.prometheus.exporters.idrac.port}"; }
-        ];
-      }
+      # {
+      #   job_name = "idrac";
+      #   scrape_timeout = "1m";
+      #   scrape_interval = "2m";
+      #   static_configs = [{
+      #     # F
+      #     targets = [ "idrac-6970JH2.local" ];
+      #     #targets = [ "192.168.3.203" ];
+      #   }];
+      #   relabel_configs = [
+      #     { source_labels = [ "__address__" ]; target_label = "__param_target"; }
+      #     { source_labels = [ "__param_target" ]; target_label = "instance"; }
+      #     { target_label = "__address__"; replacement = "127.0.0.1:${toString config.services.prometheus.exporters.idrac.port}"; }
+      #   ];
+      # }
       {
         job_name = "smartctl";
         static_configs = [
@@ -305,29 +345,29 @@
       apcupsd = {
         enable = true;
       };
-      idrac = {
-        enable = true;
-        configuration = {
-          timeout = 60;
-          listenAddress = "127.0.0.1";
-          port = 9348;
-          hosts = {
-            "idrac-6970JH2.local" = {
-              username = "root";
-              password = "calvin";
-            };
-          };
-          metrics = {
-            system = true;
-            sensors = true;
-            power = true;
-            storage = true;
-            memory = true;
-            network = true;
-            sel = true;
-          };
-        };
-      };
+      # idrac = {
+      #   enable = true;
+      #   configuration = {
+      #     timeout = 60;
+      #     listenAddress = "127.0.0.1";
+      #     port = 9348;
+      #     hosts = {
+      #       "idrac-6970JH2.local" = {
+      #         username = "root";
+      #         password = "calvin";
+      #       };
+      #     };
+      #     metrics = {
+      #       system = true;
+      #       sensors = true;
+      #       power = true;
+      #       storage = true;
+      #       memory = true;
+      #       network = true;
+      #       sel = true;
+      #     };
+      #   };
+      # };
     };
   };
 

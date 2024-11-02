@@ -11,7 +11,7 @@ let
 in
 {
   services.nginx.virtualHosts."dots.turb.io" = {
-    addSSL = true;
+    forceSSL = true;
     enableACME = true;
 
     locations."/" = {

@@ -21,28 +21,21 @@
   boot.resumeDevice = "/swapfile";
   boot.kernelParams = [ "resume_offset=63858427" ];
 
-  fileSystems."/nfs/exports/photography" = {
-    device = "/run/media/turbio/c3f0e164-fbc8-42c0-8127-ee16943f6ae3/photography/";
-    options = [ "bind" ];
+  fileSystems."/sync" = {
+    device = "192.168.86.113:/mnt/sync";
+    fsType = "nfs";
+    options = [
+      "rw"
+      "noatime"
+    ];
   };
-  services.nfs.server = {
-    enable = true;
-  };
-  services.nfs.server.exports = ''
-    /nfs/exports 192.168.86.0/24(rw,fsid=0,no_subtree_check,crossmnt) 10.100.0.0/24(rw,fsid=0,no_subtree_check,crossmnt)
-    /nfs/exports/photography 192.168.86.0/24(rw,nohide,insecure,no_subtree_check,crossmnt) 10.100.0.0/24(rw,nohide,insecure,no_subtree_check,crossmnt)
-  '';
 
-  /*
-  services.home-assistant = {
+  services.syncthing = {
     enable = true;
-    config = {
-      http.server_port = 8123;
-      http.server_host = ["0.0.0.0"];
-      homeassistant.unit_system = "imperial";
-      homeassistant.temperature_unit = "F";
-      homeassistant.name = "Potomac";
-    };
+    user = "turbio";
+    group = "users";
+    configDir = "/home/turbio/.config/syncthing";
+    dataDir = "/home/turbio";
+    settings.folders."code" = { enable = true; path = "~/code"; };
   };
-  */
 }

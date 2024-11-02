@@ -405,7 +405,7 @@ in
       };
     };
 
-    programs.firefox = {
+    programs.firefox = lib.mkIf config.isDesktop {
       enable = true;
       package = pkgs.firefox-wayland;
       profiles."lbgu1zmc.default" = {

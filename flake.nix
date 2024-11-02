@@ -50,6 +50,7 @@
         ./configuration.nix
         ./desktop.nix
         ./home.nix
+        ./syncthing.nix
         (./hosts + "/${hostname}" + /configuration.nix)
         (./hosts + "/${hostname}" + /hardware-configuration.nix)
         ./cachix.nix

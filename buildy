@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+host="$1"
+
+NIX_SSHOPTS="-i ~/.ssh/id_ed25519" nixos-rebuild switch \
+	--use-remote-sudo \
+	--flake ".#${host}" \
+	--target-host "turbio@${host}" \
+	#--builders 'ssh://turbio@ballos.local?ssh-key=/home/turbio/.ssh/id_ed25519 x86_64-linux /home/turbio/.ssh/id_ed25519 60 - -' \
+	#--no-build-nix \
+	#--max-jobs 0 \
+	#--use-substitutes
+
+#echo "Usage: $0 <ballos|balrog>"
+#exit 1

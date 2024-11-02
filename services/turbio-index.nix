@@ -1,19 +1,16 @@
 { config, pkgs, lib, ... }:
 let
+  hume = {
+    yume = "aaa";
+  };
+
   root = (pkgs.writeTextDir "index.txt" ''
-    Hey!
+    hey!
     ====
 
-    I'm Turbio 🐧
-    I'm very offline
-    This is really the extent of my web presence
+    i'm mason / turbio
 
-    If ya wanna say hi:
-      - Email me: anything @ this domain
-      - Hmu on discord: turbio eight three six three
-      - Or better yet: dots.turb.io
-
-    ヾ(*ФωФ)βyё βyё☆彡
+    🐧
   '');
 
   vhost404 = (pkgs.writeTextDir "404.txt" ''

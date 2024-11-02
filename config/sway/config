@@ -103,16 +103,20 @@ bindsym $mod+slash layout toggle split
 bindsym $mod+f fullscreen
 bindsym $mod+s floating enable
 bindsym $mod+t floating disable
+
 bindsym $mod+p focus parent
+bindsym $mod+n focus next
+bindsym $mod+u focus floating
+bindsym $mod+d focus tiling
 
 bindsym $mod+comma exec swaymsg rename workspace to $(swaymsg -t get_workspaces | jq '.[] | select(.focused == true).num | if . > 0 then . else 1 end') $(wofi --dmenu)
 #bindsym $mod+u exec swaymsg workspace $(swaymsg -t get_workspaces | jq '.[] | select(.focused == true).num | if . > 0 then . else 1 end')
 
-bindsym $mod+y focus output left
-bindsym $mod+Shift+y move container to output left
-
-bindsym $mod+u focus output right
-bindsym $mod+Shift+u move container to output right
+#bindsym $mod+y focus output left
+#bindsym $mod+Shift+y move container to output left
+#
+#bindsym $mod+u focus output right
+#bindsym $mod+Shift+u move container to output right
 
 # media keys
 bindsym XF86AudioPlay exec playerctl play-pause && mpc toggle
@@ -130,20 +134,27 @@ bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle && player
 bindsym XF86AudioMicMute exec pactl set-source-mute 1 toggle
 
 # Scratchpad:
-bindsym $mod+Shift+minus move scratchpad
-bindsym $mod+minus scratchpad show
+#bindsym $mod+Shift+minus move scratchpad
+#bindsym $mod+minus scratchpad show
 
-client.focused #7f7f7f #7f7f7f #ffffff
-client.unfocused #303030 #303030 #ffffff
-default_border none
+client.focused #ff00ff #ff00ff #ff00ff #ff0000 #ffffff88
 
-titlebar_border_thickness 0
+client.focused_inactive #ff00ff #ff00ff #ff00ff #ff0000 #00000000
+client.unfocused #ff00ff #ff00ff #ff00ff #ff0000 #00000000
+
+#client.focused #7f7f7f #7f7f7f #ffffff
+#client.unfocused #303030 #303030 #ffffff
+#default_border none
+
+#titlebar_border_thickness 0
 #titlebar_padding 1 
 
 font Terminus (ttf) 9
 
-gaps inner 12
-default_border pixel 2
+gaps inner 10
+default_border pixel 4
+
+#default_border none
 
 for_window [title=".*"] floating enable
 

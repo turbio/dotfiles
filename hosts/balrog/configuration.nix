@@ -17,42 +17,25 @@
 
   networking.nftables = {
     enable = true;
-    #ruleset = ''
-    #  table ip vpn {
-    #      chain prerouting {
-    #          type nat hook prerouting priority -100;
+    ruleset = ''
+      table ip vpn {
+        #chain im_already_tracer {
+        #  type filter hook prerouting priority raw - 1; policy accept;
+        #  tcp dport { 80, 443 } meta nftrace set 1
+        #}
 
-    #          tcp dport { 80, 443 } meta nftrace set 1
-    #          tcp dport { 80, 443 } dnat to 10.100.0.10
-    #      }
+        chain prerouting {
+            type nat hook prerouting priority -100;
+            iifname "eth0" tcp dport { 80, 443 } dnat to 10.100.0.10;
+        }
 
-    #      chain postrouting {
-    #        type nat hook postrouting priority 100;
-    #        ip saddr 10.100.0.10 meta nftrace set 1;
-    #        ip saddr 10.100.0.10 snat to 10.128.0.2;
-
-    #        #ip protocol tcp snat ip to 10.12.0.1-10.12.255.255:3000-4000
-    #      }
-    #  }
-    #'';
-  };
-
-  /*
-  networking.nat = {
-    enable = true;
-    externalInterface = "eth0";
-    externalIP = "35.208.90.40";
-    internalInterfaces = [ "wg0" ];
-    internalIPs = [ "10.100.0.0/24" ];
-    forwardPorts = [
-      {
-        destination = "10.100.0.10:80";
-        proto = "tcp";
-        sourcePort = 80;
+        chain postrouting {
+          type nat hook postrouting priority 100;
+          iifname "eth0" tcp dport { 80, 443 } snat to 10.100.0.128;
+        }
       }
-    ];
+    '';
   };
-  */
 
   security.acme.defaults.email = "letsencrypt@turb.io";
   security.acme.acceptTerms = true;

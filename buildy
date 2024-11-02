@@ -9,6 +9,3 @@ NIX_SSHOPTS="-i ~/.ssh/id_ed25519" nixos-rebuild switch \
 	#--no-build-nix \
 	#--max-jobs 0 \
 	#--use-substitutes
-
-#echo "Usage: $0 <ballos|balrog>"
-#exit 1

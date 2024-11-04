@@ -31,6 +31,10 @@
         ip = "10.100.0.6";
         pubkey = "Y9TKTr/fVYVxogi9vYYKo/xFjUk2Z5XFRuEdkSDN7yI=";
       };
+      star = {
+        ip = "10.100.0.5";
+        pubkey = "lfUVvROJvEyOHlzBxWsEpp7rWvY0Pt9J7cTKsPra92w=";
+      };
     };
 
     subnet = "10.100.0.0/24";

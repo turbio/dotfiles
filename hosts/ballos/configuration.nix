@@ -328,6 +328,7 @@
       };
       ipmi = {
         enable = true;
+        group = "ipmi-exporter";
         configFile = pkgs.writeText "ipmi-exporter-config" ''
           modules:
             default:
@@ -375,14 +376,14 @@
     PrivateDevices = false;
   };
 
+  users.groups.ipmi-exporter = {};
   services.udev.extraRules = ''
     KERNEL=="ipmi*", MODE="660", GROUP="${config.services.prometheus.exporters.ipmi.group}"
   '';
 
   fileSystems."/mnt" = {
     device = "/dev/group/five";
-    fsType = "ext4";
-    options = [ "nofail" "user" ];
+    options = [ "nofail" ];
   };
 
   #boot.loader.systemd-boot.enable = true;

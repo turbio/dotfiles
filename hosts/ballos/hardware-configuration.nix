@@ -4,8 +4,19 @@
   boot.loader.grub.enable = false;
 
   boot.initrd.availableKernelModules = [ "ahci" "ehci_pci" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" "dm-raid" "dm-cache" "raid5" ];
+  boot.initrd.kernelModules = [
+    "dm-snapshot"
+    "dm-raid"
+    "dm-cache"
+    "raid5"
+    "dm-cache-default"
+    "kvm-intel"
+
+    # is my sas controller fucked??? takes mintues to init but it's easier than
+    # waiting in userspace
+    "mpt3sas"
+  ];
+  boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
 
   fileSystems = {

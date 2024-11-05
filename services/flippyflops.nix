@@ -3,10 +3,11 @@ let
   flippyflops = rec {
     port = 3001;
     host = "127.0.0.1";
+    tz = "America/Chicago";
     bin = "${
       (import (repos.flippyflops + "/dots.turb.io")) { inherit pkgs; }
     }/bin/flippyflops";
-    wrapped = pkgs.writeShellScript "wrapped-flippys" "PORT=${toString port} HOST=${host} ${bin}";
+    wrapped = pkgs.writeShellScript "wrapped-flippys" "PORT=${toString port} HOST=${host} TZ=${tz} ${bin}";
   };
 in
 {

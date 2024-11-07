@@ -26,6 +26,21 @@
     '';
   };
 
+  services.nginx = {
+    enable = true;
+    statusPage = true; # for prom metrics
+    enableReload = true;
+    appendHttpConfig = ''
+      error_log stderr;
+      log_format vhosts '$host $remote_addr - $remote_user [$time_local] '
+                        '"$request" $status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" '
+                        'rt=$request_time ';
+      access_log syslog:server=unix:/dev/log vhosts;
+      access_log /var/log/nginx/access.log vhosts;
+    '';
+  };
+
   # vpn internal traffic to us
   services.nginx.virtualHosts."ballos" = {
     locations."/" = {
@@ -47,12 +62,6 @@
       "code" = { enable = true; path = "/mnt/sync/code"; };
     };
   };
-
-  services.nginx.appendHttpConfig = ''
-    error_log stderr;
-    access_log syslog:server=unix:/dev/log combined;
-  '';
-  services.nginx.enable = true;
 
   users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafana's socket
   services.grafana = {
@@ -199,8 +208,6 @@
     enable = true;
   };
 
-  services.nginx.statusPage = true;
-
   services.prometheus = {
     enable = true;
     port = 9090;
@@ -269,9 +276,68 @@
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.nginx.port}" ]; }
         ];
       }
+      {
+        job_name = "nginxlog";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.nginxlog.port}" ]; }
+        ];
+      }
+      {
+        job_name = "ping";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.ping.port}" ]; }
+        ];
+      }
     ];
 
     exporters = {
+      ping = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+        settings = {
+          targets = [
+            "8.8.8.8"
+            "1.1.1.1"
+            "10.100.0.1"
+            "turb.io"
+            "udm-se.local"
+          ];
+        };
+      };
+      nginxlog = {
+        enable = true;
+        group = "nginx";
+        settings = {
+          namespaces = [
+            {
+              name = "local";
+              format = ''$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" rt=$request_time'';
+              source = {
+                files = [ "/var/log/nginx/access.log" ];
+              };
+              relabel_configs = [
+                {
+                  target_label = "host";
+                  from = "host";
+                }
+              ];
+              histogram_buckets = [
+                0.005
+                0.01
+                0.025
+                0.05
+                0.1
+                0.25
+                0.5
+                1
+                2.5
+                5
+                10
+              ];
+            }
+          ];
+        };
+      };
       nginx = {
         enable = true;
       };

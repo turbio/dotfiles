@@ -57,7 +57,7 @@
         ./vpn.nix
         nur.nixosModules.nur
         # ./evergreen.nix maybe later
-        (home-manager.nixosModules.home-manager)
+        home-manager.nixosModules.home-manager
       ] ++ modules;
 
       specialArgs = {
@@ -97,7 +97,6 @@
       };
     };
 
-    mapEachHost = fn: builtins.listToAttrs (map (c: { name = c; value = fn c; }) (builtins.attrNames (builtins.readDir ./hosts)));
     pxeExecScript = system: nixpkgs.legacyPackages.x86_64-linux.writers.writeBash "pixiecore" ''
       exec ${nixpkgs.legacyPackages.x86_64-linux.pixiecore}/bin/pixiecore \
         boot ${system.config.system.build.kernel}/bzImage ${system.config.system.build.netbootRamdisk}/initrd \
@@ -150,11 +149,15 @@
 
       })
     ];
-    pxeSystemScript = hostname: (pxeExecScript (mksystem pxeModules hostname));
+
+    mapEachHost = fn: builtins.readDir ./hosts
+      |> builtins.attrNames
+      |> map (c: { name = c; value = fn c; })
+      |> builtins.listToAttrs;
   in
   rec {
-    nixosConfigurations = mapEachHost (mksystem []);
-    pxeScript = mapEachHost pxeSystemScript;
+    nixosConfigurations = mapEachHost <| mksystem [];
+    pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 
     image.ballos = (mksystem imageModules "ballos").config.system.build.image;
 

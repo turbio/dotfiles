@@ -7,10 +7,10 @@ let
 in
 {
   boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkIf is_server 1;
-  networking.extraHosts = lib.concatStrings
-    (lib.mapAttrsToList
-      (name: { ip, ... }: "${ip} ${name}\n")
-      assignments.vpn.hosts);
+  networking.extraHosts =
+    assignments.vpn.hosts
+    |> lib.mapAttrsToList (name: { ip, ... }: "${ip} ${name}\n")
+    |> lib.concatStrings;
 
   # needed???????
   networking.firewall.allowedUDPPorts = lib.mkIf is_server [ 51820 ];
@@ -32,22 +32,25 @@ in
 
       peers =
         if is_server then
-          (map
+          removeAttrs assignments.vpn.hosts [ hostname ]
+          |> attrValues
+          |> map
             ({ ip, pubkey, endpoint ? null }: {
               publicKey = pubkey;
               allowedIPs = [ "${ip}/32" ];
               endpoint = if endpoint == null then null else "${endpoint}:51820";
             })
-            (attrValues (removeAttrs assignments.vpn.hosts [ hostname ])))
         else
-          (map
+          removeAttrs assignments.vpn.hosts [ hostname ]
+          |> attrValues
+          |> filter (hasAttr "endpoint")
+          |> map
             ({ ip, pubkey, endpoint }: {
               publicKey = pubkey;
               allowedIPs = [ assignments.vpn.subnet ];
               endpoint = "${endpoint}:51820";
               persistentKeepalive = 25;
-            })
-            (filter (hasAttr "endpoint") (attrValues (removeAttrs assignments.vpn.hosts [ hostname ]))));
+            });
     };
   };
 }

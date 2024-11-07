@@ -103,7 +103,7 @@ in
   nix = {
     package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes
+      experimental-features = nix-command flakes pipe-operators
     '';
   };
 

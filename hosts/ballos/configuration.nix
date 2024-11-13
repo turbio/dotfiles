@@ -2,6 +2,7 @@
   imports = [
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
+    ./ipmi.nix
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -153,12 +154,6 @@
         };
     })
 
-    (final: prev: {
-      freeipmi = prev.freeipmi.overrideAttrs (finalAttrs: prevAttrs: {
-        configureFlags = prevAttrs.configureFlags ++ [ "ac_dont_check_for_root=yes" ];
-      });
-    })
-
     (final: { buildGoModule, fetchFromGitHub, ... }: {
       prometheus-comed-exporter = buildGoModule {
         pname = "comed_exporter";
@@ -220,7 +215,7 @@
     retentionTime = "1y";
 
     globalConfig = {
-      scrape_interval = "10s";
+      scrape_interval = "1s";
     };
 
     scrapeConfigs = [
@@ -249,12 +244,6 @@
         job_name = "lvm";
         static_configs = [
           { targets = [ "127.0.0.1:9012" ]; }
-        ];
-      }
-      {
-        job_name = "ipmi";
-        static_configs = [
-          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.ipmi.port}" ]; }
         ];
       }
       {
@@ -363,17 +352,6 @@
                   millis_utc: '{ .millisUTC }'
         '';
       };
-      ipmi = {
-        enable = true;
-        group = "ipmi-exporter";
-        configFile = pkgs.writeText "ipmi-exporter-config" ''
-          modules:
-            default:
-              collectors:
-                - ipmi
-                - dcmi
-        '';
-      };
       node = {
         enable = true;
         enabledCollectors = [ "systemd" ];
@@ -385,15 +363,6 @@
       };
     };
   };
-
-  systemd.services.prometheus-ipmi-exporter.serviceConfig = {
-    PrivateDevices = false;
-  };
-
-  users.groups.ipmi-exporter = {};
-  services.udev.extraRules = ''
-    KERNEL=="ipmi*", MODE="660", GROUP="${config.services.prometheus.exporters.ipmi.group}"
-  '';
 
   fileSystems."/mnt" = {
     device = "/dev/group/five";

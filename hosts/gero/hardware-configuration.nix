@@ -30,7 +30,15 @@
     };
 
   swapDevices =
-    [{ device = "/dev/disk/by-uuid/9554db1f-6a7f-4154-9bb6-ab220241a705"; }];
+    [{ device = "/dev/disk/by-uuid/9c4220c0-e8a3-4f5c-8f3e-1122b7d62623"; }];
+
+  boot.kernelParams = [
+    "rtc_cmos.use_acpi_alarm=1"
+    "acpi.ec_no_wakeup=1"
+  ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  services.power-profiles-daemon = {
+    enable = true;
+  };
 }

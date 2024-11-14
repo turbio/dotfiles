@@ -5,6 +5,18 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.timeout = 0;
+
+  boot.plymouth.enable = true;
+  boot.plymouth.themePackages = [ pkgs.catppuccin-plymouth ];
+  boot.plymouth.theme = "catppuccin-macchiato";
+  boot.plymouth.font = "${pkgs.terminus_font}/share/fonts/terminus/ter-u18n.otb";
+  boot.plymouth.extraConfig = ''
+    DeviceScale=1
+  '';
+  boot.initrd.verbose = false;
+  boot.initrd.systemd.enable = true;
+  boot.consoleLogLevel = 0;
 
   networking.interfaces.wlp1s0.useDHCP = true;
 
@@ -13,14 +25,14 @@
 
   programs.light.enable = true;
 
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.kernelModules = [ ];
 
   services.logind = {
-    lidSwitch = "suspend";
+    lidSwitch = "hibernate";
     extraConfig = ''
-      HandlePowerKey=ignore
-      HandleSuspendKey=ignore
-      HandleHibernateKey=ignore
+      HandlePowerKey=hibernate
+      HandleSuspendKey=hibernate
+      HandleHibernateKey=hibernate
     '';
   };
 

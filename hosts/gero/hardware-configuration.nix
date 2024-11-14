@@ -17,9 +17,12 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  boot.initrd.luks.devices.cryptroot.device =
+    "/dev/disk/by-uuid/83d4da9b-3225-40ff-952c-df0d923afbb5";
+
   fileSystems."/" =
     {
-      device = "/dev/disk/by-uuid/1ad0b8db-5c9b-46c1-8dad-17adec51b4ba";
+      device = "/dev/disk/by-uuid/00baf949-644f-428e-a30d-494ef0421864";
       fsType = "btrfs";
     };
 
@@ -29,12 +32,15 @@
       fsType = "vfat";
     };
 
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/9c4220c0-e8a3-4f5c-8f3e-1122b7d62623"; }];
+  swapDevices = [
+    { device = "/dev/disk/by-uuid/fcdae7e9-775c-4acc-9915-ec9ece203474"; }
+  ];
 
   boot.kernelParams = [
-    "rtc_cmos.use_acpi_alarm=1"
-    "acpi.ec_no_wakeup=1"
+    "quiet" "udev.log_level=0" 
+    "plymouth.use-simpledrm"
+    #"rtc_cmos.use_acpi_alarm=1"
+    #"acpi.ec_no_wakeup=1"
   ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";

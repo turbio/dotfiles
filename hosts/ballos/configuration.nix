@@ -20,11 +20,6 @@
   security.acme.defaults.email = "acme@turb.io";
   security.acme.acceptTerms = true;
 
-  #services.immich = {
-  #  enable = true;
-  #  port = 8080;
-  #};
-
   services.nfs.server = {
     enable = true;
     exports = ''

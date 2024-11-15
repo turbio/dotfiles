@@ -19,10 +19,17 @@ let
 
     uh oh
   '');
+
+  turbio404 = (pkgs.writeTextDir "404.txt" ''
+    404!
+    ====
+
+    but like what were you expecting?
+  '');
 in
 {
   services.nginx.virtualHosts."turb.io" = {
-    addSSL = true;
+    forceSSL = true;
     enableACME = true;
 
     root = "${root}";
@@ -31,7 +38,13 @@ in
       index = "index.txt";
     };
 
+    locations."=/404.txt" = {
+      root = "${turbio404}";
+      index = "404.txt";
+    };
+
     extraConfig = ''
+      error_page 404 /404.txt;
       charset utf-8;
     '';
   };
@@ -41,13 +54,19 @@ in
     enableACME = true;
 
     root = "${vhost404}";
+
     locations."/" = {
-      root = "${vhost404}";
-      index = "404.txt";
+      return = "404";
+    };
+
+    locations."=/404.txt" = {
+      extraConfig = ''
+        internal;
+      '';
     };
 
     extraConfig = ''
-      error_page 404 /;
+      error_page 404 /404.txt;
       charset utf-8;
     '';
   };

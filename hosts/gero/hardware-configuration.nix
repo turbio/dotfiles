@@ -39,12 +39,39 @@
   boot.kernelParams = [
     "quiet" "udev.log_level=0" 
     "plymouth.use-simpledrm"
-    #"rtc_cmos.use_acpi_alarm=1"
+    #''acpi_osi="!Windows 2020"''
+    #"nvme.noacpi=1"
+    "rtc_cmos.use_acpi_alarm=1"
     #"acpi.ec_no_wakeup=1"
   ];
 
+  services.logind = {
+    lidSwitch = "hibernate";
+    extraConfig = ''
+      HandlePowerKey=hibernate
+    '';
+    #lidSwitch = "suspend-then-hibernate";
+    #extraConfig = ''
+    #  HandlePowerKey=suspend-then-hibernate
+    #  IdleAction=suspend-then-hibernate
+    #  IdleActionSec=5min
+    #'';
+  };
+  #systemd.sleep.extraConfig = "HibernateDelaySec=2h";
+
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
-  services.power-profiles-daemon = {
+  #services.power-profiles-daemon = {
+  #  enable = true;
+  #};
+  services.tlp = {
     enable = true;
+    settings = {
+      PCIE_ASPM_ON_BAT = "powersupersave";
+    };
+  };
+  services.upower = {
+    enable = true;
+    criticalPowerAction = "Hibernate";
+    noPollBatteries = true;
   };
 }

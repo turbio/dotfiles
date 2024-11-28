@@ -41,4 +41,10 @@
       "code" = { enable = true; path = "~/code"; };
     };
   };
+
+  boot.kernelParams = [ "modprobe.blacklist=dvb_usb_rtl28xxu" ];
+  services.udev.packages = [ pkgs.rtl-sdr ];
+  hardware.rtl-sdr.enable = true;
+  users.users.turbio.extraGroups = [ "plugdev" ];
+  environment.systemPackages = with pkgs; [ rtl-sdr ];
 }

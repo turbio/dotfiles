@@ -15,7 +15,7 @@
   users.groups.ipmi-exporter = {};
   users.users.ipmi-exporter = { isSystemUser = true; group = "ipmi-exporter"; };
   services.udev.extraRules = ''
-    KERNEL=="ipmi*", MODE="660", GROUP="impi-exporter"
+    KERNEL=="ipmi*", MODE="660", GROUP="ipmi-exporter"
   '';
 
   services.prometheus = {

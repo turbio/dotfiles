@@ -28,6 +28,8 @@ let
   '');
 in
 {
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
+
   services.nginx.virtualHosts."turb.io" = {
     forceSSL = true;
     enableACME = true;

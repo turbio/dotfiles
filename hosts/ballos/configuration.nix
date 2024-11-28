@@ -8,8 +8,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.firewall.enable = false;
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.enable = true;
 
   networking.nftables = {
     enable = true;
@@ -20,6 +19,8 @@
   security.acme.defaults.email = "acme@turb.io";
   security.acme.acceptTerms = true;
 
+  networking.firewall.allowedUDPPorts = [ 111 2049 ];
+  networking.firewall.allowedTCPPorts = [ 111 2049 ];
   services.nfs.server = {
     enable = true;
     exports = ''
@@ -183,6 +184,15 @@
     })
   ];
 
+  systemd.services.fan_speed = {
+    enable = true;
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.ipmitool pkgs.bc pkgs.bash ];
+    serviceConfig = {
+      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh}";
+    };
+  };
+
   systemd.services.prometheus-comed-exporter = {
     enable = true;
     wantedBy = [ "multi-user.target" ];
@@ -277,9 +287,16 @@
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.ping.port}" ]; }
         ];
       }
+      {
+        job_name = "wireguard";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.wireguard.port}" ]; }
+        ];
+      }
     ];
 
     exporters = {
+      wireguard = { enable = true; };
       ping = {
         enable = true;
         listenAddress = "127.0.0.1";

@@ -15,6 +15,9 @@ in
   # needed???????
   networking.firewall.allowedUDPPorts = lib.mkIf is_server [ 51820 ];
 
+  systemd.network.wait-online.ignoredInterfaces = [ "wg0" ];
+  systemd.network.wait-online.anyInterface = true;
+
   networking.interfaces.wg0.mtu = 1300;
   networking.wireguard.interfaces = {
     wg0 = {
@@ -50,6 +53,7 @@ in
               allowedIPs = [ assignments.vpn.subnet ];
               endpoint = "${endpoint}:51820";
               persistentKeepalive = 25;
+              dynamicEndpointRefreshSeconds = 30;
             });
     };
   };

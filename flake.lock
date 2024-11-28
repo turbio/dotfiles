@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "dingllm-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1729728585,
+        "narHash": "sha256-mTUpNbhKeH0AbYJbU7rL8H0yAh/V7I1H3IHdVCBKt54=",
+        "owner": "yacineMTB",
+        "repo": "dingllm.nvim",
+        "rev": "ecfe8c6b23b18947849c9cd109ad9bd8d1804a0b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yacineMTB",
+        "repo": "dingllm.nvim",
+        "type": "github"
+      }
+    },
     "evaldb": {
       "flake": false,
       "locked": {
@@ -35,11 +51,11 @@
     "github-copilot-vim": {
       "flake": false,
       "locked": {
-        "lastModified": 1724958007,
-        "narHash": "sha256-LDUVqwTEldeuxyoP4FnjtGdMNcnI3sdDIDdEeNXXETg=",
+        "lastModified": 1728401940,
+        "narHash": "sha256-9264TNocFvtC2znvgfjpwLWBTGfg1U5Fr0dZkkyCYpQ=",
         "owner": "github",
         "repo": "copilot.vim",
-        "rev": "782461159655b259cff10ecff05efa761e3d4764",
+        "rev": "87038123804796ca7af20d1b71c3428d858a9124",
         "type": "github"
       },
       "original": {
@@ -118,6 +134,38 @@
         "ref": "nixfix",
         "repo": "live_wallpaper",
         "type": "github"
+      }
+    },
+    "llm-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721817357,
+        "narHash": "sha256-mFi22n8vkVghjJXo5twoAFFqCI+To2vW0Ab/7cBzPTY=",
+        "owner": "melbaldove",
+        "repo": "llm.nvim",
+        "rev": "0cc5a0fdf2e6b613a2ab62c5b3d5b2c9eee5b07e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "melbaldove",
+        "repo": "llm.nvim",
+        "type": "github"
+      }
+    },
+    "lsp-lines-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1716108775,
+        "narHash": "sha256-QsvmPOer7JgO7Y+N/iaNJD7Kmy69gnlV4CeyaQesNvA=",
+        "ref": "refs/heads/main",
+        "rev": "7d9e2748b61bff6ebba6e30adbc7173ccf21c055",
+        "revCount": 52,
+        "type": "git",
+        "url": "https://git.sr.ht/~whynothugo/lsp_lines.nvim"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.sr.ht/~whynothugo/lsp_lines.nvim"
       }
     },
     "muble-vim": {
@@ -244,11 +292,14 @@
     },
     "root": {
       "inputs": {
+        "dingllm-nvim": "dingllm-nvim",
         "evaldb": "evaldb",
         "flippyflops": "flippyflops",
         "github-copilot-vim": "github-copilot-vim",
         "home-manager": "home-manager",
         "livewallpaper": "livewallpaper",
+        "llm-nvim": "llm-nvim",
+        "lsp-lines-nvim": "lsp-lines-nvim",
         "muble-vim": "muble-vim",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",

@@ -15,6 +15,9 @@
     github-copilot-vim = { flake = false; url = "github:github/copilot.vim"; };
     openscad-vim = { flake = false; url = "github:sirtaj/vim-openscad"; };
     muble-vim = { flake = false; url = "github:turbio/muble.vim"; };
+    lsp-lines-nvim = { flake = false; url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim"; };
+    dingllm-nvim = { flake = false; url = "github:yacineMTB/dingllm.nvim"; };
+    llm-nvim = { flake = false; url = "github:melbaldove/llm.nvim"; };
 
     zsh-syntax-highlighting = { flake = false; url = "github:zsh-users/zsh-syntax-highlighting"; };
     zsh-history-substring-search = { flake = false; url = "github:zsh-users/zsh-history-substring-search"; };

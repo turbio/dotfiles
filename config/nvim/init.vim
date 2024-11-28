@@ -51,15 +51,19 @@ vim.opt.ignorecase = true
 vim.opt.gdefault = true
 
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
---vim.keymap.set('n', 'gf', vim.lsp.buf.format)
-vim.keymap.set('n', 'gh', ':Lspsaga hover_doc<cr>')
-vim.keymap.set('n', 'gr', ':Lspsaga rename<cr>')
+vim.keymap.set('n', 'gf', vim.lsp.buf.format)
 
-vim.keymap.set('n', 'gn', ':Lspsaga diagnostic_jump_next<cr>')
-vim.keymap.set('n', 'gN', ':Lspsaga diagnostic_jump_prev<cr>')
-vim.keymap.set('n', 'gb', ':Lspsaga show_cursor_diagnostics<cr>')
-vim.keymap.set('n', 'gc', ':Lspsaga code_action<cr>')
-vim.keymap.set('n', 'gJ', ':Lspsaga lsp_finder<cr>')
+vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
+
+--vim.keymap.set('n', 'gr', vim.lsp.buf.rename)
+vim.keymap.set('n', 'gr', require("renamer").rename)
+require('renamer').setup()
+
+vim.keymap.set('n', 'gn', vim.diagnostic.goto_next)
+vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
+
+-- vim.keymap.set('n', 'ga', vim.lsp.buf.code_action)
+vim.keymap.set('n', "ga", require("actions-preview").code_actions)
 
 vim.keymap.set('n', '<C-p>', ':FZF<CR>')
 vim.keymap.set('n', '<C-/>', ':Ag<CR>')
@@ -68,8 +72,69 @@ vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3
 
--- Set up nvim-cmp.
-local cmp = require'cmp'
+require('lsp_signature').setup({})
+
+require('trouble').setup({
+	icons = false,
+})
+
+-- local dingllm = require('dingllm')
+-- vim.keymap.set({ 'n', 'v' }, '<leader>k', groq_replace, { desc = 'llm groq' })
+-- vim.keymap.set({ 'n', 'v' }, '<leader>K', groq_help, { desc = 'llm groq_help' })
+
+require('llm').setup({
+	timeout_ms = 10000,
+	system_prompt = [[
+You are an AI programming assistant integrated into a code editor. Your purpose is to help the user with programming tasks as they write code.
+Key capabilities:
+- Thoroughly analyze the user's code and provide insightful suggestions for improvements related to best practices, performance, readability, and maintainability. Explain your reasoning.
+- Answer coding questions in detail, using examples from the user's own code when relevant. Break down complex topics step- Spot potential bugs and logical errors. Alert the user and suggest fixes.
+- Upon request, add helpful comments explaining complex or unclear code.
+- Suggest relevant documentation, StackOverflow answers, and other resources related to the user's code and questions.
+- Engage in back-and-forth conversations to understand the user's intent and provide the most helpful information.
+- Keep concise and use markdown.
+- When asked to create code, only generate the code. No bugs.
+- Think step by step
+	]],
+	system_prompt_replace = [[
+You should replace the code that you are sent, only following the comments.
+Do not talk at all.
+Only output valid code.
+Do not provide any backticks that surround the code.
+Any comment that is asking you for something should be removed after you satisfy them.
+Other comments should left alone.
+Do not output any decoration or labels on the code.
+Output only exactly what the code should be replaced with.
+Never ever output backticks like this ```.
+NEVER EVER WRAP THE CODE IN BACKTICKS.
+	]],
+	print_prompt = false,
+	services = {
+		openai = {
+			url = "https://api.openai.com/v1/chat/completions",
+			model = "gpt-4o",
+			api_key_name = "OPENAI_API_KEY",
+		},
+		anthropic = {
+			url = "https://api.anthropic.com/v1/messages",
+			model = "claude-3-5-sonnet-20241022",
+			api_key_name = "ANTHROPIC_API_KEY",
+		},
+	},
+})
+
+function bind(f, ...)
+	local arg = {...}
+	return function()
+		f(unpack(arg))
+	end
+end
+
+
+vim.keymap.set({'v'}, "gao", bind(require("llm").prompt, { replace = true, service = "openai" }))
+vim.keymap.set({'v'}, "gap", bind(require("llm").prompt, { replace = true, service = "anthropic" }))
+
+local cmp = require('cmp')
 
 cmp.setup({
 	mapping = cmp.mapping.preset.insert({
@@ -87,7 +152,7 @@ cmp.setup({
 	)
 })
 
-local capabilities = require'cmp_nvim_lsp'.default_capabilities()
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require'lspconfig'.gopls.setup{ capabilities = capabilities }
 require'lspconfig'.rust_analyzer.setup{  capabilities = capabilities  }
@@ -140,6 +205,10 @@ vim.keymap.set({ 'i' }, 'jK', '<ESC>')
 vim.keymap.set({ 'i' }, 'Jk', '<ESC>')
 vim.keymap.set({ 'i' }, 'JK', '<ESC>')
 
+require("lsp_lines").setup()
+vim.diagnostic.config({
+  virtual_text = false,
+})
 
 EOF
 

@@ -8,19 +8,25 @@
     withPython3 = true;
 
     plugins = with pkgs.vimPlugins; [
+      nvim-nio
       vim-nix
       lightline-vim
       vim-jsx-typescript
       typescript-vim
       yats-vim # more typescript?
 
+      plenary-nvim # window managment stuff??
+
       # fancy new neovim powered lsp
-      lspsaga-nvim
       nvim-lspconfig
+      cmp-nvim-lsp
+      actions-preview-nvim
+      renamer-nvim
+      lsp_signature-nvim
+      trouble-nvim
 
       nvim-treesitter # and ast based syntax highlighting
       nvim-cmp
-      cmp-nvim-lsp
 
       vim-gitgutter
       vim-fugitive
@@ -35,7 +41,6 @@
       fzf-vim # for ctrl-p and ctrl-/
       # vim-go # snazzy go support TODO: no arm support???
       popup-nvim # [wip] pop api from vim in neovim
-      plenary-nvim # window managment stuff??
       telescope-nvim # alternative fzf
     ] ++ [
       (pkgs.vimUtils.buildVimPlugin {
@@ -52,6 +57,21 @@
         pname = "copilot";
         version = "1";
         src = repos.github-copilot-vim;
+      })
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "lsp_lines.nvim";
+        version = "1";
+        src = repos.lsp-lines-nvim;
+      })
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "dingllm-nvim";
+        version = "1";
+        src = repos.dingllm-nvim;
+      })
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "llm-nvim";
+        version = "1";
+        src = repos.llm-nvim;
       })
     ];
     extraConfig = (builtins.readFile ./config/nvim/init.vim);

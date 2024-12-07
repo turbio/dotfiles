@@ -15,8 +15,6 @@
     spotify
     mako # notification daemon
     pass
-    yubikey-manager
-    yubikey-agent
 
     lxappearance
     gtk_engines

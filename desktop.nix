@@ -115,7 +115,6 @@ in
     virtualisation.virtualbox.host.enableExtensionPack = true;
     users.extraGroups.vboxusers.members = [ "turbio" ];
 
-    services.yubikey-agent.enable = true;
     services.pcscd.enable = true;
 
     fonts.packages = with pkgs; [

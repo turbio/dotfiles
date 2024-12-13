@@ -52,17 +52,16 @@ vim.opt.gdefault = true
 
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
 vim.keymap.set('n', 'gf', vim.lsp.buf.format)
+vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition)
 
 vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
 
---vim.keymap.set('n', 'gr', vim.lsp.buf.rename)
 vim.keymap.set('n', 'gr', require("renamer").rename)
 require('renamer').setup()
 
 vim.keymap.set('n', 'gn', vim.diagnostic.goto_next)
 vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
 
--- vim.keymap.set('n', 'ga', vim.lsp.buf.code_action)
 vim.keymap.set('n', "ga", require("actions-preview").code_actions)
 
 vim.keymap.set('n', '<C-p>', ':FZF<CR>')
@@ -72,7 +71,24 @@ vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3
 
-require('lsp_signature').setup({})
+--vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 237, fg = "#cccccc", bg = "#3a3a3a" })
+--vim.api.nvim_set_hl(0, 'FloatBorder', { ctermfg = 15, ctermbg = 237, fg = "#cccccc", bg = "#3a3a3a" })
+
+vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 0 })
+vim.api.nvim_set_hl(0, 'FloatBorder', { fg = "#5c5c5c", ctermbg = 0 })
+vim.api.nvim_set_hl(0, 'TelescopeBorder', { link = 'FloatBorder' })
+vim.api.nvim_set_hl(0, 'RenamerBorder', { link = 'FloatBorder' })
+
+require('lsp_signature').setup({
+	handler_opts = {
+		border = "rounded",
+	},
+	hint_prefix = {
+		above = "↙ ",
+		current = "← ",
+		below = "↖ "
+	}
+})
 
 require('trouble').setup({
 	icons = false,
@@ -130,13 +146,36 @@ function bind(f, ...)
 	end
 end
 
+vim.keymap.set('v', "<leader>lm", bind(require("llm").prompt, { replace = true, service = "openai" }))
+vim.keymap.set('n', "<leader>lm", bind(require("llm").prompt, { replace = false, service = "openai" }))
 
-vim.keymap.set({'v'}, "gao", bind(require("llm").prompt, { replace = true, service = "openai" }))
-vim.keymap.set({'v'}, "gap", bind(require("llm").prompt, { replace = true, service = "anthropic" }))
-
+-- fancy completion
+local ELLIPSIS_CHAR = '…'
 local cmp = require('cmp')
-
 cmp.setup({
+	formatting = {
+		format = function(entry, vim_item)
+			if vim_item.menu and #vim_item.menu > 20 then
+				vim_item.menu = vim_item.menu:sub(1, 20) .. ELLIPSIS_CHAR
+			end
+
+			return vim_item
+		end,
+	},
+	window = {
+		completion = {
+			border = "rounded", -- or nil
+			scrollbar = true,
+			winblender = 0,
+			winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+		},
+		documentation = {
+			border = "rounded", -- or nil
+			scrollbar = true,
+			winblender = 0,
+			winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+		},
+	},
 	mapping = cmp.mapping.preset.insert({
 		['<C-b>'] = cmp.mapping.scroll_docs(-4),
 		['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -149,13 +188,20 @@ cmp.setup({
 	sources = cmp.config.sources(
 		{ { name = 'nvim_lsp' }, },
 		{ { name = 'buffer' }, }
-	)
+	),
 })
+
+
+local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+  opts.border = "rounded"
+  return orig_util_open_floating_preview(contents, syntax, opts, ...)
+end
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require'lspconfig'.gopls.setup{ capabilities = capabilities }
-require'lspconfig'.rust_analyzer.setup{  capabilities = capabilities  }
+require'lspconfig'.rust_analyzer.setup{ capabilities = capabilities }
 
 -- keep search target centered
 vim.keymap.set('n', 'n', 'nzzzv')
@@ -173,7 +219,7 @@ vim.keymap.set('n', '<Leader><space>', ':noh<cr>:call clearmatches()<cr>')
 vim.keymap.set('n', '<Leader>ut', ':UndotreeToggle<CR>:UndotreeFocus<CR>')
 
 -- toggle cursor line
-vim.keymap.set('n', '<Leader>l', ':set invcursorline<CR>')
+-- vim.keymap.set('n', '<Leader>l', ':set invcursorline<CR>')
 
 vim.api.nvim_create_autocmd(
 	{"WinLeave","InsertEnter"},
@@ -187,8 +233,6 @@ vim.api.nvim_create_autocmd(
 
 vim.opt.colorcolumn = "80,120,121,122"
 
-
--- telescope
 require('telescope').setup {
   defaults = {
     mappings = {
@@ -205,6 +249,7 @@ vim.keymap.set({ 'i' }, 'jK', '<ESC>')
 vim.keymap.set({ 'i' }, 'Jk', '<ESC>')
 vim.keymap.set({ 'i' }, 'JK', '<ESC>')
 
+-- virtual inline diagnostic messages
 require("lsp_lines").setup()
 vim.diagnostic.config({
   virtual_text = false,

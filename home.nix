@@ -409,7 +409,7 @@ in
       enable = true;
       package = pkgs.firefox-wayland;
       profiles."lbgu1zmc.default" = {
-        extensions = with config.nur.repos.rycee.firefox-addons; [
+        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           tree-style-tab
           onepassword-password-manager
           metamask

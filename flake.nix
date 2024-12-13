@@ -58,7 +58,7 @@
         (./hosts + "/${hostname}" + /hardware-configuration.nix)
         ./cachix.nix
         ./vpn.nix
-        nur.nixosModules.nur
+        nur.modules.nixos.default
         # ./evergreen.nix maybe later
         home-manager.nixosModules.home-manager
       ] ++ modules;

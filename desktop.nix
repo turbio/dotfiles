@@ -107,7 +107,6 @@ in
     hardware.pulseaudio.enable = false;
 
     hardware.opengl.enable = true;
-    hardware.opengl.driSupport = true;
 
     networking.networkmanager.enable = true;
 

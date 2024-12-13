@@ -98,7 +98,6 @@
 
     arduino
 
-    openra
     saleae-logic-2
 
     darktable
@@ -107,6 +106,7 @@
   ];
 
   core = with pkgs; [
+    mosh
     wget
     git
     htop

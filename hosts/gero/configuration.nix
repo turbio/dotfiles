@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, repos, ... }: {
   isDesktop = true;
 
   services.fwupd.enable = true;
@@ -47,4 +47,13 @@
   hardware.rtl-sdr.enable = true;
   users.users.turbio.extraGroups = [ "plugdev" ];
   environment.systemPackages = with pkgs; [ rtl-sdr ];
+
+  fileSystems."/sync" = {
+    device = "10.100.0.10:/mnt/sync";
+    fsType = "nfs";
+    options = [
+      "rw"
+      "noatime"
+    ];
+  };
 }

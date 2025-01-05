@@ -61,7 +61,10 @@
         nur.modules.nixos.default
         # ./evergreen.nix maybe later
         home-manager.nixosModules.home-manager
-      ] ++ modules;
+      ] ++ modules ++ (
+        if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ]
+        else []
+      );
 
       specialArgs = {
         inherit hostname;

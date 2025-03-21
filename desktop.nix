@@ -1,3 +1,5 @@
+let desktop = "niri"; # one of: "sway", "niri", "gnome"
+in
 { config, lib, localpkgs, pkgs, ... }:
 let
   # bash script to let dbus know about important env variables and
@@ -91,8 +93,8 @@ in
     programs.browserpass.enable = true;
 
     environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit localpkgs; }).desktop ++ [
-      dbus-sway-environment
-      configure-gtk
+      (lib.mkIf (desktop == "sway") dbus-sway-environment)
+      (lib.mkIf (desktop == "sway") configure-gtk)
     ];
 
     programs.steam.enable = true;
@@ -128,7 +130,9 @@ in
     programs.adb.enable = true;
     users.users.turbio.extraGroups = [ "adbusers" ];
 
-    programs.sway = {
+    programs.niri.enable = desktop == "niri";
+
+    programs.sway = lib.mkIf (desktop == "sway") {
       enable = true;
       wrapperFeatures.gtk = true;
     };
@@ -177,8 +181,5 @@ in
     #   displayManager.gdm.wayland = false;
     #   desktopManager.gnome.enable = true;
     # };
-
-
-    #virtualisation.docker.enable = true;
   };
 }

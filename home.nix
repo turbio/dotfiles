@@ -41,12 +41,10 @@ in
       {
         "tmux/tmux.conf".source = ./config/tmux/tmux.conf;
 
-
         "nvim/tmp/undo/.keep".text = "";
         "nvim/tmp/backup/.keep".text = "";
         "nvim/tmp/swap/.keep".text = "";
 
-        # fish
         "fish/functions/fish_prompt.fish".source = ./config/fish/functions/fish_prompt.fish;
       }
 
@@ -90,7 +88,7 @@ in
               color: #cdd6f4;
               font-weight: bold;
               background-color: #1e1e2e;
-             	outline: none;
+              outline: none;
               border-radius: 15px;
               margin: 10px;
               margin-bottom: 2px;
@@ -152,97 +150,13 @@ in
           }
 
         '';
+        "niri/config.kdl".source = ./config/niri/config.kdl;
         "sway/config".text = (
           builtins.replaceStrings
             [ "NIX_REPLACE_WALLPAPER" "NIX_REPLACE_GNOME_POLKIT" ]
             [ (builtins.toString wallpaper) ("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1") ]
             (builtins.readFile ./config/sway/config)
         );
-        "hypr/hyprland.conf".text =
-
-          builtins.replaceStrings
-            [ "NIX_REPLACE_WALLPAPER" ]
-            [ (builtins.toString wallpaper) ]
-
-            ''
-              # This is an example Hyprland config file.
-              # Syntax is the same as in Hypr, but settings might differ.
-              #
-              # Refer to the wiki for more information.
-
-              #monitor=,1280x720@60,0x0,1
-              #workspace=DP-1,1
-
-              input {
-                  kb_layout=
-                  kb_variant=
-                  kb_model=
-                  kb_options=
-                  kb_rules=
-
-                  follow_mouse=1
-              }
-
-              general {
-                  max_fps=60 # deprecated, unused
-                  sensitivity=1
-                  main_mod=SUPER
-
-                  gaps_in=5
-                  gaps_out=20
-                  border_size=2
-                  col.active_border=0xff7f7f7f
-                  col.inactive_border=0xff303030
-
-                  damage_tracking=full
-              }
-
-              decoration {
-                  rounding=10
-                  blur=1
-                  blur_size=3 # minimum 1
-                  blur_passes=1 # minimum 1, more passes = more resource intensive.
-                  # Your blur "amount" is blur_size * blur_passes, but high blur_size (over around 5-ish) will produce artifacts.
-                  # if you want heavy blur, you need to up the blur_passes.
-                  # the more passes, the more you can up the blur_size without noticing artifacts.
-                  multisample_edges=1
-              }
-
-              animations {
-                  enabled=1
-                  animation=windows,1,7,default
-                  animation=borders,1,10,default
-                  animation=fadein,1,10,default
-                  animation=workspaces,1,6,default
-              }
-
-              dwindle {
-                  pseudotile=0 # enable pseudotiling on dwindle
-              }
-
-              exec-once=waybar
-              exec-once=kitty
-              exec-once=swaybg -i NIX_REPLACE_WALLPAPER
-
-              windowrule=float,.*
-
-              bind=SUPER,RETURN,exec,kitty
-              bind=SUPER,Q,killactive,
-              bind=SUPERSHIFT,Q,exit,
-              bind=SUPER,S,togglefloating,
-              bind=SUPER,F,fullscreen,1
-
-              bind=SUPER,h,movefocus,l
-              bind=SUPER,l,movefocus,r
-              bind=SUPER,k,movefocus,u
-              bind=SUPER,j,movefocus,d
-
-              bind=SUPER,I,workspace,-1
-              bind=SUPER,O,workspace,+1
-
-              bind=SUPERSHIFT,I,movetoworkspace,-1
-              bind=SUPERSHIFT,O,movetoworkspace,+1
-            '';
         "waybar/config".text =
           builtins.replaceStrings
             [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" "NIX_LOCK_BIN" ]
@@ -379,22 +293,18 @@ in
     };
 
     home.sessionVariables = {
-      EDITOR = "vim";
       MOZ_ENABLE_WAYLAND = "1";
       XDG_CURRENT_DESKTOP = "sway";
       CLUTTER_BACKEND = "wayland";
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 
-    imports = [
-      (m@{ pkgs, ... }: import ./vim.nix (m // { inherit repos; }))
-    ];
-
-    programs.neovim.enable = true;
-
     programs.nix-index.enable = true;
 
     programs.git = {
+      lfs = {
+        enable = true;
+      };
       enable = true;
       userEmail = "git@turb.io";
       userName = "turbio";

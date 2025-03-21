@@ -3,9 +3,12 @@
 	"position": "top",
 	"height": 30,
 	"modules-left": [
-		"sway/workspaces"
+		"sway/workspaces",
+		"niri/workspaces"
 	],
-	"modules-center": [],
+	"modules-center": [
+		"custom/hostname"
+	],
 	"modules-right": [
 		"custom/yubi",
 		"custom/media",
@@ -18,6 +21,8 @@
 		"tray",
 		"custom/lock"
 	],
+	"niri/workspaces": {
+	},
 	"sway/workspaces": {
 		"disable-scroll": true,
 		"all-outputs": false,
@@ -108,7 +113,7 @@
 		"on-click": "playerctl play-pause",
 		"escape": true,
 		"exec": "waybar-mediaplayer.py 2> /dev/null",
-		"exec-if": "pgrep spotify"
+		"exec-if": "playerctl status"
 	},
 	"custom/yubi": {
 		"format": "{icon} {}",
@@ -121,12 +126,16 @@
 		"exec-if": "ykman -v",
 		"on-click": "NIX_WAYBAR_YUBI_ONCLICK"
 	},
-
 	"custom/lock": {
 		"format": "{icon}",
 		"format-icons": {
 			"default": ""
 		},
 		"on-click": "NIX_LOCK_BIN"
-	}
+	},
+	"custom/hostname": {
+		"format": "{}",
+		"exec": "hostname",
+		"interval": "once"
+	},
 }

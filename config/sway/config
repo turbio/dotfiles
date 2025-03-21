@@ -130,17 +130,16 @@ bindsym XF86MonBrightnessDown exec light -U 10 && notify-send.sh -R /tmp/notify_
 
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume '@DEFAULT_SINK@' +5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume '@DEFAULT_SINK@' -5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
-bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle && playerctl -a pause
+bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle
 bindsym XF86AudioMicMute exec pactl set-source-mute 1 toggle
 
 # Scratchpad:
 #bindsym $mod+Shift+minus move scratchpad
 #bindsym $mod+minus scratchpad show
 
-client.focused #ff00ff #ff00ff #ff00ff #ff0000 #ffffff88
-
-client.focused_inactive #ff00ff #ff00ff #ff00ff #ff0000 #00000000
-client.unfocused #ff00ff #ff00ff #ff00ff #ff0000 #00000000
+client.focused          #ff00ff #ff00ff #ff00ff #ff0000 #ffffff88
+client.focused_inactive #ff00ff #ff00ff #ff00ff #ff0000 #ffffff44
+client.unfocused        #ff00ff #ff00ff #ff00ff #ff0000 #ffffff44
 
 #client.focused #7f7f7f #7f7f7f #ffffff
 #client.unfocused #303030 #303030 #ffffff
@@ -158,7 +157,8 @@ default_border pixel 4
 
 for_window [title=".*"] floating enable
 
-bindsym $mod+semicolon exec rofi-pass
+# holy yikes
+for_window [title="^Syncthing Tray( \(.*\))?$"] floating enable, border none, resize set 20 ppt 400, move position 80 ppt -10
 
 input "type:keyboard" {
 	xkb_options ctrl:nocaps
@@ -196,6 +196,7 @@ input "2362:628:PIXA3854:00_093A:0274_Touchpad" {
 exec mako
 exec waybar
 exec lxsession
+exec syncthingtray --wait
 
 exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 

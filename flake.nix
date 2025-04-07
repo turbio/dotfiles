@@ -1,5 +1,5 @@
 {
-  description = "My dotfiles uwu";
+  description = "dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
@@ -16,7 +16,6 @@
     openscad-vim = { flake = false; url = "github:sirtaj/vim-openscad"; };
     muble-vim = { flake = false; url = "github:turbio/muble.vim"; };
     lsp-lines-nvim = { flake = false; url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim"; };
-    dingllm-nvim = { flake = false; url = "github:yacineMTB/dingllm.nvim"; };
     llm-nvim = { flake = false; url = "github:melbaldove/llm.nvim"; };
 
     zsh-syntax-highlighting = { flake = false; url = "github:zsh-users/zsh-syntax-highlighting"; };
@@ -28,12 +27,6 @@
     flippyflops = { flake = false; url = "github:turbio/flippyflops"; };
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
-
-    #hyprland = {
-    #  url = "github:vaxerski/Hyprland";
-    #  # build with your own instance of nixpkgs
-    #  inputs.nixpkgs.follows = "unstable";
-    #};
   };
 
   outputs =
@@ -53,13 +46,13 @@
         ./configuration.nix
         ./desktop.nix
         ./home.nix
-        ./syncthing.nix
+        ./system_vim.nix
+        ./services/syncthing.nix
         (./hosts + "/${hostname}" + /configuration.nix)
         (./hosts + "/${hostname}" + /hardware-configuration.nix)
         ./cachix.nix
         ./vpn.nix
         nur.modules.nixos.default
-        # ./evergreen.nix maybe later
         home-manager.nixosModules.home-manager
       ] ++ modules ++ (
         if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ]
@@ -68,36 +61,8 @@
 
       specialArgs = {
         inherit hostname;
-        #unstablepkgs = unstablepkgs;
-        #
-        # kinda fucky, probably incorrect... sometimes usefull when
-        # we really don't want anyone to fuck w our nixpkgs
-        #pkgs = import nixpkgs {
-        #  inherit system;
-        #  overlays = [
-        #    # pick some unstable stuff
-        #    (self: super: with unstablepkgs; {
-        #      inherit discord obs-studio mars-mips fish;
-
-        #      obs-studio-plugins = unstablepkgs.obs-studio-plugins;
-        #      vimPlugins = super.vimPlugins // { vim-fugitive = unstablepkgs.vimPlugins.vim-fugitive; };
-        #    })
-
-        #    # cause openra is fucked in upstream
-        #    (self: super: {
-        #      openra = (super.appimageTools.wrapType2 {
-        #        name = "openra";
-        #        src = super.fetchurl
-        #          {
-        #            url = "https://github.com/OpenRA/OpenRA/releases/download/release-20210321/OpenRA-Red-Alert-x86_64.AppImage";
-        #            sha256 = "sha256-toJ416/V0tHWtEA0ONrw+JyU+ssVHFzM6M8SEJPIwj0=";
-        #          };
-        #      });
-        #    })
-
-        #  ];
-        #  config.allowUnfree = true; # owo sowwy daddy stallman
-        #};
+        unstablepkgs = unstable.legacyPackages.${arch hostname};
+        assignments = import ./assignments.nix;
 
         repos = inputs;
       };
@@ -163,9 +128,25 @@
   in
   rec {
     nixosConfigurations = mapEachHost <| mksystem [];
-    pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 
-    image.ballos = (mksystem imageModules "ballos").config.system.build.image;
+    netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable.nix ];
+
+    nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
+
+    # Spits out the kernel and initrd for pxe booting a host.
+    netbootableSystems = mapEachHost (h: nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-${h}" {
+      bzImage = "${(mksystem [ ./modules/netbootable.nix  ] h).config.system.build.netbootKernel}/bzImage";
+      initrd = "${(mksystem [ ./modules/netbootable.nix  ] h).config.system.build.netbootRamdisk}/initrd";
+      cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" (mksystem [ ./netbootable.nix  ] h).config.system.build.netbootCmdline);
+
+      "squashfs.img" = (mksystem [ ./netbootable.nix  ] h).config.system.build.squashfsStore;
+
+      "${h}-store" = (mksystem [ ./netbootable.nix  ] h).config.system.build.ext4Store;
+    });
+
+    netbootInitrd = mapEachHost (h: (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" (mksystem [ ./netbootable.nix  ] h).config.system.build.netbootCmdline));
+
+    image = mapEachHost (h: (mksystem imageModules h).config.system.build.image);
 
     activate-uki.ballos =
       let
@@ -179,6 +160,8 @@
           cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
             /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
         '';
+
+    pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 
     # output a flashable raspi image
     images.pando = nixosConfigurations.pando.config.system.build.sdImage;

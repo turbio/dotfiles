@@ -1,7 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
-{
-
+{ modulesPath, ... }: {
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   imports =
@@ -9,9 +6,9 @@
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "kvm-intel" "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
 
   boot.initrd.luks.devices.cryptroot.device =
@@ -32,16 +29,4 @@
   swapDevices = [
     { device = "/dev/disk/by-uuid/fcdae7e9-775c-4acc-9915-ec9ece203474"; }
   ];
-
-  boot.kernelParams = [
-    "quiet" "udev.log_level=0" 
-    "plymouth.use-simpledrm"
-  ];
-
-  services.logind = {
-    lidSwitch = "hibernate";
-    extraConfig = ''
-      HandlePowerKey=hibernate
-    '';
-  };
 }

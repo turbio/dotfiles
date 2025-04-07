@@ -8,5 +8,5 @@ fi
 i=1;
 while [ $i -le $cols ]; do
 	i=$((i+1));
-	printf "%s" "${1:-=}";
+	printf "%s" "${1:--}";
 done

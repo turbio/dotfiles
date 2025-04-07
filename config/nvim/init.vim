@@ -5,8 +5,9 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
-vim.opt.cindent = true -- C style indenting
-vim.opt.tabstop = 4 -- Number of spaces that a <Tab> in the file counts for
+vim.opt.cindent = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
 vim.opt.expandtab = false
 
 vim.opt.shell = "zsh"
@@ -64,9 +65,6 @@ vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
 
 vim.keymap.set('n', "ga", require("actions-preview").code_actions)
 
-vim.keymap.set('n', '<C-p>', ':FZF<CR>')
-vim.keymap.set('n', '<C-/>', ':Ag<CR>')
-
 vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3
@@ -93,61 +91,6 @@ require('lsp_signature').setup({
 require('trouble').setup({
 	icons = false,
 })
-
--- local dingllm = require('dingllm')
--- vim.keymap.set({ 'n', 'v' }, '<leader>k', groq_replace, { desc = 'llm groq' })
--- vim.keymap.set({ 'n', 'v' }, '<leader>K', groq_help, { desc = 'llm groq_help' })
-
-require('llm').setup({
-	timeout_ms = 10000,
-	system_prompt = [[
-You are an AI programming assistant integrated into a code editor. Your purpose is to help the user with programming tasks as they write code.
-Key capabilities:
-- Thoroughly analyze the user's code and provide insightful suggestions for improvements related to best practices, performance, readability, and maintainability. Explain your reasoning.
-- Answer coding questions in detail, using examples from the user's own code when relevant. Break down complex topics step- Spot potential bugs and logical errors. Alert the user and suggest fixes.
-- Upon request, add helpful comments explaining complex or unclear code.
-- Suggest relevant documentation, StackOverflow answers, and other resources related to the user's code and questions.
-- Engage in back-and-forth conversations to understand the user's intent and provide the most helpful information.
-- Keep concise and use markdown.
-- When asked to create code, only generate the code. No bugs.
-- Think step by step
-	]],
-	system_prompt_replace = [[
-You should replace the code that you are sent, only following the comments.
-Do not talk at all.
-Only output valid code.
-Do not provide any backticks that surround the code.
-Any comment that is asking you for something should be removed after you satisfy them.
-Other comments should left alone.
-Do not output any decoration or labels on the code.
-Output only exactly what the code should be replaced with.
-Never ever output backticks like this ```.
-NEVER EVER WRAP THE CODE IN BACKTICKS.
-	]],
-	print_prompt = false,
-	services = {
-		openai = {
-			url = "https://api.openai.com/v1/chat/completions",
-			model = "gpt-4o",
-			api_key_name = "OPENAI_API_KEY",
-		},
-		anthropic = {
-			url = "https://api.anthropic.com/v1/messages",
-			model = "claude-3-5-sonnet-20241022",
-			api_key_name = "ANTHROPIC_API_KEY",
-		},
-	},
-})
-
-function bind(f, ...)
-	local arg = {...}
-	return function()
-		f(unpack(arg))
-	end
-end
-
-vim.keymap.set('v', "<leader>lm", bind(require("llm").prompt, { replace = true, service = "openai" }))
-vim.keymap.set('n', "<leader>lm", bind(require("llm").prompt, { replace = false, service = "openai" }))
 
 -- fancy completion
 local ELLIPSIS_CHAR = '…'
@@ -191,7 +134,6 @@ cmp.setup({
 	),
 })
 
-
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
 function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   opts.border = "rounded"
@@ -200,8 +142,120 @@ end
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-require'lspconfig'.gopls.setup{ capabilities = capabilities }
-require'lspconfig'.rust_analyzer.setup{ capabilities = capabilities }
+require('lspconfig').gopls.setup({ capabilities = capabilities })
+require('lspconfig').rust_analyzer.setup({ capabilities = capabilities })
+require('lspconfig').rust_analyzer.setup({ capabilities = capabilities })
+require('lspconfig').nil_ls.setup({ capabilities = capabilities })
+
+require('render-markdown').setup({})
+
+--[[
+require('avante').setup({
+	---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
+	provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+	-- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
+	-- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
+	-- Of course, you can reduce the request frequency by increasing `suggestion.debounce`.
+	auto_suggestions_provider = "claude",
+	cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
+	claude = {
+	  endpoint = "https://api.anthropic.com",
+	  model = "claude-3-5-sonnet-20241022",
+	  temperature = 0,
+	  max_tokens = 4096,
+	},
+	behaviour = {
+	  auto_suggestions = false, -- Experimental stage
+	  auto_set_highlight_group = true,
+	  auto_set_keymaps = true,
+	  auto_apply_diff_after_generation = false,
+	  support_paste_from_clipboard = false,
+	  minimize_diff = true, -- Whether to remove unchanged lines when applying a code block
+	  enable_token_counting = true, -- Whether to enable token counting. Default to true.
+	  enable_cursor_planning_mode = false, -- Whether to enable Cursor Planning Mode. Default to false.
+	},
+	mappings = {
+	  --- @class AvanteConflictMappings
+	  diff = {
+	    ours = "co",
+	    theirs = "ct",
+	    all_theirs = "ca",
+	    both = "cb",
+	    cursor = "cc",
+	    next = "]x",
+	    prev = "[x",
+	  },
+	  suggestion = {
+	    accept = "<M-l>",
+	    next = "<M-]>",
+	    prev = "<M-[>",
+	    dismiss = "<C-]>",
+	  },
+	  jump = {
+	    next = "]" .. "]",
+	    prev = "[" .. "[",
+	  },
+	  submit = {
+	    normal = "<CR>",
+	    insert = "<C-s>",
+	  },
+	  sidebar = {
+	    apply_all = "A",
+	    apply_cursor = "a",
+	    switch_windows = "<Tab>",
+	    reverse_switch_windows = "<S-Tab>",
+	  },
+	},
+	hints = { enabled = true },
+	windows = {
+	  ---@type "right" | "left" | "top" | "bottom"
+	  position = "right", -- the position of the sidebar
+	  wrap = true, -- similar to vim.o.wrap
+	  width = 30, -- default % based on available width
+	  sidebar_header = {
+	    enabled = true, -- true, false to enable/disable the header
+	    align = "center", -- left, center, right for title
+	    rounded = true,
+	  },
+	  input = {
+	    prefix = "> ",
+	    height = 8, -- Height of the input window in vertical layout
+	  },
+	  edit = {
+	    border = "rounded",
+	    start_insert = true, -- Start insert mode when opening the edit window
+	  },
+	  ask = {
+	    floating = false, -- Open the 'AvanteAsk' prompt in a floating window
+	    start_insert = true, -- Start insert mode when opening the ask window
+	    border = "rounded",
+	    ---@type "ours" | "theirs"
+	    focus_on_apply = "ours", -- which diff to focus after applying
+	  },
+	},
+	highlights = {
+	  ---@type AvanteConflictHighlights
+	  diff = {
+	    current = "DiffText",
+	    incoming = "DiffAdd",
+	  },
+	},
+	--- @class AvanteConflictUserConfig
+	diff = {
+	  autojump = true,
+	  ---@type string | fun(): any
+	  list_opener = "copen",
+	  --- Override the 'timeoutlen' setting while hovering over a diff (see :help timeoutlen).
+	  --- Helps to avoid entering operator-pending mode with diff mappings starting with `c`.
+	  --- Disable by setting to -1.
+	  override_timeoutlen = 500,
+	},
+	suggestion = {
+	  debounce = 600,
+	  throttle = 600,
+	},
+})
+--]]
 
 -- keep search target centered
 vim.keymap.set('n', 'n', 'nzzzv')
@@ -239,10 +293,16 @@ require('telescope').setup {
       i = {
         ['<C-u>'] = false,
         ['<C-d>'] = false,
+	['<C-j>'] = require('telescope.actions').move_selection_next,
+	['<C-k>'] = require('telescope.actions').move_selection_previous,
       },
     },
   },
 }
+
+local telescope = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', telescope.find_files)
+vim.keymap.set('n', '<C-/>', telescope.live_grep)
 
 vim.keymap.set({ 'i' }, 'jk', '<ESC>')
 vim.keymap.set({ 'i' }, 'jK', '<ESC>')
@@ -321,11 +381,6 @@ let g:indentLine_first_char='┊'
 let g:indentLine_concealcursor=0
 let g:indentLine_showFirstIndentLevel=1
 " }}}
-
-"fzf {{{
-noremap <C-p> :FZF<CR>
-noremap <C-_> :Ag<CR>
-"}}}
 
 filetype plugin indent on
 

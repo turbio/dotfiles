@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--build-on)
+			BUILD_ON="$2"
+			shift
+			shift
+			;;
+		--deploy-on)
+			DEPLOY_ON="$2"
+			shift
+			shift
+			;;
+		-h|--help)
+			echo "Usage: $0 [--build-on <host>] [--deploy-on <host>] [<hostname>]"
+			exit 0
+			;;
+		-*|--*)
+			echo "Unknown option $1"
+			exit 1
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1")
+			shift
+			;;
+	esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+WHOMST=$1
+
+SELFHOST="$(hostname)"
+
+if [ -z "$WHOMST" ]; then
+	WHOMST="$SELFHOST"
+fi
+
+if [ -z "$DEPLOY_ON" ]; then
+	DEPLOY_ON="$WHOMST"
+fi
+
+
+echo -n "Building "
+
+if [ "$WHOMST" = "$SELFHOST" ]; then
+	echo -n "self ($WHOMST) "
+else
+	echo -n "$WHOMST "
+fi
+
+echo -n "for "
+
+if [ "$DEPLOY_ON" = "$SELFHOST" ]; then
+	echo -n "self ($DEPLOY_ON) "
+else
+	echo -n "$DEPLOY_ON "
+fi
+
+echo -n "on "
+
+FLAGS="--use-remote-sudo --flake .#${WHOMST} --target-host turbio@${DEPLOY_ON}"
+
+if [ -z "$BUILD_ON" ]; then
+	echo "self ($SELFHOST)"
+else
+	echo "$BUILD_ON"
+
+	# --builders format: "builder <;|\n> ..."
+	# builder: "<hostname> [arch, ...] [ssh identity file] [max parallel builds] [relative speed] [supported feature, ...] [mandatory feature, ...] [base64 public key]"
+	#
+	# eg: "ssh://mac x86_64-darwin ; ssh://beastie i686-linux,x86_64-freebsd"
+
+	FLAGS="$FLAGS --builders \"ssh-ng://turbio@${BUILD_ON}?ssh-key=/home/turbio/.ssh/id_ed25519\" --use-substitutes --max-jobs 0"
+fi
+
+if command -v nom 2>&1 >/dev/null; then
+	USE_NOM=1
+	FLAGS="$FLAGS --log-format internal-json -v"
+
+fi
+
+
+if [ -n "$USE_NOM" ]; then
+	nixos-rebuild switch $FLAGS |& nom --json
+else
+	nixos-rebuild switch $FLAGS
+fi

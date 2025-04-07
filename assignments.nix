@@ -6,6 +6,7 @@
         ip = "10.100.0.1";
         pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
         endpoint = "gateway.turb.io";
+        router = true;
       };
       gero = {
         ip = "10.100.0.3";
@@ -30,6 +31,7 @@
       ballos = {
         ip = "10.100.0.10";
         pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
+        endpoint = "ballos.lan";
       };
     };
 

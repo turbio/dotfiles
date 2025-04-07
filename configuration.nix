@@ -1,10 +1,9 @@
-{ hostname, config, localpkgs, pkgs, unstablepkgs, ... }:
+{ lib, hostname, localpkgs, pkgs, ... }:
 let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
 in
 {
   services.fwupd.enable = true;
-  nix.settings.trusted-users = [ "turbio" ];
 
   nixpkgs.overlays = [
     (final: prev: {
@@ -95,14 +94,31 @@ in
     })
   ];
 
-  #nix.autoOptimiseStore = true;
+  networking.hosts = { # TODO: ewww
+    "10.100.0.10" = [
+      "int.turb.io"
+      "bt.int.turb.io"
+      "jelly.int.turb.io"
+      "ollama.int.turb.io"
+      "sync.int.turb.io"
+      "home.int.turb.io"
+      "nixcache.turb.io"
+    ];
+  };
+
 
   nixpkgs.config.allowUnfree = true;
 
   nix = {
+    #autoOptimiseStore = true;
+
+    settings = {
+      trusted-users = [ "turbio" ];
+
+    };
     package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators
+      experimental-features = nix-command flakes pipe-operators ca-derivations
     '';
   };
 
@@ -155,12 +171,85 @@ in
   #enableSSHSupport = true;
   #};
 
+  programs.mosh.enable = true;
+
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
   };
 
   services.chrony.enable = true;
+
+  programs.htop.enable = true;
+  programs.htop.settings = {
+    hide_kernel_threads = false;
+    hide_running_in_container = false;
+    hide_userland_threads = true;
+    show_program_path = false;
+  };
+
+  # services.wgvpn = {
+  #   enable = true;
+  #   networks.yep = {
+  #     subnet = "10.38.0.0/24"; # choose something unlikely to conflict
+  #     forwardPorts = [
+  #       {
+  #         destinationHost = "ballos";
+  #         destinationPort = 80;
+  #         sourceHost = "balrog";
+  #         sourcePort = 80;
+  #         proto = "tcp";
+  #       }
+  #       {
+  #         destinationHost = "ballos";
+  #         destinationPort = 443;
+  #         sourceHost = "balrog";
+  #         sourcePort = 443;
+  #         proto = "tcp";
+  #       }
+  #     ];
+  #     hosts = [
+  #       {
+  #         hostname = "balrog";
+  #         ip = "10.100.0.1";
+  #         pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
+  #         endpoint = "gateway.turb.io";
+  #         router = true;
+  #       }
+  #       {
+  #         hostname = "gero";
+  #         ip = "10.100.0.3";
+  #         pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
+  #       }
+  #       {
+  #         hostname = "itoh";
+  #         ip = "10.100.0.4";
+  #         pubkey = "nl9gri7OsWGYWj+LbbtUBv8dKxFVOz4wlunm7dUhAgk=";
+  #       }
+  #       {
+  #         hostname = "star";
+  #         ip = "10.100.0.5";
+  #         pubkey = "lfUVvROJvEyOHlzBxWsEpp7rWvY0Pt9J7cTKsPra92w=";
+  #       }
+  #       {
+  #         hostname = "pando";
+  #         ip = "10.100.0.6";
+  #         pubkey = "Y9TKTr/fVYVxogi9vYYKo/xFjUk2Z5XFRuEdkSDN7yI=";
+  #       }
+  #       {
+  #         hostname = "ios";
+  #         pubkey = "8RPnvY0Vy641THmmnkGiz37oN65VGKplEZkOKuUqly8=";
+  #         ip = "10.100.0.11";
+  #       }
+  #       {
+  #         hostname = "ballos";
+  #         ip = "10.100.0.10";
+  #         pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
+  #         endpoint = "ballos.lan";
+  #       }
+  #     ];
+  #   };
+  # };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

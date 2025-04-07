@@ -1,9 +1,5 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 let
-  hume = {
-    yume = "aaa";
-  };
-
   root = (pkgs.writeTextDir "index.txt" ''
     hey!
     ====

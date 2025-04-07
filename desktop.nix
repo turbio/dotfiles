@@ -1,4 +1,4 @@
-let desktop = "niri"; # one of: "sway", "niri", "gnome"
+let desktop = "niri"; # one of: "sway", "niri"
 in
 { config, lib, localpkgs, pkgs, ... }:
 let
@@ -145,18 +145,6 @@ in
       pulse.enable = true;
       jack.enable = true;
     };
-
-    #programs.gnupg.agent.pinentryFlavor = "gnome3";
-
-    #environment.variables.GTK_USE_PORTAL = "1";
-    #environment.variables.GDK_BACKEND = "wayland";
-
-    #systemd.user.services.xdg-desktop-portal.wantedBy = [ "default.target" ];
-    #systemd.user.services.xdg-desktop-portal-wlr.wantedBy = [ "default.target" ];
-
-    #systemd.user.services.xdg-desktop-portal.environment = {
-    #  XDG_DESKTOP_PORTAL_DIR = config.environment.variables.XDG_DESKTOP_PORTAL_DIR;
-    #};
 
     security.polkit.enable = true;
 

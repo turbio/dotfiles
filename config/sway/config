@@ -123,8 +123,6 @@ bindsym XF86AudioPlay exec playerctl play-pause && mpc toggle
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-bindsym $mod+Control+l exec block
-
 bindsym XF86MonBrightnessUp   exec light -A 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"
 bindsym XF86MonBrightnessDown exec light -U 10 && notify-send.sh -R /tmp/notify_brightness -u low -t 500 "brightness $(light) / 100"
 

@@ -1,5 +1,7 @@
-{ pkgs, repos, ... }: {
+{ pkgs, ... }: {
   isDesktop = true;
+
+  services.upower.enable = true;
 
   services.fwupd.enable = true;
 
@@ -11,17 +13,8 @@
   boot.initrd.systemd.enable = true;
   boot.consoleLogLevel = 0;
 
-  boot.plymouth = {
-    enable = true;
-    themePackages = [ pkgs.catppuccin-plymouth ];
-    theme = "catppuccin-macchiato";
-    font = "${pkgs.terminus_font}/share/fonts/terminus/ter-u18n.otb";
-    extraConfig = ''
-      DeviceScale=1
-    '';
-  };
-
   networking.interfaces.wlp1s0.useDHCP = true;
+  networking.firewall.enable = false;
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
@@ -30,8 +23,6 @@
 
   boot.initrd.kernelModules = [ ];
 
-  programs.hyprland.enable = true;
-
   services.syncthing = {
     enable = true;
     configDir = "/home/turbio/.config/syncthing";
@@ -39,10 +30,11 @@
     settings.folders = {
       "photos" = { enable = true; path = "~/photos"; };
       "code" = { enable = true; path = "~/code"; };
+      "notes" = { enable = true; path = "~/notes"; };
     };
   };
 
-  boot.kernelParams = [ "modprobe.blacklist=dvb_usb_rtl28xxu" ];
+  #boot.kernelParams = [ "modprobe.blacklist=dvb_usb_rtl28xxu" ];
   services.udev.packages = [ pkgs.rtl-sdr ];
   hardware.rtl-sdr.enable = true;
   users.users.turbio.extraGroups = [ "plugdev" ];
@@ -56,4 +48,21 @@
       "noatime"
     ];
   };
+
+  boot.kernelParams = [
+    #"quiet" "udev.log_level=0" 
+  ];
+
+  services.logind = {
+    lidSwitch = "hibernate";
+    extraConfig = ''
+      HandlePowerKey=hibernate
+    '';
+  };
+
+  services.physlock.enable = true;
+  services.physlock.lockOn.hibernate = false;
+  services.physlock.lockOn.suspend = false;
+  services.physlock.muteKernelMessages = false;
+  services.physlock.disableSysRq = true;
 }

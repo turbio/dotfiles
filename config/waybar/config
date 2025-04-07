@@ -19,7 +19,6 @@
 		"battery",
 		"clock",
 		"tray",
-		"custom/lock"
 	],
 	"niri/workspaces": {
 	},
@@ -125,13 +124,6 @@
 		"exec": "NIX_WAYBAR_YUBI_EXEC",
 		"exec-if": "ykman -v",
 		"on-click": "NIX_WAYBAR_YUBI_ONCLICK"
-	},
-	"custom/lock": {
-		"format": "{icon}",
-		"format-icons": {
-			"default": ""
-		},
-		"on-click": "NIX_LOCK_BIN"
 	},
 	"custom/hostname": {
 		"format": "{}",

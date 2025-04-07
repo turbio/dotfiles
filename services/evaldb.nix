@@ -25,6 +25,13 @@ let
     '';
   };
 
+  gatewayResources = pkgs.runCommand "gateway-resources" {} ''
+      mkdir -p $out
+      cp -r ${src}/client $out/
+      cp ${evalers}/luaval $out/
+      cp ${evalers}/duktape $out/
+  '';
+
   gateway = pkgs.buildGoModule {
     pname = "gateway";
     version = "0.0.1";
@@ -43,30 +50,20 @@ let
       '';
     };
 
-    #vendorHash = "sha256-/jwrbJfDqo95JPrf7OzVIOavN0yOOJkWqAAGyMDyLvU=";
-    vendorHash = "";
-    #runVend = true;
-    #doCheck = false;
-  };
-  dbroot = "/evaldb";
-  dbstore = "${dbroot}/store";
-  port = 3005;
-in
-{
-  system.activationScripts = {
-    evaldb = ''
-      mkdir -p ${dbstore}/dbs
-      rm -rf ${dbroot}/client
-      cp -r ${src}/client ${dbroot}
-      ln -sf ${evalers}/luaval ${dbroot}
-      ln -sf ${evalers}/duktape ${dbroot}
-    '';
+    vendorHash = "sha256-pivZRC1x1GXLIDvZQfcGEvrLa8EP22wMiBLhpdOf4Dg=";
+    doCheck = false;
+    proxyVendor = true;
   };
 
+  port = 3005;
+
+  dbstore = "/pool/evaldb/";
+in
+{
   services.nginx.virtualHosts."evaldb.turb.io" = {
-    addSSL = true;
+    forceSSL = true;
     enableACME = true;
-    default = true;
+    #default = true;
 
     locations."/" = {
       proxyPass = "http://127.0.0.1:${builtins.toString port}";
@@ -84,12 +81,20 @@ in
   };
 
   systemd.services.evaldb = {
+    enable = true;
     description = "evaldb";
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
-      ExecStart = "${gateway}/bin/gateway --path ${dbstore} --port ${toString port}";
-      WorkingDirectory = dbroot;
+      ExecStart = "${gateway}/bin/gateway --path $STATE_DIRECTORY --port ${toString port}";
+      WorkingDirectory = "${gatewayResources}";
+      StateDirectory = "evaldb";
+      DynamicUser = true;
+      ProtectSystem = "strict";
+      PrivateDevices = true;
+      PrivateTmp = true;
+      ProtectHome = true;
+      InaccessiblePaths = [ "/pool" "/etc" "/home" "/mnt" ];
     };
   };
 }

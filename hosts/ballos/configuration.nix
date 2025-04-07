@@ -2,13 +2,67 @@
   imports = [
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
+    ../../services/evaldb.nix
+    ../../services/jelly.nix
+    ../../services/netboot_host.nix
     ./ipmi.nix
   ];
+
+  services.nix-serve = {
+    enable = true;
+    secretKeyFile = "/var/cache-priv-key.pem"; # TODO: state
+  };
+
+  services.nginx.virtualHosts."nixcache.turb.io" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
+      extraConfig = ''
+        allow 10.100.0.0/25;
+        deny all;
+      '';
+
+    };
+    locations."/.well-known/acme-challenge" = {
+      extraConfig = ''
+        allow all;
+      '';
+    };
+  };
+
+  users.groups.locate = {};
+  users.users.locate = {
+    group = "locate";
+    description = "locate Daemon user";
+    isSystemUser = true;
+    extraGroups = [ "users" ];
+  };
+  services.locate = {
+    enable = true;
+    pruneNames = [];
+    localuser = "locate";
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.firewall.enable = true;
+
+  services.zfs.autoScrub.enable = true;
+  services.sanoid = {
+    enable = true;
+    datasets = {
+      "pool/primary" = {
+        hourly = 24;
+        daily = 30;
+        monthly = 12;
+
+        autosnap = true;
+        autoprune = true;
+      };
+    };
+  };
 
   networking.nftables = {
     enable = true;
@@ -16,20 +70,60 @@
     '';
   };
 
+  services.vector = {
+    enable = false;
+    journaldAccess = true;
+    settings = builtins.fromTOML ''
+      [sources.journald]
+      type = "journald"
+      current_boot_only = true
+
+      [sinks.elasticsearch]
+      type = "elasticsearch"
+      inputs = [ "journald" ]
+      api_version = "auto"
+      endpoints = [ "http://localhost:9200" ]
+      id_key = "id"
+  '';
+  };
+
+  services.elasticsearch = {
+    enable = false;
+    port = 9200;
+    listenAddress = "127.0.0.1";
+  };
+
   security.acme.defaults.email = "acme@turb.io";
   security.acme.acceptTerms = true;
 
-  networking.firewall.allowedUDPPorts = [ 111 2049 ];
-  networking.firewall.allowedTCPPorts = [ 111 2049 ];
+  services.postgresql = {
+    enable = false;
+    package = pkgs.postgresql;
+  };
+
+
+  networking.firewall.allowedUDPPorts = [ 111 2049 10809 5201 ];
+  networking.firewall.allowedTCPPorts = [ 111 2049 10809 5201 ];
   services.nfs.server = {
     enable = true;
     exports = ''
       /mnt/sync 192.168.86.0/24(rw)
+      /mnt/sync 10.100.0.0/24(rw)
     '';
   };
 
   services.nginx = {
     enable = true;
+
+    recommendedGzipSettings = true;
+    recommendedZstdSettings = true;
+    recommendedBrotliSettings = true;
+    recommendedTlsSettings = true;
+    recommendedOptimisation = true;
+
+    # todo: breaks grafana
+    #recommendedProxySettings = true;
+
     statusPage = true; # for prom metrics
     enableReload = true;
     appendHttpConfig = ''
@@ -44,24 +138,85 @@
   };
 
   # vpn internal traffic to us
-  services.nginx.virtualHosts."ballos" = {
+  services.nginx.virtualHosts."ctrl.turb.io" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://10.100.0.6";
+      extraConfig = ''
+        proxy_set_header Host $host;
+      '';
+
+    };
+  };
+  services.nginx.virtualHosts."graph.turb.io" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://10.100.0.6";
+      extraConfig = ''
+        proxy_set_header Host $host;
+      '';
+    };
+    locations."/ws" = {
+      proxyPass = "http://10.100.0.6";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+      '';
+    };
+
+  };
+  services.nginx.virtualHosts."ollama.int.turb.io" = {
+    extraConfig = ''
+      allow 10.100.0.0/25;
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:11434";
+    };
+  };
+
+  services.nginx.virtualHosts."sync.int.turb.io" = {
+    extraConfig = ''
+      allow 10.100.0.0/25;
+      deny all;
+    '';
     locations."/" = {
       proxyPass = "http://${config.services.syncthing.guiAddress}";
+    };
+  };
+
+  services.nginx.virtualHosts."home.int.turb.io" = {
+    extraConfig = ''
+      allow 10.100.0.0/25;
+      deny all;
+    '';
+    locations."/" = {
       extraConfig = ''
-        allow 10.100.0.0/25;
-        deny all;
+        resolver 127.0.0.53;
+        set $ha_url "http://homeassistant.lan:8123";
+        proxy_pass $ha_url;
+        proxy_set_header Host $host;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
       '';
     };
   };
 
   services.syncthing = {
     enable = true;
-    openDefaultPorts = true;
     configDir = "/mnt/sync/config";
     dataDir = "/mnt/sync";
     settings.folders = {
       "photos" = { enable = true; path = "/mnt/sync/photos"; };
       "code" = { enable = true; path = "/mnt/sync/code"; };
+      "notes" = { enable = true; path = "/mnt/sync/notes"; };
+      "ios_photos" = { enable = true; path = "/mnt/sync/ios_photos"; };
     };
   };
 
@@ -87,10 +242,6 @@
         "--network=host" 
       ];
     };
-  };
-
-  services.matter-server = lib.mkIf false {
-    enable = true;
   };
 
   services.nginx.virtualHosts = {
@@ -166,30 +317,15 @@
         doCheck = false;
       };
     })
-
-    (final: { buildGoModule, fetchFromGitHub, ... }: {
-      lvm-exporter = buildGoModule rec {
-        pname = "prometheus-lvm-exporter";
-        version = "v0.3.3";
-
-        src = fetchFromGitHub {
-          owner = "hansmi";
-          repo = pname;
-          rev = version;
-          hash = "sha256-mA84Bnq5JF0BGfqHhcCzTef5nDotLgQuiyg3/zOPqTE=";
-        };
-        vendorHash = "sha256-vqxsg70ShMo4OVdzhqYDj/HT3RTpCUBGHze/EkbBJig=";
-        doCheck = false;
-      };
-    })
   ];
 
-  systemd.services.fan_speed = {
+  systemd.services.fanspeed = {
     enable = true;
     wantedBy = [ "multi-user.target" ];
     path = [ pkgs.ipmitool pkgs.bc pkgs.bash ];
     serviceConfig = {
-      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh}";
+      User = "root";
+      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --verbose-log --disengage-temp 74 --target-temp 55";
     };
   };
 
@@ -199,18 +335,6 @@
     serviceConfig = {
       ExecStart = "${pkgs.prometheus-comed-exporter}/bin/comed_exporter --address :9010";
     };
-  };
-
-  systemd.services.prometheus-lvm-exporter = {
-    enable = true;
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.lvm-exporter}/bin/prometheus-lvm-exporter --web.listen-address 127.0.0.1:9012 --command=${pkgs.lvm2.bin}/bin/lvm";
-    };
-  };
-
-  services.apcupsd = {
-    enable = true;
   };
 
   services.prometheus = {
@@ -241,61 +365,82 @@
       }
       {
         job_name = "comed";
+        scrape_interval = "10s";
         static_configs = [
           { targets = [ "127.0.0.1:9010" ]; }
         ];
       }
       {
-        job_name = "lvm";
-        static_configs = [
-          { targets = [ "127.0.0.1:9012" ]; }
-        ];
-      }
-      {
         job_name = "nodexporter";
+        scrape_interval = "5s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ]; }
         ];
       }
       {
-        job_name = "apcupsd";
-        static_configs = [
-          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.apcupsd.port}" ]; }
-        ];
-      }
-      {
         job_name = "smartctl";
+        scrape_interval = "1m";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.smartctl.port}" ]; }
         ];
       }
       {
         job_name = "nginx";
+        scrape_interval = "1s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.nginx.port}" ]; }
         ];
       }
       {
         job_name = "nginxlog";
+        scrape_interval = "1s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.nginxlog.port}" ]; }
         ];
       }
       {
         job_name = "ping";
+        scrape_interval = "1s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.ping.port}" ]; }
         ];
       }
       {
         job_name = "wireguard";
+        scrape_interval = "5s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.wireguard.port}" ]; }
+        ];
+      }
+      {
+        job_name = "zfs";
+        scrape_interval = "5s";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.zfs.port}" ]; }
+        ];
+      }
+      {
+        job_name = "process";
+        scrape_interval = "5s";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.process.port}" ]; }
         ];
       }
     ];
 
     exporters = {
+      process = {
+        enable = true;
+        settings.process_names = [
+          # { name = "{{.Matches.Wrapped}} {{ .Matches.Args }}"; cmdline = [ "^/nix/store[^ ]*/(?P<Wrapped>[^ /]*) (?P<Args>.*)" ]; }
+          { name = "{{.Comm}}"; cmdline = [ ".+" ]; }
+        ];
+        listenAddress = "127.0.0.1";
+      };
+      zfs = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+      };
       wireguard = { enable = true; };
       ping = {
         enable = true;
@@ -306,7 +451,7 @@
             "1.1.1.1"
             "10.100.0.1"
             "turb.io"
-            "udm-se.local"
+            "udm-se.lan"
           ];
         };
       };
@@ -370,15 +515,7 @@
         listenAddress = "127.0.0.1";
         port = 9092;
       };
-      apcupsd = {
-        enable = true;
-      };
     };
-  };
-
-  fileSystems."/mnt" = {
-    device = "/dev/group/five";
-    options = [ "nofail" ];
   };
 
   #boot.uki.settings.UKI.Cmdline = "init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}";

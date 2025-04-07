@@ -151,6 +151,7 @@ in
 
         '';
         "niri/config.kdl".source = ./config/niri/config.kdl;
+        "wallpaper".source = wallpaper;
         "sway/config".text = (
           builtins.replaceStrings
             [ "NIX_REPLACE_WALLPAPER" "NIX_REPLACE_GNOME_POLKIT" ]
@@ -159,7 +160,7 @@ in
         );
         "waybar/config".text =
           builtins.replaceStrings
-            [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" "NIX_LOCK_BIN" ]
+            [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" ]
             [
               (builtins.toString (pkgs.writeShellScript "yubi-waybar-status"
                 ''
@@ -195,10 +196,6 @@ in
                       read";
                 ''
               ))
-
-              (
-                "${./bin/block}"
-              )
             ]
             (builtins.readFile ./config/waybar/config)
         ;
@@ -321,7 +318,6 @@ in
       profiles."lbgu1zmc.default" = {
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           tree-style-tab
-          onepassword-password-manager
           metamask
           ublock-origin
         ];

@@ -3,19 +3,22 @@
   desktop = with pkgs; [
     #urbit
 
+    _1password-gui
+    _1password-cli
+
     uhubctl
     fwupd
 
     discord
+    element-desktop
+
     nixpkgs-fmt
     chromium
     alacritty
     pavucontrol
     blueberry
     spotify
-    mako # notification daemon
     pass
-
     lxappearance
     gtk_engines
     gtk-engine-murrine
@@ -31,6 +34,17 @@
     gnome.dconf-editor
     swaylock
     swayidle
+    mako
+    swaybg
+    xwayland-satellite # x under niri
+    syncthingtray
+    wf-recorder
+
+    # bluetooth tray
+
+    # network manager tray
+    networkmanagerapplet
+
     # need pactl for sway stuff
     pulseaudio
 
@@ -50,7 +64,6 @@
 
     docker-compose
     vagrant
-    ansible
 
     gnome.nautilus
     gnome.file-roller
@@ -103,10 +116,19 @@
     darktable
     kdenlive
     ocl-icd
+
+    cubicsdr
+    ffmpeg
+    gnome-power-manager
+    gparted
+    gnupg
+    inkscape
+    imagemagick
+    lan-mouse
+    logisim
   ];
 
   core = with pkgs; [
-    mosh
     wget
     git
     htop
@@ -114,6 +136,7 @@
     zsh
     fish
     silver-searcher
+    pv
 
     gnumake
     gdb
@@ -123,10 +146,12 @@
     cloc
 
     ncdu
+    dfc
 
     bind.dnsutils
     linuxPackages.perf
     iptables
+    nftables
 
     entr
 
@@ -135,5 +160,13 @@
 
     tmux
     wireguard-tools
+
+    nil # nix langauge server
+
+    iperf
+    iotop
+    nethogs
+    nmap
+    progress
   ];
 }

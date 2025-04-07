@@ -1,6 +1,10 @@
 { pkgs, repos, ... }: {
   environment.variables = { EDITOR = "vim"; };
 
+  environment.systemPackages = with pkgs; [
+    ripgrep
+  ];
+
   programs.neovim = {
     enable = true;
 
@@ -36,7 +40,7 @@
           trouble-nvim
 
           nvim-treesitter # and ast based syntax highlighting
-          nvim-cmp # note: used by avante-nvim
+          nvim-cmp
           render-markdown-nvim
 
           vim-gitgutter
@@ -50,7 +54,6 @@
           vim-misc # ?????
           echodoc-vim # print function signatures in command line
           fzf-vim # for ctrl-p and ctrl-/
-          # vim-go # snazzy go support TODO: no arm support???
           popup-nvim # [wip] pop api from vim in neovim
           telescope-nvim # alternative fzf
           avante-nvim
@@ -75,7 +78,7 @@
             version = "1";
             src = repos.lsp-lines-nvim;
           })
-        ];
+        ] ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else []);
       };
     };
   };

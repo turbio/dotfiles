@@ -1,4 +1,4 @@
-{ config, pkgs, stdenv, lib, factorio-utils, ... }: {
+{ pkgs, ... }: {
   services.factorio = {
     enable = true;
     saveName = "nixtorio";

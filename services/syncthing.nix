@@ -1,11 +1,16 @@
-{ lib, ... }: {
+{ lib, hostname, ... }: {
   services.syncthing = {
     enable = lib.mkDefault false;
     user = "turbio";
     group = "users";
-    openDefaultPorts = lib.mkDefault false;
+    openDefaultPorts = true; # todo(turbio): magic hostnames
     settings = {
-      options.urAccepted = -1;
+      options = {
+        urAccepted = -1;
+        # globalAnnounceEnabled = false; todo(turbio): disable this
+        localAnnounceEnabled = true;
+        natEnabled = false;
+      };
       folders = {
         "photos" = {
           enable = lib.mkDefault false;
@@ -17,8 +22,21 @@
           path = lib.mkDefault "/none";
           devices = [ "ballos" "gero" "itoh" ];
         };
+        "notes" = {
+          enable = lib.mkDefault false;
+          path = lib.mkDefault "/none";
+          devices = [ "ballos" "gero" "iphone" ];
+        };
+        "ios_photos" = {
+          enable = lib.mkDefault false;
+          path = lib.mkDefault "/none";
+          devices = [ "ballos" "iphone" ];
+        };
       };
       devices = {
+        iphone = {
+          id = "QJTQAXZ-H67T4R2-5TOKD3Y-LKGTNPA-GF5NDQR-6X2CPVG-UHPTDOR-ER6SGAE";
+        };
         ballos = {
           id = "6SH2YN7-U5D7HOJ-NE4QYNS-E3MIXKO-XIWYIUA-TZBEAHU-4LH3XFK-VHLBGAQ";
         };

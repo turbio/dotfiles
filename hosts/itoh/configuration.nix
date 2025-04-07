@@ -1,11 +1,11 @@
-{ config, pkgs, ... }: {
+{ ... }: {
   isDesktop = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.interfaces.enp23s0.useDHCP = true;
-  networking.firewall.enable = true;
+  networking.firewall.enable = false;
 
   systemd.services.NetworkManager-wait-online.enable = false;
 
@@ -17,11 +17,11 @@
       size = 32 * 1024;
     }
   ];
-  boot.resumeDevice = "/swapfile";
-  boot.kernelParams = [ "resume_offset=63858427" ];
+  #boot.resumeDevice = "/swapfile";
+  #boot.kernelParams = [ "resume_offset=63858427" ];
 
   fileSystems."/sync" = {
-    device = "192.168.86.113:/mnt/sync";
+    device = "10.100.0.10:/mnt/sync";
     fsType = "nfs";
     options = [
       "rw"

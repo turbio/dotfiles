@@ -131,7 +131,7 @@
 
     netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable.nix ];
 
-    nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
+    #nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
 
     # Spits out the kernel and initrd for pxe booting a host.
     netbootableSystems = mapEachHost (h: nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-${h}" {

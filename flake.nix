@@ -88,7 +88,7 @@
               ./configuration.nix
               ./desktop.nix
               ./home.nix
-              ./system_vim.nix
+              ./vim.nix
               ./services/syncthing.nix
               (./hosts + "/${hostname}" + /configuration.nix)
               (./hosts + "/${hostname}" + /hardware-configuration.nix)
@@ -105,9 +105,7 @@
                 {
                   nixpkgs.overlays = [
                     (final: prev: {
-                      # TODO(turbio): until nil has a release including pipe-operators
-                      # (https://github.com/oxalica/nil/commit/52304da8e9748feff559ec90cb1f4873eda5cee1)
-                      nil = inputs.nil-ls.outputs.packages.x86_64-linux.nil;
+                      nil = inputs.nil-ls.outputs.packages.x86_64-linux.nil; # TODO(turbio): until nil has a release including pipe-operators (https://github.com/oxalica/nil/commit/52304da8e9748feff559ec90cb1f4873eda5cee1)
                       saleae-logic-2 = pkgs.callPackage ./packages/saleae-logic-2.nix { };
                     })
                   ];

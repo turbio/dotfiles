@@ -8,6 +8,8 @@ let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
 in
 {
+  documentation.man.generateCaches = false; # building the cache takes forver and I don't use it
+
   services.fwupd.enable = true;
 
   nixpkgs.overlays = [

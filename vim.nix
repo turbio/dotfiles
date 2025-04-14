@@ -61,6 +61,8 @@
           telescope-nvim # alternative fzf
           avante-nvim
 
+          indent-blankline-nvim
+
           (pkgs.vimUtils.buildVimPlugin {
             pname = "muble";
             version = "1";

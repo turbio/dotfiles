@@ -23,6 +23,7 @@ vim.opt.relativenumber = true
 vim.opt.undofile = true
 vim.opt.undoreload = 10000
 vim.opt.list = true
+vim.opt.listchars = "trail:·,nbsp:·"
 vim.opt.listchars = "tab:┊ ,trail:·,nbsp:·"
 vim.opt.fillchars = "vert:┃"
 vim.opt.lazyredraw = true
@@ -50,6 +51,13 @@ vim.opt.smartcase = true
 vim.opt.ignorecase = true
 
 vim.opt.gdefault = true
+
+require('ibl').setup({
+	indent = {
+		char = '┊',
+		tab_char = '┊',
+	},
+})
 
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
 vim.keymap.set('n', 'gf', vim.lsp.buf.format)
@@ -281,7 +289,7 @@ vim.api.nvim_create_autocmd(
 )
 
 vim.api.nvim_create_autocmd(
-	{"WinEnter","InsertLeave"},
+	{"BufWinEnter", "WinEnter","InsertLeave"},
 	{ callback = function()  vim.opt.cursorline = true end }
 )
 

@@ -1,10 +1,17 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
-  root = (pkgs.writeTextDir "index.txt" ''
-    https://nohello.net/
-    https://dontasktoask.com/
-    https://xyproblem.info/
-  '');
+  root = (
+    pkgs.writeTextDir "index.txt" ''
+      https://nohello.net/
+      https://dontasktoask.com/
+      https://xyproblem.info/
+    ''
+  );
 in
 {
   services.nginx.virtualHosts."protip.turb.io" = {

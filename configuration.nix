@@ -1,4 +1,9 @@
-{ lib, hostname, localpkgs, pkgs, ... }:
+{
+  hostname,
+  localpkgs,
+  pkgs,
+  ...
+}:
 let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
 in
@@ -7,94 +12,11 @@ in
 
   nixpkgs.overlays = [
     (final: prev: {
-      #bambu-studio = unstablepkgs.bambu-studio;
-      #orca-slicer = unstablepkgs.orca-slicer;
-    })
-
-    (final: prev: {
-      #saleae-logic-2 = prev.saleae-logic-2.overrideAttrs (old: {
-      #src = pkgs.fetchurl {
-      #url = "https://downloads.saleae.com/logic2/Logic-2.4.10-linux-x64.AppImage";
-      #hash = "sha256-aKD1va9ODPWtTBI3vuqjCSne+Y4DWicMkNBlcb6OJyk=";
-      #};
-      #});
-
-      saleae-logic-2 =
-        let
-          name = "saleae-logic-2";
-          version = "2.4.10";
-          src = pkgs.fetchurl {
-            url = "https://downloads.saleae.com/logic2/Logic-${version}-linux-x64.AppImage";
-            hash = "sha256-aKD1va9ODPWtTBI3vuqjCSne+Y4DWicMkNBlcb6OJyk=";
-          };
-          desktopItem = pkgs.makeDesktopItem {
-            inherit name;
-            exec = name;
-            icon = "Logic";
-            comment = "Software for Saleae logic analyzers";
-            desktopName = "Saleae Logic";
-            genericName = "Logic analyzer";
-            categories = [ "Development" ];
-          };
-        in
-        pkgs.appimageTools.wrapType2 {
-          inherit name src;
-
-          extraInstallCommands =
-            let
-              appimageContents = pkgs.appimageTools.extractType2 { inherit name src; };
-            in
-            ''
-              mkdir -p $out/etc/udev/rules.d
-              cp ${appimageContents}/resources/linux-x64/99-SaleaeLogic.rules $out/etc/udev/rules.d/
-              mkdir -p $out/share/pixmaps
-              ln -s ${desktopItem}/share/applications $out/share/
-              cp ${appimageContents}/usr/share/icons/hicolor/256x256/apps/Logic.png $out/share/pixmaps/Logic.png
-            '';
-
-          extraPkgs = pkgs: with pkgs; [
-            wget
-            unzip
-            glib
-            xorg.libX11
-            xorg.libxcb
-            xorg.libXcomposite
-            xorg.libXcursor
-            xorg.libXdamage
-            xorg.libXext
-            xorg.libXfixes
-            xorg.libXi
-            xorg.libXrender
-            xorg.libXtst
-            nss
-            nspr
-            dbus
-            gdk-pixbuf
-            gtk3
-            pango
-            atk
-            cairo
-            expat
-            xorg.libXrandr
-            xorg.libXScrnSaver
-            alsa-lib
-            at-spi2-core
-            cups
-            libxcrypt-legacy
-          ];
-
-          meta = with pkgs.lib; {
-            homepage = "https://www.saleae.com/";
-            description = "Software for Saleae logic analyzers";
-            license = licenses.unfree;
-            platforms = [ "x86_64-linux" ];
-            maintainers = with maintainers; [ j-hui newam ];
-          };
-        };
     })
   ];
 
-  networking.hosts = { # TODO: ewww
+  networking.hosts = {
+    # TODO: ewww VPN FIXE THIS
     "10.100.0.10" = [
       "int.turb.io"
       "bt.int.turb.io"
@@ -106,7 +28,6 @@ in
     ];
   };
 
-
   nixpkgs.config.allowUnfree = true;
 
   nix = {
@@ -115,7 +36,16 @@ in
     settings = {
       trusted-users = [ "turbio" ];
 
+      # todo(turbio): centralize self-hosted cache logic
+      # how should we handle pushing n stuff
+      substituters = [
+        "https://nixcache.turb.io"
+      ];
+      trusted-public-keys = [
+        "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" # TODO(turbio): key management
+      ];
     };
+
     package = pkgs.nixVersions.latest;
     extraOptions = ''
       experimental-features = nix-command flakes pipe-operators ca-derivations
@@ -151,12 +81,12 @@ in
     uid = 1000;
 
     # probably a bad idea lmao
-    hashedPassword = "$6$UnnB5IybU$cBw9zHoM7xTdwyXnAAbeXOGoqQQtzbYsuPqTDjpGF3J3H3WaarzAEtoBxXOImZlmmzY2amSqSgwUbEP0.ma3w0";
+    hashedPassword = "$6$UnnB5IybU$cBw9zHoM7xTdwyXnAAbeXOGoqQQtzbYsuPqTDjpGF3J3H3WaarzAEtoBxXOImZlmmzY2amSqSgwUbEP0.ma3w0"; # TODO(turbio): key management
 
     #shell = pkgs.zsh;
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio" # TODO(turbio): key management
     ];
   };
 

@@ -1,4 +1,5 @@
-{ lib, hostname, ... }: {
+{ lib, hostname, ... }:
+{
   services.syncthing = {
     enable = lib.mkDefault false;
     user = "turbio";
@@ -15,22 +16,36 @@
         "photos" = {
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
-          devices = [ "ballos" "gero" ];
+          devices = [
+            "ballos"
+            "gero"
+          ];
         };
         "code" = {
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
-          devices = [ "ballos" "gero" "itoh" ];
+          devices = [
+            "ballos"
+            "gero"
+            "itoh"
+          ];
         };
         "notes" = {
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
-          devices = [ "ballos" "gero" "iphone" ];
+          devices = [
+            "ballos"
+            "gero"
+            "iphone"
+          ];
         };
         "ios_photos" = {
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
-          devices = [ "ballos" "iphone" ];
+          devices = [
+            "ballos"
+            "iphone"
+          ];
         };
       };
       devices = {

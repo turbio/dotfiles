@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   isDesktop = true;
 
   boot.loader.systemd-boot.enable = true;

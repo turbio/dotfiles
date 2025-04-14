@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   isDesktop = true;
 
   boot.loader.systemd-boot.enable = true;
@@ -35,6 +36,9 @@
     group = "users";
     configDir = "/home/turbio/.config/syncthing";
     dataDir = "/home/turbio";
-    settings.folders."code" = { enable = true; path = "~/code"; };
+    settings.folders."code" = {
+      enable = true;
+      path = "~/code";
+    };
   };
 }

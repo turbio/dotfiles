@@ -1,4 +1,10 @@
-{ assignments, pkgs, hostname, lib, ... }:
+{
+  assignments,
+  pkgs,
+  hostname,
+  lib,
+  ...
+}:
 let
   self = assignments.vpn.hosts.${hostname};
   reachable = self ? "endpoint";
@@ -33,18 +39,27 @@ in
       '';
 
       peers =
-          removeAttrs assignments.vpn.hosts [ hostname ]
-          |> builtins.attrNames
-          |> map (n: { hostname = n; } // builtins.getAttr n assignments.vpn.hosts)
-          |> map ({ hostname, ip, pubkey, router ? false, endpoint ? null }: {
-              publicKey = pubkey;
-              allowedIPs = [
-                (if router then assignments.vpn.subnet else "${ip}/32" )
-              ];
-              endpoint = if endpoint != null then "${endpoint}:51820" else "${hostname}.local:51820";
-              persistentKeepalive = 25;
-              dynamicEndpointRefreshSeconds = 30;
-            });
+        removeAttrs assignments.vpn.hosts [ hostname ]
+        |> builtins.attrNames
+        |> map (n: { hostname = n; } // builtins.getAttr n assignments.vpn.hosts)
+        |> map (
+          {
+            hostname,
+            ip,
+            pubkey,
+            router ? false,
+            endpoint ? null,
+          }:
+          {
+            publicKey = pubkey;
+            allowedIPs = [
+              (if router then assignments.vpn.subnet else "${ip}/32")
+            ];
+            endpoint = if endpoint != null then "${endpoint}:51820" else "${hostname}.local:51820";
+            persistentKeepalive = 25;
+            dynamicEndpointRefreshSeconds = 30;
+          }
+        );
     };
   };
 }

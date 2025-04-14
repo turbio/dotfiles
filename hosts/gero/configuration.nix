@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   isDesktop = true;
 
   services.upower.enable = true;
@@ -28,9 +29,18 @@
     configDir = "/home/turbio/.config/syncthing";
     dataDir = "/home/turbio";
     settings.folders = {
-      "photos" = { enable = true; path = "~/photos"; };
-      "code" = { enable = true; path = "~/code"; };
-      "notes" = { enable = true; path = "~/notes"; };
+      "photos" = {
+        enable = true;
+        path = "~/photos";
+      };
+      "code" = {
+        enable = true;
+        path = "~/code";
+      };
+      "notes" = {
+        enable = true;
+        path = "~/notes";
+      };
     };
   };
 
@@ -50,7 +60,7 @@
   };
 
   boot.kernelParams = [
-    #"quiet" "udev.log_level=0" 
+    #"quiet" "udev.log_level=0"
   ];
 
   services.logind = {

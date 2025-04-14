@@ -1,4 +1,15 @@
-{ name, host, dataDir ? "/srv/http/${host}" }: { config, pkgs, lib, ... }: {
+{
+  name,
+  host,
+  dataDir ? "/srv/http/${host}",
+}:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   services.phpfpm.pools.${name} = {
     user = name;
     settings = {
@@ -40,7 +51,7 @@
   users.users.${name} = {
     isSystemUser = true;
     createHome = true;
-    group  = name;
+    group = name;
   };
-  users.groups.${name} = {};
+  users.groups.${name} = { };
 }

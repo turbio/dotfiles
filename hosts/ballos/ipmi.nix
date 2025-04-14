@@ -1,9 +1,12 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   nixpkgs.overlays = [
     (final: prev: {
-      freeipmi = prev.freeipmi.overrideAttrs (finalAttrs: prevAttrs: {
-        configureFlags = prevAttrs.configureFlags ++ [ "ac_dont_check_for_root=yes" ];
-      });
+      freeipmi = prev.freeipmi.overrideAttrs (
+        finalAttrs: prevAttrs: {
+          configureFlags = prevAttrs.configureFlags ++ [ "ac_dont_check_for_root=yes" ];
+        }
+      );
     })
   ];
 
@@ -12,8 +15,11 @@
     DynamicUser = false;
   };
 
-  users.groups.ipmi-exporter = {};
-  users.users.ipmi-exporter = { isSystemUser = true; group = "ipmi-exporter"; };
+  users.groups.ipmi-exporter = { };
+  users.users.ipmi-exporter = {
+    isSystemUser = true;
+    group = "ipmi-exporter";
+  };
   services.udev.extraRules = ''
     KERNEL=="ipmi*", MODE="660", GROUP="ipmi-exporter"
   '';

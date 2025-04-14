@@ -1,4 +1,10 @@
-{ config, pkgs, lib, repos, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  repos,
+  ...
+}:
 let
   src = repos.evaldb;
 
@@ -25,11 +31,11 @@ let
     '';
   };
 
-  gatewayResources = pkgs.runCommand "gateway-resources" {} ''
-      mkdir -p $out
-      cp -r ${src}/client $out/
-      cp ${evalers}/luaval $out/
-      cp ${evalers}/duktape $out/
+  gatewayResources = pkgs.runCommand "gateway-resources" { } ''
+    mkdir -p $out
+    cp -r ${src}/client $out/
+    cp ${evalers}/luaval $out/
+    cp ${evalers}/duktape $out/
   '';
 
   gateway = pkgs.buildGoModule {
@@ -94,7 +100,12 @@ in
       PrivateDevices = true;
       PrivateTmp = true;
       ProtectHome = true;
-      InaccessiblePaths = [ "/pool" "/etc" "/home" "/mnt" ];
+      InaccessiblePaths = [
+        "/pool"
+        "/etc"
+        "/home"
+        "/mnt"
+      ];
     };
   };
 }

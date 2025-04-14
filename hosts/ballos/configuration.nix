@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   imports = [
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
@@ -31,7 +37,7 @@
     };
   };
 
-  users.groups.locate = {};
+  users.groups.locate = { };
   users.users.locate = {
     group = "locate";
     description = "locate Daemon user";
@@ -40,7 +46,7 @@
   };
   services.locate = {
     enable = true;
-    pruneNames = [];
+    pruneNames = [ ];
     localuser = "locate";
   };
 
@@ -66,8 +72,7 @@
 
   networking.nftables = {
     enable = true;
-    ruleset = ''
-    '';
+    ruleset = '''';
   };
 
   services.vector = {
@@ -84,7 +89,7 @@
       api_version = "auto"
       endpoints = [ "http://localhost:9200" ]
       id_key = "id"
-  '';
+    '';
   };
 
   services.elasticsearch = {
@@ -101,9 +106,18 @@
     package = pkgs.postgresql;
   };
 
-
-  networking.firewall.allowedUDPPorts = [ 111 2049 10809 5201 ];
-  networking.firewall.allowedTCPPorts = [ 111 2049 10809 5201 ];
+  networking.firewall.allowedUDPPorts = [
+    111
+    2049
+    10809
+    5201
+  ];
+  networking.firewall.allowedTCPPorts = [
+    111
+    2049
+    10809
+    5201
+  ];
   services.nfs.server = {
     enable = true;
     exports = ''
@@ -213,10 +227,22 @@
     configDir = "/mnt/sync/config";
     dataDir = "/mnt/sync";
     settings.folders = {
-      "photos" = { enable = true; path = "/mnt/sync/photos"; };
-      "code" = { enable = true; path = "/mnt/sync/code"; };
-      "notes" = { enable = true; path = "/mnt/sync/notes"; };
-      "ios_photos" = { enable = true; path = "/mnt/sync/ios_photos"; };
+      "photos" = {
+        enable = true;
+        path = "/mnt/sync/photos";
+      };
+      "code" = {
+        enable = true;
+        path = "/mnt/sync/code";
+      };
+      "notes" = {
+        enable = true;
+        path = "/mnt/sync/notes";
+      };
+      "ios_photos" = {
+        enable = true;
+        path = "/mnt/sync/ios_photos";
+      };
     };
   };
 
@@ -238,8 +264,8 @@
       volumes = [ "home-assistant:/config" ];
       environment.TZ = "America/Chicago";
       image = "ghcr.io/home-assistant/home-assistant:stable"; # Warning: if the tag does not change, the image will not be updated
-      extraOptions = [ 
-        "--network=host" 
+      extraOptions = [
+        "--network=host"
       ];
     };
   };
@@ -269,8 +295,17 @@
   };
 
   nixpkgs.overlays = [
-    (final: { lib, buildGoModule, fetchFromGitHub, nixosTests, ... }: {
-      prometheus-idrac-exporter = buildGoModule rec {
+    (
+      final:
+      {
+        lib,
+        buildGoModule,
+        fetchFromGitHub,
+        nixosTests,
+        ...
+      }:
+      {
+        prometheus-idrac-exporter = buildGoModule rec {
           pname = "idrac_exporter";
           version = "unstable-2023-06-29";
 
@@ -285,7 +320,10 @@
 
           patches = [ ./idrac-exporter/config-from-environment.patch ];
 
-          ldflags = [ "-s" "-w" ];
+          ldflags = [
+            "-s"
+            "-w"
+          ];
 
           doCheck = true;
 
@@ -299,30 +337,39 @@
             maintainers = with maintainers; [ codec ];
           };
         };
-    })
+      }
+    )
 
-    (final: { buildGoModule, fetchFromGitHub, ... }: {
-      prometheus-comed-exporter = buildGoModule {
-        pname = "comed_exporter";
-        version = "1.0";
-        src = fetchFromGitHub {
-          owner = "kklipsch";
-          repo = "comed_exporter";
-          rev = "1a90f09ceb0ebdfe09c2b307b4080d81b7d8de5f";
-          hash = "sha256-oDvOp7SGz7RTWW3b74I1V3WhiNsHvO3hv01Gr4UkyiY=";
+    (
+      final:
+      { buildGoModule, fetchFromGitHub, ... }:
+      {
+        prometheus-comed-exporter = buildGoModule {
+          pname = "comed_exporter";
+          version = "1.0";
+          src = fetchFromGitHub {
+            owner = "kklipsch";
+            repo = "comed_exporter";
+            rev = "1a90f09ceb0ebdfe09c2b307b4080d81b7d8de5f";
+            hash = "sha256-oDvOp7SGz7RTWW3b74I1V3WhiNsHvO3hv01Gr4UkyiY=";
+          };
+
+          vendorHash = null;
+
+          doCheck = false;
         };
-
-        vendorHash = null;
-
-        doCheck = false;
-      };
-    })
+      }
+    )
   ];
 
   systemd.services.fanspeed = {
     enable = true;
     wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.ipmitool pkgs.bc pkgs.bash ];
+    path = [
+      pkgs.ipmitool
+      pkgs.bc
+      pkgs.bash
+    ];
     serviceConfig = {
       User = "root";
       ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --verbose-log --disengage-temp 74 --target-temp 55";
@@ -352,15 +399,24 @@
         job_name = "comed_json";
         metrics_path = "/probe";
         params = {
-          module = ["comed"];
+          module = [ "comed" ];
         };
         static_configs = [
           { targets = [ "https://hourlypricing.comed.com/api?type=currenthouraverage" ]; }
         ];
         relabel_configs = [
-          { source_labels = [ "__address__" ]; target_label = "__param_target"; }
-          { source_labels = [ "__param_target" ]; target_label = "instance"; }
-          { target_label = "__address__"; replacement = "127.0.0.1:${toString config.services.prometheus.exporters.json.port}"; }
+          {
+            source_labels = [ "__address__" ];
+            target_label = "__param_target";
+          }
+          {
+            source_labels = [ "__param_target" ];
+            target_label = "instance";
+          }
+          {
+            target_label = "__address__";
+            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.json.port}";
+          }
         ];
       }
       {
@@ -433,7 +489,10 @@
         enable = true;
         settings.process_names = [
           # { name = "{{.Matches.Wrapped}} {{ .Matches.Args }}"; cmdline = [ "^/nix/store[^ ]*/(?P<Wrapped>[^ /]*) (?P<Args>.*)" ]; }
-          { name = "{{.Comm}}"; cmdline = [ ".+" ]; }
+          {
+            name = "{{.Comm}}";
+            cmdline = [ ".+" ];
+          }
         ];
         listenAddress = "127.0.0.1";
       };
@@ -441,7 +500,9 @@
         enable = true;
         listenAddress = "127.0.0.1";
       };
-      wireguard = { enable = true; };
+      wireguard = {
+        enable = true;
+      };
       ping = {
         enable = true;
         listenAddress = "127.0.0.1";
@@ -523,7 +584,6 @@
   #  enable = true;
   #  installHook = pkgs.writeScript "install-bootloader" ''
   #    cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${arch}.efi /efi/EFI/BOOT/BOOT${lib.toUpper arch}.EFI
-
 
   #  ''
 

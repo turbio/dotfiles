@@ -1,30 +1,39 @@
 { pkgs, ... }:
 let
-  root = (pkgs.writeTextDir "index.txt" ''
-    hey!
-    ====
+  root = (
+    pkgs.writeTextDir "index.txt" ''
+      hey!
+      ====
 
-    i'm mason / turbio
+      i'm mason / turbio
 
-    🐧
-  '');
+      🐧
+    ''
+  );
 
-  vhost404 = (pkgs.writeTextDir "404.txt" ''
-    404!
-    ====
+  vhost404 = (
+    pkgs.writeTextDir "404.txt" ''
+      404!
+      ====
 
-    uh oh
-  '');
+      uh oh
+    ''
+  );
 
-  turbio404 = (pkgs.writeTextDir "404.txt" ''
-    404!
-    ====
+  turbio404 = (
+    pkgs.writeTextDir "404.txt" ''
+      404!
+      ====
 
-    but like what were you expecting?
-  '');
+      but like what were you expecting?
+    ''
+  );
 in
 {
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   services.nginx.virtualHosts."turb.io" = {
     forceSSL = true;

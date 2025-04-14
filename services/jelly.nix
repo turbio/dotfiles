@@ -1,10 +1,11 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   services.jellyfin = {
     group = "media";
     enable = true;
   };
 
-  users.groups.media = {};
+  users.groups.media = { };
   users.users.qbittorrent = {
     group = "media";
     home = "/var/lib/qbittorrent";

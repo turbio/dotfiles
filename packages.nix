@@ -161,7 +161,9 @@
     tmux
     wireguard-tools
 
-    nil # nix langauge server
+    # should all my machines really have nix tooling???
+    nil
+    nixfmt-rfc-style
 
     iperf
     iotop

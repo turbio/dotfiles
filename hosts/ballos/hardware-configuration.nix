@@ -1,4 +1,11 @@
-{ config, lib, pkgs, modulesPath, ... }: {
+{
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}:
+{
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   boot.loader.grub.enable = false;
@@ -12,7 +19,12 @@
   boot.zfs.extraPools = [ "pool" ];
   networking.hostId = "00ba1105";
 
-  boot.initrd.availableKernelModules = [ "ahci" "ehci_pci" "usbhid" "sd_mod" ];
+  boot.initrd.availableKernelModules = [
+    "ahci"
+    "ehci_pci"
+    "usbhid"
+    "sd_mod"
+  ];
   boot.initrd.kernelModules = [
     "kvm-intel"
 
@@ -32,7 +44,10 @@
     "/boot" = {
       device = "/dev/disk/by-label/boot";
       fsType = "vfat";
-      options = [ "fmask=0022" "dmask=0022" ];
+      options = [
+        "fmask=0022"
+        "dmask=0022"
+      ];
     };
   };
 
@@ -41,21 +56,21 @@
   ];
 
   /*
-  fileSystems = {
-    "/" = {
-      device = "tmproot";
-      fsType = "tmpfs";
-      options = [ "defaults" "mode=755" "size=50%" ];
+    fileSystems = {
+      "/" = {
+        device = "tmproot";
+        fsType = "tmpfs";
+        options = [ "defaults" "mode=755" "size=50%" ];
+      };
+      "/nix/store" = {
+        device = "/dev/disk/by-label/nix-store";
+      };
+      "/boot" = {
+        device = "/dev/disk/by-label/BOOT";
+      };
     };
-    "/nix/store" = {
-      device = "/dev/disk/by-label/nix-store";
-    };
-    "/boot" = {
-      device = "/dev/disk/by-label/BOOT";
-    };
-  };
 
-  swapDevices = [ ];
+    swapDevices = [ ];
   */
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

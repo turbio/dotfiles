@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   services.factorio = {
     enable = true;
     saveName = "nixtorio";
@@ -17,7 +18,8 @@
             url = "https://github.com/remijouannet/graftorio2/releases/download/0.0.15/graftorio2_0.0.15.zip";
             sha256 = "sha256:1bf7yjp5is3ga0g4n85ni577g2n8k5kz48rbia8bbq8f2208awqd";
           };
-        })
+        }
+      )
     ];
   };
 

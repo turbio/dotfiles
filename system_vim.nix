@@ -1,5 +1,8 @@
-{ pkgs, repos, ... }: {
-  environment.variables = { EDITOR = "vim"; };
+{ pkgs, repos, ... }:
+{
+  environment.variables = {
+    EDITOR = "vim";
+  };
 
   environment.systemPackages = with pkgs; [
     ripgrep
@@ -78,7 +81,7 @@
             version = "1";
             src = repos.lsp-lines-nvim;
           })
-        ] ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else []);
+        ] ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else [ ]);
       };
     };
   };

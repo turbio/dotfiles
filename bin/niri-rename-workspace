@@ -2,7 +2,7 @@
 
 current_name="$(niri msg -j workspaces | jq '.[] | select (.is_focused and .is_active) | .name' -r)"
 
-next_name="$(echo "$current_name" | wofi --dmenu)"
+next_name="$(echo "$current_name" | fuzzel --dmenu)"
 
 if [ -z "$next_name" ]; then
 	niri msg action unset-workspace-name

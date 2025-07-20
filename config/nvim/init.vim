@@ -59,6 +59,10 @@ require('ibl').setup({
 	},
 })
 
+local codewindow = require('codewindow')
+codewindow.setup()
+codewindow.apply_default_keybinds()
+
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
 vim.keymap.set('n', 'gf', vim.lsp.buf.format)
 vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition)
@@ -77,12 +81,8 @@ vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3
 
---vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 237, fg = "#cccccc", bg = "#3a3a3a" })
---vim.api.nvim_set_hl(0, 'FloatBorder', { ctermfg = 15, ctermbg = 237, fg = "#cccccc", bg = "#3a3a3a" })
-
 vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 0 })
 vim.api.nvim_set_hl(0, 'FloatBorder', { fg = "#5c5c5c", ctermbg = 0 })
-vim.api.nvim_set_hl(0, 'TelescopeBorder', { link = 'FloatBorder' })
 vim.api.nvim_set_hl(0, 'RenamerBorder', { link = 'FloatBorder' })
 
 require('lsp_signature').setup({
@@ -152,118 +152,7 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require('lspconfig').gopls.setup({ capabilities = capabilities })
 require('lspconfig').rust_analyzer.setup({ capabilities = capabilities })
-require('lspconfig').rust_analyzer.setup({ capabilities = capabilities })
 require('lspconfig').nil_ls.setup({ capabilities = capabilities })
-
-require('render-markdown').setup({})
-
---[[
-require('avante').setup({
-	---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-	provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
-	-- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
-	-- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
-	-- Of course, you can reduce the request frequency by increasing `suggestion.debounce`.
-	auto_suggestions_provider = "claude",
-	cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
-	claude = {
-	  endpoint = "https://api.anthropic.com",
-	  model = "claude-3-5-sonnet-20241022",
-	  temperature = 0,
-	  max_tokens = 4096,
-	},
-	behaviour = {
-	  auto_suggestions = false, -- Experimental stage
-	  auto_set_highlight_group = true,
-	  auto_set_keymaps = true,
-	  auto_apply_diff_after_generation = false,
-	  support_paste_from_clipboard = false,
-	  minimize_diff = true, -- Whether to remove unchanged lines when applying a code block
-	  enable_token_counting = true, -- Whether to enable token counting. Default to true.
-	  enable_cursor_planning_mode = false, -- Whether to enable Cursor Planning Mode. Default to false.
-	},
-	mappings = {
-	  --- @class AvanteConflictMappings
-	  diff = {
-	    ours = "co",
-	    theirs = "ct",
-	    all_theirs = "ca",
-	    both = "cb",
-	    cursor = "cc",
-	    next = "]x",
-	    prev = "[x",
-	  },
-	  suggestion = {
-	    accept = "<M-l>",
-	    next = "<M-]>",
-	    prev = "<M-[>",
-	    dismiss = "<C-]>",
-	  },
-	  jump = {
-	    next = "]" .. "]",
-	    prev = "[" .. "[",
-	  },
-	  submit = {
-	    normal = "<CR>",
-	    insert = "<C-s>",
-	  },
-	  sidebar = {
-	    apply_all = "A",
-	    apply_cursor = "a",
-	    switch_windows = "<Tab>",
-	    reverse_switch_windows = "<S-Tab>",
-	  },
-	},
-	hints = { enabled = true },
-	windows = {
-	  ---@type "right" | "left" | "top" | "bottom"
-	  position = "right", -- the position of the sidebar
-	  wrap = true, -- similar to vim.o.wrap
-	  width = 30, -- default % based on available width
-	  sidebar_header = {
-	    enabled = true, -- true, false to enable/disable the header
-	    align = "center", -- left, center, right for title
-	    rounded = true,
-	  },
-	  input = {
-	    prefix = "> ",
-	    height = 8, -- Height of the input window in vertical layout
-	  },
-	  edit = {
-	    border = "rounded",
-	    start_insert = true, -- Start insert mode when opening the edit window
-	  },
-	  ask = {
-	    floating = false, -- Open the 'AvanteAsk' prompt in a floating window
-	    start_insert = true, -- Start insert mode when opening the ask window
-	    border = "rounded",
-	    ---@type "ours" | "theirs"
-	    focus_on_apply = "ours", -- which diff to focus after applying
-	  },
-	},
-	highlights = {
-	  ---@type AvanteConflictHighlights
-	  diff = {
-	    current = "DiffText",
-	    incoming = "DiffAdd",
-	  },
-	},
-	--- @class AvanteConflictUserConfig
-	diff = {
-	  autojump = true,
-	  ---@type string | fun(): any
-	  list_opener = "copen",
-	  --- Override the 'timeoutlen' setting while hovering over a diff (see :help timeoutlen).
-	  --- Helps to avoid entering operator-pending mode with diff mappings starting with `c`.
-	  --- Disable by setting to -1.
-	  override_timeoutlen = 500,
-	},
-	suggestion = {
-	  debounce = 600,
-	  throttle = 600,
-	},
-})
---]]
 
 -- keep search target centered
 vim.keymap.set('n', 'n', 'nzzzv')
@@ -295,23 +184,6 @@ vim.api.nvim_create_autocmd(
 
 vim.opt.colorcolumn = "80,120,121,122"
 
-require('telescope').setup {
-  defaults = {
-    mappings = {
-      i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
-	['<C-j>'] = require('telescope.actions').move_selection_next,
-	['<C-k>'] = require('telescope.actions').move_selection_previous,
-      },
-    },
-  },
-}
-
-local telescope = require('telescope.builtin')
-vim.keymap.set('n', '<C-p>', telescope.find_files)
-vim.keymap.set('n', '<C-/>', telescope.live_grep)
-
 vim.keymap.set({ 'i' }, 'jk', '<ESC>')
 vim.keymap.set({ 'i' }, 'jK', '<ESC>')
 vim.keymap.set({ 'i' }, 'Jk', '<ESC>')
@@ -319,6 +191,7 @@ vim.keymap.set({ 'i' }, 'JK', '<ESC>')
 
 -- virtual inline diagnostic messages
 require("lsp_lines").setup()
+
 vim.diagnostic.config({
   virtual_text = false,
 })
@@ -361,15 +234,8 @@ nnoremap vv ^vg_
 "Allow saving of files as sudo when I forgot to start vim using sudo.
 cmap w!! w !sudo tee > /dev/null %
 
-"leader {{{
-"strip whitespace
-
-"Toggle Cursor Line
-
-"Reindent the entire file
 nmap <leader>= gg=G``:echo "reindent global"<CR>
 
-"gitgutter {{{
 set signcolumn=yes
 let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
@@ -379,16 +245,11 @@ let g:gitgutter_sign_modified = '~'
 let g:gitgutter_sign_removed = '-'
 let g:gitgutter_sign_modified_removed = '~'
 let g:gitgutter_sign_removed_first_line = '^'
-"}}}
 
-"sneak {{{
-"}}}
-" indentLine {{{
 let g:indentLine_char = '┊'
 let g:indentLine_first_char='┊'
 let g:indentLine_concealcursor=0
 let g:indentLine_showFirstIndentLevel=1
-" }}}
 
 filetype plugin indent on
 

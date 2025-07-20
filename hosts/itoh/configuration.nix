@@ -2,11 +2,12 @@
 {
   isDesktop = true;
 
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.interfaces.enp23s0.useDHCP = true;
-  networking.firewall.enable = false;
 
   systemd.services.NetworkManager-wait-online.enable = false;
 
@@ -22,7 +23,7 @@
   #boot.kernelParams = [ "resume_offset=63858427" ];
 
   fileSystems."/sync" = {
-    device = "10.100.0.10:/mnt/sync";
+    device = "ballos:/mnt/sync";
     fsType = "nfs";
     options = [
       "rw"
@@ -39,6 +40,14 @@
     settings.folders."code" = {
       enable = true;
       path = "~/code";
+    };
+    settings.folders."clips" = {
+      enable = true;
+      path = "~/Pictures/clip";
+    };
+    settings.folders."webcamlog" = {
+      enable = true;
+      path = "~/Pictures/webcamlog";
     };
   };
 }

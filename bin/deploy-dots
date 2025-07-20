@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+
+POSITIONAL_ARGS=()
+
+declare -a BUILD_ON
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--repo)
+			REPO="$2"
+			shift
+			shift
+			;;
+		--no-nom)
+			NO_NOM=1
+			shift
+			;;
+		--offline)
+			OFFLINE=1
+			shift
+			;;
+		-b|--builder)
+			BUILD_ON+=("$2")
+			shift
+			shift
+			;;
+		--no-local-build)
+			NO_LOCAL_BUILD=1
+			shift
+			shift
+			;;
+		--deploy-on)
+			DEPLOY_ON="$2"
+			shift
+			shift
+			;;
+		-h|--help)
+			echo "Usage: $0 [--no-nom] [--build-on <host>] [--deploy-on <host>] [<hostname>]"
+			exit 0
+			;;
+		-*|--*)
+			echo "Unknown option $1"
+			exit 1
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1")
+			shift
+			;;
+	esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+SELFHOST="$(hostname)"
+
+if [ -z "$REPO" ]; then
+	if [ -d "$HOME/code/dotfiles" ]; then
+		REPO="$HOME/code/dotfiles"
+	else
+		echo "can't find dotfiles repo... maybe try passing --repo <path>"
+		exit 1
+	fi
+fi
+
+WHOMST="$1"
+
+if [ -z "$WHOMST" ]; then
+	WHOMST="$SELFHOST"
+fi
+
+if [ -z "$DEPLOY_ON" ]; then
+	DEPLOY_ON="$WHOMST"
+fi
+
+echo "Using dotfiles: $REPO"
+
+cd "$REPO"
+
+echo -n "Building "
+
+if [ "$WHOMST" = "$SELFHOST" ]; then
+	echo -n "self ($WHOMST) "
+else
+	echo -n "$WHOMST "
+fi
+
+echo -n "for "
+
+if [ "$DEPLOY_ON" = "$SELFHOST" ]; then
+	echo -n "self ($DEPLOY_ON) "
+else
+	echo -n "$DEPLOY_ON "
+fi
+
+echo -n "on "
+
+FLAGS="--use-remote-sudo --flake .#${WHOMST} --target-host turbio@${DEPLOY_ON}"
+
+if [ -n "$OFFLINE" ]; then
+	FLAGS="$FLAGS --offline"
+fi
+
+if [ ${#BUILD_ON[@]} -eq 0 ]; then
+	echo "self ($SELFHOST)"
+else
+	echo "${BUILD_ON[@]}"
+
+	# --builders format: "builder <;|\n> ..."
+	# builder: "<hostname> [arch, ...] [ssh identity file] [max parallel builds] [relative speed] [supported feature, ...] [mandatory feature, ...] [base64 public key]"
+	#
+	# eg: "ssh://mac x86_64-darwin ; ssh://beastie i686-linux,x86_64-freebsd"
+
+	for item in "${BUILD_ON[@]}"; do
+		BUILDERS="ssh-ng://turbio@${item} x86_64-linux /home/turbio/.ssh/id_ed25519 32;$BUILDERS"
+	done
+
+	FLAGS="$FLAGS --use-substitutes"
+
+	if [ -n "$NO_LOCAL_BUILD" ]; then
+		FLAGS="$FLAGS --max-jobs 0"
+	fi
+fi
+
+if [ -z "$NO_NOM" ] && command -v nom 1>&2 2>/dev/null; then
+	USE_NOM=1
+	FLAGS="$FLAGS --log-format internal-json -v"
+
+fi
+
+#echo "Building toplevel..."
+#
+#scratch_dir="$(mktemp --tmpdir -d "nixos-toplevel-$WHOMST-deploy-dots.XXXXXXXXXX")"
+#
+#nix \
+#	build \
+#	.#nixosConfigurations."$WHOMST".config.system.build.toplevel \
+#	--out-link "$scratch_dir/toplevel" \
+#	--builders "$BUILDERS" \
+#	-v \
+#	--builders-use-substitutes #--log-format internal-json #|& nom --json
+
+if [ -n "$USE_NOM" ]; then
+	nixos-rebuild switch $FLAGS --builders "$BUILDERS" |& nom --json
+else
+	nixos-rebuild switch $FLAGS --builders "$BUILDERS" -v
+fi

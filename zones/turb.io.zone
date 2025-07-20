@@ -1,0 +1,34 @@
+turb.io. 300 IN A 35.208.90.40
+*.turb.io. 300 IN A 35.208.90.40
+
+; ns
+turb.io. 21600 IN SOA ns1.turb.io. hostmaster.turb.io. 1 21600 3600 259200 300
+turb.io. 21600 IN NS ns1.turb.io.
+turb.io. 21600 IN NS ns2.turb.io.
+ns1.turb.io 300 IN A 35.208.90.40
+ns2.turb.io 300 IN A 35.208.90.40
+
+; vpn gateway
+gateway.turb.io. 300 IN A 35.208.90.40
+
+; internal. TODO: don't
+*.int.turb.io. 300 IN A 100.100.57.46
+
+; google verification
+turb.io. 300 IN TXT "google-site-verification=AcajvYUFYcjku1QXkdYyIpZcYB7ENXt9XeD3nGr7PiM"
+
+; fastmail
+turb.io. 300 IN MX 10 in1-smtp.messagingengine.com.
+turb.io. 300 IN MX 20 in2-smtp.messagingengine.com.
+fm1._domainkey.turb.io. 300 IN CNAME fm1.turb.io.dkim.fmhosted.com.
+fm2._domainkey.turb.io. 300 IN CNAME fm2.turb.io.dkim.fmhosted.com.
+fm3._domainkey.turb.io. 300 IN CNAME fm3.turb.io.dkim.fmhosted.com.
+turb.io. 300 IN TXT "v=spf1 include:spf.messagingengine.com ?all"
+
+; ???
+balrog.turb.io. 300 IN A 35.208.90.40
+dns.turb.io. 300 IN NS turb.io.
+miro.turb.io. 300 IN NS ns1.vercel-dns.com.
+miro.turb.io. 300 IN NS ns2.vercel-dns.com.
+not.turb.io. 300 IN A 104.248.4.38
+sushi.turb.io. 300 IN CNAME 51b51842-30d1-4f19-9347-411d788c5a42.repl.co.

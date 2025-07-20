@@ -19,7 +19,7 @@ in
 
   networking.hosts = {
     # TODO: ewww VPN FIXE THIS
-    "10.100.0.10" = [
+    "100.100.57.46" = [
       "int.turb.io"
       "bt.int.turb.io"
       "jelly.int.turb.io"
@@ -35,22 +35,30 @@ in
   nix = {
     #autoOptimiseStore = true;
 
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+
+
     settings = {
       trusted-users = [ "turbio" ];
 
       # todo(turbio): centralize self-hosted cache logic
       # how should we handle pushing n stuff
-      substituters = [
+      substituters = if hostname != "ballos" then [
         "https://nixcache.turb.io"
-      ];
+      ] else [];
       trusted-public-keys = [
         "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" # TODO(turbio): key management
       ];
     };
 
-    package = pkgs.nixVersions.latest;
+    #package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators ca-derivations
+      experimental-features = nix-command flakes pipe-operators
+      builders-use-substitutes = true
     '';
   };
 
@@ -92,6 +100,12 @@ in
     ];
   };
 
+  programs.ssh.extraConfig = ''
+    ControlMaster auto
+    Host *
+      StrictHostKeyChecking accept-new
+  '';
+
   programs.fish = {
     enable = true;
   };
@@ -120,68 +134,87 @@ in
     show_program_path = false;
   };
 
-  # services.wgvpn = {
-  #   enable = true;
-  #   networks.yep = {
-  #     subnet = "10.38.0.0/24"; # choose something unlikely to conflict
-  #     forwardPorts = [
-  #       {
-  #         destinationHost = "ballos";
-  #         destinationPort = 80;
-  #         sourceHost = "balrog";
-  #         sourcePort = 80;
-  #         proto = "tcp";
-  #       }
-  #       {
-  #         destinationHost = "ballos";
-  #         destinationPort = 443;
-  #         sourceHost = "balrog";
-  #         sourcePort = 443;
-  #         proto = "tcp";
-  #       }
-  #     ];
-  #     hosts = [
-  #       {
-  #         hostname = "balrog";
-  #         ip = "10.100.0.1";
-  #         pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
-  #         endpoint = "gateway.turb.io";
-  #         router = true;
-  #       }
-  #       {
-  #         hostname = "gero";
-  #         ip = "10.100.0.3";
-  #         pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
-  #       }
-  #       {
-  #         hostname = "itoh";
-  #         ip = "10.100.0.4";
-  #         pubkey = "nl9gri7OsWGYWj+LbbtUBv8dKxFVOz4wlunm7dUhAgk=";
-  #       }
-  #       {
-  #         hostname = "star";
-  #         ip = "10.100.0.5";
-  #         pubkey = "lfUVvROJvEyOHlzBxWsEpp7rWvY0Pt9J7cTKsPra92w=";
-  #       }
-  #       {
-  #         hostname = "pando";
-  #         ip = "10.100.0.6";
-  #         pubkey = "Y9TKTr/fVYVxogi9vYYKo/xFjUk2Z5XFRuEdkSDN7yI=";
-  #       }
-  #       {
-  #         hostname = "ios";
-  #         pubkey = "8RPnvY0Vy641THmmnkGiz37oN65VGKplEZkOKuUqly8=";
-  #         ip = "10.100.0.11";
-  #       }
-  #       {
-  #         hostname = "ballos";
-  #         ip = "10.100.0.10";
-  #         pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
-  #         endpoint = "ballos.lan";
-  #       }
-  #     ];
-  #   };
-  # };
+  /*
+    services.wgvpn = {
+      enable = true;
+      networks.yep = {
+        subnet = "10.38.0.0/24"; # choose something unlikely to conflict
+        generatePrivateKeyFile = true;
+        privateKeyFile = "/tmp/TODO";
+        listenPort = 51820;
+        mtu = 1420;
+
+        forwardPorts = [
+          {
+            destinationHost = "ballos";
+            destinationPort = 80;
+            sourceHost = "balrog";
+            sourcePort = 80;
+            proto = "tcp";
+          }
+          {
+            destinationHost = "ballos";
+            destinationPort = 443;
+            sourceHost = "balrog";
+            sourcePort = 443;
+            proto = "tcp";
+          }
+        ];
+
+        hosts = [
+          {
+            hostname = "balrog";
+            ip = "10.100.0.1";
+            pubkey = "z8vFtmrdwBEFTe49UykBbz9sQS8XvoDBGcsf/7dZ9R8=";
+            endpoint = "gateway.turb.io";
+            router = true;
+          }
+          {
+            hostname = "gero";
+            ip = "10.100.0.3";
+            pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
+          }
+          {
+            hostname = "itoh";
+            ip = "10.100.0.4";
+            pubkey = "nl9gri7OsWGYWj+LbbtUBv8dKxFVOz4wlunm7dUhAgk=";
+          }
+          {
+            hostname = "star";
+            ip = "10.100.0.5";
+            pubkey = "lfUVvROJvEyOHlzBxWsEpp7rWvY0Pt9J7cTKsPra92w=";
+          }
+          {
+            hostname = "pando";
+            ip = "10.100.0.6";
+            pubkey = "Y9TKTr/fVYVxogi9vYYKo/xFjUk2Z5XFRuEdkSDN7yI=";
+          }
+          {
+            hostname = "ios";
+            pubkey = "8RPnvY0Vy641THmmnkGiz37oN65VGKplEZkOKuUqly8=";
+            ip = "10.100.0.11";
+          }
+          {
+            hostname = "ballos";
+            ip = "10.100.0.10";
+            pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
+            endpoint = "ballos.lan";
+          }
+        ];
+      };
+    };
+  */
+
+  services.tailscale.enable = true;
+
+  networking.nameservers = [ "100.100.100.100" "8.8.8.8" "1.1.1.1" ];
+  networking.search = [ "tailffb1.ts.net" ];
+  networking.nftables = {
+    enable = true;
+  };
+
+  networking.useNetworkd = true;
+  services.resolved.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

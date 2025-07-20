@@ -12,6 +12,10 @@
         ip = "10.100.0.3";
         pubkey = "6QkyXbJ4orCVjGlw03Aa0R1GeUiEoalVdWCAxQH6Qkw=";
       };
+      curly = {
+        ip = "10.100.0.2";
+        pubkey = "yrP2YV5L1LE4Frmf0IkbvVvtdZZuMuRMVbHsE06k9GI=";
+      };
       itoh = {
         ip = "10.100.0.4";
         pubkey = "nl9gri7OsWGYWj+LbbtUBv8dKxFVOz4wlunm7dUhAgk=";
@@ -31,11 +35,12 @@
       ballos = {
         ip = "10.100.0.10";
         pubkey = "7u9v3uGkvTY0fAZwz1ACMHSHyD+ocPXFrccDSuPPzUQ=";
-        endpoint = "ballos.lan";
       };
     };
 
-    subnet = "10.100.0.0/24";
+    #subnet = "10.100.0.0/24";
+    subnet = "100.64.0.0/10"; # cgnat
+    internal = "100.100.0.0/16";
   };
 
   sshkeys = {

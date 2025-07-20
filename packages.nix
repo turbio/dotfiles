@@ -1,132 +1,133 @@
 { pkgs, ... }:
-{
-  desktop = with pkgs; [
-    #urbit
-
-    _1password-gui
-    _1password-cli
-
-    uhubctl
-    fwupd
-
-    discord
-    element-desktop
-
-    nixpkgs-fmt
-    chromium
-    alacritty
-    pavucontrol
-    blueberry
-    spotify
-    pass
-    lxappearance
-    gtk_engines
-    gtk-engine-murrine
-    gsettings-desktop-schemas
-    lsb-release
-
-    arc-theme
-
-    # wayland
-    wdisplays
-    flashfocus
-    xdg-utils
-    gnome.dconf-editor
-    swaylock
-    swayidle
-    mako
-    swaybg
-    xwayland-satellite # x under niri
-    syncthingtray
-    wf-recorder
-
-    # bluetooth tray
-
-    # network manager tray
-    networkmanagerapplet
-
-    # need pactl for sway stuff
-    pulseaudio
-
-    wineWowPackages.staging
-
-    # waybar stuff
-    (waybar.override { withMediaPlayer = true; })
-    playerctl
-    libappindicator
-    wofi
-
-    polkit
-    polkit_gnome
-
-    # gdbus
-    glib
-
-    docker-compose
-    vagrant
-
-    gnome.nautilus
-    gnome.file-roller
-
-    qemu
-
+rec {
+  extra = with pkgs; [
     obs-studio-plugins.wlrobs
     obs-studio
-    linuxPackages.v4l2loopback
     zoom-us
-    gimp
-
-    slurp
-    grim
-    wl-clipboard
-
+    chromium
     aseprite
-    gnome.eog
-    mpv
+    cubicsdr
+    darktable
 
-    steam
-    bspwm
-    sxhkd
-
-    openscad
-
-    cargo
-    rustc
-    rustup
-    nodejs
+    #saleae-logic-2
+    qemu
 
     clang
     gcc
     go
     rust-analyzer
 
-    wev
-    xorg.xev
-    xdotool
+    vagrant
+    steam
 
+    openscad
     mars-mips
+
+    wineWowPackages.staging
 
     prusa-slicer
     orca-slicer
 
+    element-desktop
+    discord
+
     arduino
 
-    saleae-logic-2
-
-    darktable
-    kdenlive
-    ocl-icd
-
-    cubicsdr
-    ffmpeg
-    gnome-power-manager
-    gparted
-    gnupg
     inkscape
-    imagemagick
-    lan-mouse
-    logisim
+
+    wf-recorder
+
+    spotify
+
+    obsidian
   ];
+
+  desktop =
+    with pkgs;
+    [
+      #urbit
+
+      _1password-gui
+      _1password-cli
+
+      uhubctl
+      fwupd
+
+      nix-output-monitor
+
+      nixpkgs-fmt
+      alacritty
+      pavucontrol
+      blueberry
+      pass
+      gtk_engines
+      gtk-engine-murrine
+      gsettings-desktop-schemas
+      lsb-release
+
+      arc-theme
+
+      # wayland
+      wdisplays
+      flashfocus
+      xdg-utils
+      dconf-editor
+      swaylock
+      swayidle
+      mako
+      swaybg
+      xwayland-satellite # x under niri
+      syncthingtray
+      trayscale
+
+      # network manager tray
+      networkmanagerapplet
+
+      # need pactl for sway stuff
+      pulseaudio
+
+      # waybar stuff
+      (waybar.override { withMediaPlayer = true; })
+      playerctl
+      libappindicator
+      fuzzel
+
+      polkit
+      polkit_gnome
+
+      # gdbus
+      glib
+
+      docker-compose
+
+      nautilus
+      file-roller
+
+      linuxPackages.v4l2loopback
+      gimp
+
+      slurp
+      grim
+      wl-clipboard
+
+      eog
+      mpv
+
+      wev
+      xorg.xev
+      xdotool
+
+      ocl-icd
+
+      ffmpeg
+      gnome-power-manager
+      gparted
+      gnupg
+      imagemagick
+      lan-mouse
+      logisim
+    ]
+    ++ extra;
 
   core = with pkgs; [
     wget
@@ -161,14 +162,13 @@
     tmux
     wireguard-tools
 
-    # should all my machines really have nix tooling???
-    nil
-    nixfmt-rfc-style
-
     iperf
     iotop
     nethogs
     nmap
     progress
+    nixos-firewall-tool
+
+    shellcheck
   ];
 }

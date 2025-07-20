@@ -4,6 +4,9 @@
   lib,
   ...
 }:
+let
+  internalIp = (import ../../assignments.nix).vpn.internal;
+in
 {
   imports = [
     ../../services/turbio-index.nix
@@ -12,11 +15,49 @@
     ../../services/jelly.nix
     ../../services/netboot_host.nix
     ./ipmi.nix
+    (import ./acme-wildcard.nix { domain = "turb.io"; })
   ];
+
+  # services.headscale = {
+  #   enable = true;
+  #   settings = {
+  #     server_url = "https://scale.turb.io";
+  #     dns.base_domain = "net.turb.io";
+  #   };
+  # };
+
+  # services.nginx.virtualHosts."scale.turb.io" = {
+  #   forceSSL = true;
+  #   enableACME = true;
+  #   locations."/" = {
+  #     proxyPass = "http://${config.services.headscale.address}:${toString config.services.headscale.port}";
+  #     extraConfig = ''
+  #       proxy_http_version 1.1;
+  #       proxy_set_header Upgrade $http_upgrade;
+  #       proxy_set_header Connection $connection_upgrade;
+  #       proxy_set_header Host $server_name;
+  #       proxy_redirect http:// https://;
+  #       proxy_buffering off;
+  #       proxy_set_header X-Real-IP $remote_addr;
+  #       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  #       proxy_set_header X-Forwarded-Proto $scheme;
+  #       add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
+  #     '';
+  #   };
+  #   locations."/.well-known/acme-challenge" = {
+  #     extraConfig = ''
+  #       allow all;
+  #     '';
+  #   };
+  # };
+
+  security.acme.defaults.email = "acme@turb.io";
+  security.acme.acceptTerms = true;
 
   services.nix-serve = {
     enable = true;
     secretKeyFile = "/var/cache-priv-key.pem"; # TODO: state
+    # secretKeyFile = "/keys/nix-cache-priv-key.pem"; # TODO: state
   };
 
   services.nginx.virtualHosts."nixcache.turb.io" = {
@@ -25,7 +66,7 @@
     locations."/" = {
       proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
       extraConfig = ''
-        allow 10.100.0.0/25;
+        allow ${internalIp};
         deny all;
       '';
 
@@ -47,7 +88,6 @@
   services.locate = {
     enable = true;
     pruneNames = [ ];
-    localuser = "locate";
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -75,59 +115,34 @@
     ruleset = '''';
   };
 
-  services.vector = {
-    enable = false;
-    journaldAccess = true;
-    settings = builtins.fromTOML ''
-      [sources.journald]
-      type = "journald"
-      current_boot_only = true
-
-      [sinks.elasticsearch]
-      type = "elasticsearch"
-      inputs = [ "journald" ]
-      api_version = "auto"
-      endpoints = [ "http://localhost:9200" ]
-      id_key = "id"
-    '';
-  };
-
-  services.elasticsearch = {
-    enable = false;
-    port = 9200;
-    listenAddress = "127.0.0.1";
-  };
-
-  security.acme.defaults.email = "acme@turb.io";
-  security.acme.acceptTerms = true;
-
-  services.postgresql = {
-    enable = false;
-    package = pkgs.postgresql;
-  };
-
   networking.firewall.allowedUDPPorts = [
     111
     2049
     10809
     5201
+    23
   ];
   networking.firewall.allowedTCPPorts = [
     111
     2049
     10809
     5201
+    23
   ];
   services.nfs.server = {
     enable = true;
     exports = ''
-      /mnt/sync 192.168.86.0/24(rw)
-      /mnt/sync 10.100.0.0/24(rw)
+      /mnt/sync 192.168.0.0/16(rw)
+      /mnt/sync 100.100.0.0/16(rw)
     '';
   };
 
   services.nginx = {
     enable = true;
+
+    appendConfig = ''
+      worker_processes 32;
+    '';
 
     recommendedGzipSettings = true;
     recommendedZstdSettings = true;
@@ -136,7 +151,7 @@
     recommendedOptimisation = true;
 
     # todo: breaks grafana
-    #recommendedProxySettings = true;
+    # recommendedProxySettings = true;
 
     statusPage = true; # for prom metrics
     enableReload = true;
@@ -186,7 +201,7 @@
   };
   services.nginx.virtualHosts."ollama.int.turb.io" = {
     extraConfig = ''
-      allow 10.100.0.0/25;
+      allow ${internalIp};
       deny all;
     '';
     locations."/" = {
@@ -196,7 +211,7 @@
 
   services.nginx.virtualHosts."sync.int.turb.io" = {
     extraConfig = ''
-      allow 10.100.0.0/25;
+      allow ${internalIp};
       deny all;
     '';
     locations."/" = {
@@ -206,7 +221,7 @@
 
   services.nginx.virtualHosts."home.int.turb.io" = {
     extraConfig = ''
-      allow 10.100.0.0/25;
+      allow ${internalIp};
       deny all;
     '';
     locations."/" = {
@@ -242,6 +257,14 @@
       "ios_photos" = {
         enable = true;
         path = "/mnt/sync/ios_photos";
+      };
+      "clips" = {
+        enable = true;
+        path = "/mnt/sync/clips";
+      };
+      "webcamlog" = {
+        enable = true;
+        path = "/mnt/sync/webcamlog";
       };
     };
   };
@@ -372,7 +395,7 @@
     ];
     serviceConfig = {
       User = "root";
-      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --verbose-log --disengage-temp 74 --target-temp 55";
+      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --disengage-temp 74 --target-temp 55";
     };
   };
 
@@ -394,7 +417,31 @@
       scrape_interval = "1s";
     };
 
+    pushgateway.enable = true;
+    pushgateway.web.listen-address = "127.0.0.1:9091";
+
     scrapeConfigs = [
+      {
+        job_name = "prometheus";
+        scrape_interval = "5s";
+        static_configs = [
+          { targets = [ "127.0.0.1:9090" ]; }
+        ];
+      }
+      {
+        job_name = "reth";
+        scrape_interval = "5s";
+        static_configs = [
+          { targets = [ "127.0.0.1:9551" ]; }
+        ];
+      }
+      {
+        job_name = "pushgateway";
+        scrape_interval = "5s";
+        static_configs = [
+          { targets = [ config.services.prometheus.pushgateway.web.listen-address ]; }
+        ];
+      }
       {
         job_name = "comed_json";
         metrics_path = "/probe";

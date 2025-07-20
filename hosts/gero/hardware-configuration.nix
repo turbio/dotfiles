@@ -7,7 +7,6 @@
   ];
 
   boot.initrd.availableKernelModules = [
-    "kvm-intel"
     "xhci_pci"
     "nvme"
     "usb_storage"

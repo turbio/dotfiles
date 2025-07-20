@@ -28,6 +28,7 @@
             "ballos"
             "gero"
             "itoh"
+            "curly"
           ];
         };
         "notes" = {
@@ -37,6 +38,7 @@
             "ballos"
             "gero"
             "iphone"
+            "curly"
           ];
         };
         "ios_photos" = {
@@ -45,6 +47,26 @@
           devices = [
             "ballos"
             "iphone"
+          ];
+        };
+        "clips" = {
+          enable = lib.mkDefault false;
+          path = lib.mkDefault "/none";
+          devices = [
+            "ballos"
+            "curly"
+            "itoh"
+            "gero"
+          ];
+        };
+        "webcamlog" = {
+          enable = lib.mkDefault false;
+          path = lib.mkDefault "/none";
+          devices = [
+            "ballos"
+            "curly"
+            "itoh"
+            "gero"
           ];
         };
       };
@@ -60,6 +82,9 @@
         };
         itoh = {
           id = "UQWKK6L-ECHOK23-QNNH5PC-BDY6RL4-AILT6PX-QDG27VN-BLT664L-7ERCGAD";
+        };
+        curly = {
+          id = "CIVDHUC-7N4ASZ6-DSOFH3X-NPI3TQA-7SDUNV4-JFSUDEC-GRPFWEA-GRXLIQJ";
         };
       };
     };

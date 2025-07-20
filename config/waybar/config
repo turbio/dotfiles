@@ -10,10 +10,10 @@
 		"custom/hostname"
 	],
 	"modules-right": [
+		"idle_inhibitor",
 		"custom/yubi",
 		"custom/media",
 		"network",
-		"idle_inhibitor",
 		"backlight",
 		"pulseaudio",
 		"battery",

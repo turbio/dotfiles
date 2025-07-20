@@ -1,4 +1,13 @@
-{ ... }:
+{ pkgs, ... }:
+let
+  domain = "turb.io";
+  zonepath = "/var/db/bind/${domain}.zone";
+  zonefile = pkgs.writeText "_acme-challenge.turb.io.zone" ''
+    _acme-challenge.turb.io. 300 IN SOA ns1.turb.io. hostmaster.turb.io. 1 21600 3600 259200 300
+    _acme-challenge.turb.io. 300 IN NS ns1.turb.io.
+  '';
+  dnskeypath = "/var/lib/secrets/dnskeys.conf";
+in
 {
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [
@@ -12,19 +21,75 @@
       table ip vpn {
         #chain im_already_tracer {
         #  type filter hook prerouting priority raw - 1; policy accept;
-        #  tcp dport { 80, 443 } meta nftrace set 1
+        #  tcp dport { 23 } meta nftrace set 1
         #}
 
         chain prerouting {
-            type nat hook prerouting priority -100;
-            iifname "eth0" tcp dport { 80, 443 } dnat to 10.100.0.10;
+          type nat hook prerouting priority -100;
+          iifname "eth0" tcp dport { 80, 443, 23 } dnat to 100.100.57.46
         }
 
         chain postrouting {
           type nat hook postrouting priority 100;
-          iifname "eth0" tcp dport { 80, 443 } snat to 10.100.0.128;
+          #iifname "eth0" tcp dport { 80, 443, 23 } snat to 100.100.57.46
+          oifname "tailscale0" masquerade
         }
       }
+    '';
+  };
+
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = true;
+    "net.ipv6.conf.all.forwarding" = true;
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /var/db/bind 0750 named named - -"
+  ];
+
+  system.activationScripts."init-zone-${domain}".text = ''
+    if [ ! -e "${zonepath}" ]; then
+      install -o named -g named -m 0644 ${zonefile} "${zonepath}"
+    fi
+  '';
+
+  networking.firewall.allowedUDPPorts = [ 53 ];
+  services.bind = {
+    enable = true;
+
+    extraConfig = ''
+      include "${dnskeypath}";
+    '';
+
+    zones."_acme-challenge.${domain}" = {
+      file = zonepath;
+      master = true;
+      extraConfig = "allow-update { key rfc2136key.${domain}.; };";
+    };
+
+    zones."turb.io" = {
+      master = true;
+      file = ../../zones/turb.io.zone;
+    };
+  };
+
+  systemd.services.dns-rfc2136-conf = {
+    requiredBy = ["bind.service"];
+    before = ["bind.service"];
+    unitConfig = {
+      ConditionPathExists = "!${dnskeypath}";
+    };
+    serviceConfig = {
+      Type = "oneshot";
+      UMask = 0077;
+    };
+    path = [ pkgs.bind ];
+    script = ''
+      mkdir -p /var/lib/secrets
+      chmod 755 /var/lib/secrets
+      tsig-keygen rfc2136key.${domain} > ${dnskeypath}
+      chown named:root ${dnskeypath}
+      chmod 400 ${dnskeypath}
     '';
   };
 }

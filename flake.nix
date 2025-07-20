@@ -2,23 +2,16 @@
   description = "dotfiles";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    unstable.url = "github:nixos/nixpkgs/master";
-    nur.url = "github:nix-community/NUR";
-
-    home-manager = {
-      url = "github:rycee/home-manager/release-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
+    unstable.url = "github:nixos/nixpkgs";
+    nixvim.url = "github:nix-community/nixvim";
+    nixvim.inputs.nixpkgs.follows = "unstable";
+    home-manager.url = "github:rycee/home-manager/release-25.05";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     github-copilot-vim = {
       flake = false;
       url = "github:github/copilot.vim";
-    };
-    openscad-vim = {
-      flake = false;
-      url = "github:sirtaj/vim-openscad";
     };
     muble-vim = {
       flake = false;
@@ -27,10 +20,6 @@
     lsp-lines-nvim = {
       flake = false;
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
-    };
-    llm-nvim = {
-      flake = false;
-      url = "github:melbaldove/llm.nvim";
     };
 
     zsh-syntax-highlighting = {
@@ -62,9 +51,15 @@
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
 
     nil-ls = {
-      url = "github:oxalica/nil";
+      url = "github:oxalica/nil/577d160da311cc7f5042038456a0713e9863d09e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
@@ -74,17 +69,19 @@
       home-manager,
       nixos-hardware,
       unstable,
-      nur,
+      disko,
+      nixvim,
       ...
     }@inputs:
     let
       arch = hostname: if hostname == "pando" then "aarch64-linux" else "x86_64-linux";
       mksystem =
-        modules: hostname:
+        extraModules: hostname:
         nixpkgs.lib.nixosSystem {
           system = arch hostname;
           modules =
             [
+              #./modules/wg-vpn.nix
               ./configuration.nix
               ./desktop.nix
               ./home.nix
@@ -93,11 +90,12 @@
               (./hosts + "/${hostname}" + /configuration.nix)
               (./hosts + "/${hostname}" + /hardware-configuration.nix)
               ./cachix.nix
-              ./vpn.nix
-              nur.modules.nixos.default
+              #./vpn.nix
+              disko.nixosModules.disko
               home-manager.nixosModules.home-manager
+              nixvim.nixosModules.nixvim
             ]
-            ++ modules
+            ++ extraModules
             ++ (if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ] else [ ])
             ++ [
               (
@@ -106,7 +104,7 @@
                   nixpkgs.overlays = [
                     (final: prev: {
                       nil = inputs.nil-ls.outputs.packages.x86_64-linux.nil; # TODO(turbio): until nil has a release including pipe-operators (https://github.com/oxalica/nil/commit/52304da8e9748feff559ec90cb1f4873eda5cee1)
-                      saleae-logic-2 = pkgs.callPackage ./packages/saleae-logic-2.nix { };
+                      #saleae-logic-2 = pkgs.callPackage ./packages/saleae-logic-2.nix { };
                     })
                   ];
                 }
@@ -141,53 +139,6 @@
           }
         )
       ];
-      imageModules = [
-        (
-          {
-            config,
-            lib,
-            pkgs,
-            modulesPath,
-            ...
-          }:
-          {
-
-            imports = [ "${modulesPath}/image/repart.nix" ];
-
-            boot.loader.grub.enable = false;
-
-            image.repart.name = "image";
-            image.repart.partitions = {
-              "10-esp" = {
-                contents = {
-                  "/EFI/BOOT/BOOT${lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI".source =
-                    "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi";
-
-                  "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
-                    "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-                };
-                repartConfig = {
-                  Type = "esp";
-                  Format = "vfat";
-                  SizeMinBytes = "512M";
-                  Label = "boot";
-                };
-              };
-              "20-store" = {
-                storePaths = [ config.system.build.toplevel ];
-                stripNixStorePrefix = true;
-                repartConfig = {
-                  Type = "linux-generic";
-                  Format = "ext4";
-                  Label = "nix-store";
-                  Minimize = "guess";
-                };
-              };
-            };
-
-          }
-        )
-      ];
 
       mapEachHost =
         fn:
@@ -198,6 +149,13 @@
           value = fn c;
         })
         |> builtins.listToAttrs;
+
+      suffix = fix: attrs:
+        nixpkgs.lib.attrsets.mapAttrs'
+          (n: v:
+            { name = "${n}-${fix}"; value = v; }
+          )
+          attrs;
     in
     rec {
       nixosConfigurations = mapEachHost <| mksystem [ ];
@@ -209,41 +167,44 @@
       # Spits out the kernel and initrd for pxe booting a host.
       netbootableSystems = mapEachHost (
         h:
+        let
+          output = netbootableConfigurations.${h}.config.system.build;
+        in
         nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-${h}" {
-          bzImage = "${(mksystem [ ./modules/netbootable.nix ] h).config.system.build.netbootKernel}/bzImage";
-          initrd = "${(mksystem [ ./modules/netbootable.nix ] h).config.system.build.netbootRamdisk}/initrd";
-          cmdline = (
-            nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline"
-              (mksystem [ ./netbootable.nix ] h).config.system.build.netbootCmdline
-          );
+          bzImage = "${output.netbootKernel}/bzImage";
+          initrd = "${output.netbootRamdisk}/initrd";
+          cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
 
-          "squashfs.img" = (mksystem [ ./netbootable.nix ] h).config.system.build.squashfsStore;
-
-          "${h}-store" = (mksystem [ ./netbootable.nix ] h).config.system.build.ext4Store;
+          "squashfs.img" = output.squashfsStore;
+          "${h}-store" = output.ext4Store;
         }
       );
 
-      netbootInitrd = mapEachHost (
-        h:
-        (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline"
-          (mksystem [ ./netbootable.nix ] h).config.system.build.netbootCmdline
-        )
-      );
+      # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
 
-      image = mapEachHost (h: (mksystem imageModules h).config.system.build.image);
+      packages.x86_64-linux =
+        (
+          mapEachHost (mksystem [({ ... }: {
+            disko.devices.disk.main.imageSize = "60G"; # should be enough right
+          })])
+          |> nixpkgs.lib.filterAttrs (n: sys: n == "curly")
+          |> nixpkgs.lib.filterAttrs (n: sys: sys.config.disko.devices.disk != {})
+          |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
+          |> suffix "disko-image-script"
+        );
 
-      activate-uki.ballos =
-        let
-          system = (mksystem imageModules "ballos");
-          pkgs = system.pkgs;
-          config = system.config;
-        in
-        nixpkgs.legacyPackages.x86_64-linux.writeScript "activate-uki" ''
-          cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi \
-            /boot/EFI/BOOT/BOOT${system.lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI
-          cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
-            /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
-        '';
+      # activate-uki.ballos =
+      #   let
+      #     system = (mksystem repartImageModule "ballos");
+      #     pkgs = system.pkgs;
+      #     config = system.config;
+      #   in
+      #   nixpkgs.legacyPackages.x86_64-linux.writeScript "activate-uki" ''
+      #     cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi \
+      #       /boot/EFI/BOOT/BOOT${system.lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI
+      #     cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
+      #       /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
+      #   '';
 
       pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 

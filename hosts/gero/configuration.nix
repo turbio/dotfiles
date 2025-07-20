@@ -15,7 +15,6 @@
   boot.consoleLogLevel = 0;
 
   networking.interfaces.wlp1s0.useDHCP = true;
-  networking.firewall.enable = false;
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
@@ -41,6 +40,14 @@
         enable = true;
         path = "~/notes";
       };
+      "clips" = {
+        enable = true;
+        path = "~/Pictures/clip";
+      };
+      "webcamlog" = {
+        enable = true;
+        path = "~/Pictures/webcamlog";
+      };
     };
   };
 
@@ -51,7 +58,7 @@
   environment.systemPackages = with pkgs; [ rtl-sdr ];
 
   fileSystems."/sync" = {
-    device = "10.100.0.10:/mnt/sync";
+    device = "ballos:/mnt/sync";
     fsType = "nfs";
     options = [
       "rw"
@@ -73,6 +80,6 @@
   services.physlock.enable = true;
   services.physlock.lockOn.hibernate = false;
   services.physlock.lockOn.suspend = false;
-  services.physlock.muteKernelMessages = false;
+  services.physlock.muteKernelMessages = true;
   services.physlock.disableSysRq = true;
 }

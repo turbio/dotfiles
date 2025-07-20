@@ -25,8 +25,8 @@ let
       systemctl --user restart pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-wlr
     '';
   };
-  webcam_log = pkgs.writeScriptBin "webcam-log" ''
-    log_to="$HOME/Pictures/webcam_log"
+  webcamlog = pkgs.writeScriptBin "webcam-log" ''
+    log_to="$HOME/Pictures/webcamlog/$HOSTNAME"
     mkdir -p "$log_to"
     out_file="$log_to/$(date "+%Y_%m_%d_%H:%M:%S").jpg"
 
@@ -61,7 +61,13 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    services.usbmuxd.enable = true;
+
+    powerManagement.powertop.enable = true;
+
     services.automatic-timezoned.enable = true;
+
+    services.speechd.enable = false;
 
     programs.wireshark.enable = true;
     programs.wireshark.package = pkgs.wireshark;
@@ -85,7 +91,7 @@ in
     };
 
     systemd.services."webcam-log" = {
-      script = "${webcam_log}/bin/webcam-log";
+      script = "${webcamlog}/bin/webcam-log";
       serviceConfig = {
         Type = "oneshot";
         User = "turbio";
@@ -96,20 +102,16 @@ in
       MaxRetentionSec=1week
     '';
 
-    programs.browserpass.enable = true;
-
     environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit localpkgs; }).desktop ++ [
       (lib.mkIf (desktop == "sway") dbus-sway-environment)
       (lib.mkIf (desktop == "sway") configure-gtk)
     ];
 
+    environment.sessionVariables = {
+      GDK_BACKEND = "wayland";
+    };
+
     programs.steam.enable = true;
-
-    #services.xserver.enable = true;
-    #services.xserver.displayManager.gdm.enable = true;
-    #services.xserver.desktopManager.gnome.enable = true;
-    #services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
-
     programs.dconf.enable = true;
 
     hardware.pulseaudio.enable = false;
@@ -117,10 +119,6 @@ in
     hardware.opengl.enable = true;
 
     networking.networkmanager.enable = true;
-
-    virtualisation.virtualbox.host.enable = true;
-    virtualisation.virtualbox.host.enableExtensionPack = true;
-    users.extraGroups.vboxusers.members = [ "turbio" ];
 
     services.pcscd.enable = true;
 
@@ -168,12 +166,5 @@ in
         ];
       };
     };
-
-    # services.xserver = {
-    #   enable = true;
-    #   displayManager.gdm.enable = true;
-    #   displayManager.gdm.wayland = false;
-    #   desktopManager.gnome.enable = true;
-    # };
   };
 }

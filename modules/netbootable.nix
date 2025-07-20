@@ -179,4 +179,9 @@
     volumeLabel = "nixos";
     uuid = "44444444-4444-4444-8888-888888888888";
   };
+
+  system.build.squashfsStore = pkgs.callPackage "${modulesPath}/../lib/make-squashfs.nix" {
+    storeContents = [ config.system.build.toplevel ];
+    comp = "zstd -Xcompression-level 19";
+  };
 }

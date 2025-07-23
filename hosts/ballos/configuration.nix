@@ -16,7 +16,10 @@ in
     ../../services/netboot_host.nix
     ./ipmi.nix
     (import ./acme-wildcard.nix { domain = "turb.io"; })
+    (import ../../services/vibes.nix { mediaRoot = "/pool/vibes"; domain = "vibes.turb.io"; })
   ];
+
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   # services.headscale = {
   #   enable = true;
@@ -421,6 +424,13 @@ in
     pushgateway.web.listen-address = "127.0.0.1:9091";
 
     scrapeConfigs = [
+      {
+        job_name = "big-ups";
+        scrape_interval = "1s";
+        static_configs = [
+          { targets = [ "big-ups.lan:8080" ]; }
+        ];
+      }
       {
         job_name = "prometheus";
         scrape_interval = "5s";

@@ -17,6 +17,10 @@ while [[ $# -gt 0 ]]; do
 			NO_NOM=1
 			shift
 			;;
+		--build-only)
+			BUILD_ONLY=1
+			shift
+			;;
 		--offline)
 			OFFLINE=1
 			shift
@@ -29,7 +33,6 @@ while [[ $# -gt 0 ]]; do
 		--no-local-build)
 			NO_LOCAL_BUILD=1
 			shift
-			shift
 			;;
 		--deploy-on)
 			DEPLOY_ON="$2"
@@ -37,7 +40,7 @@ while [[ $# -gt 0 ]]; do
 			shift
 			;;
 		-h|--help)
-			echo "Usage: $0 [--no-nom] [--build-on <host>] [--deploy-on <host>] [<hostname>]"
+			echo "Usage: $0 [--no-nom] [--builder <host>] [--deploy-on <host>] [<hostname>]"
 			exit 0
 			;;
 		-*|--*)
@@ -86,12 +89,14 @@ else
 	echo -n "$WHOMST "
 fi
 
-echo -n "for "
+if [ -z "$BUILD_ONLY" ]; then
+	echo -n "for "
 
-if [ "$DEPLOY_ON" = "$SELFHOST" ]; then
-	echo -n "self ($DEPLOY_ON) "
-else
-	echo -n "$DEPLOY_ON "
+	if [ "$DEPLOY_ON" = "$SELFHOST" ]; then
+		echo -n "self ($DEPLOY_ON) "
+	else
+		echo -n "$DEPLOY_ON "
+	fi
 fi
 
 echo -n "on "
@@ -113,7 +118,7 @@ else
 	# eg: "ssh://mac x86_64-darwin ; ssh://beastie i686-linux,x86_64-freebsd"
 
 	for item in "${BUILD_ON[@]}"; do
-		BUILDERS="ssh-ng://turbio@${item} x86_64-linux /home/turbio/.ssh/id_ed25519 32;$BUILDERS"
+		BUILDERS="ssh-ng://turbio@${item} x86_64-linux /home/turbio/.ssh/id_ed25519 32 2 kvm,big-parallel;$BUILDERS"
 	done
 
 	FLAGS="$FLAGS --use-substitutes"
@@ -140,8 +145,9 @@ fi
 #	--builders "$BUILDERS" \
 #	-v \
 #	--builders-use-substitutes #--log-format internal-json #|& nom --json
-
-if [ -n "$USE_NOM" ]; then
+if [ -n "$BUILD_ONLY" ]; then
+	nix build ".#nixosConfigurations.${WHOMST}.config.system.build.toplevel" --no-link --builders "$BUILDERS" --builders-use-substitutes
+elif [ -n "$USE_NOM" ]; then
 	nixos-rebuild switch $FLAGS --builders "$BUILDERS" |& nom --json
 else
 	nixos-rebuild switch $FLAGS --builders "$BUILDERS" -v

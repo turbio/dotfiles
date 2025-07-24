@@ -9,6 +9,7 @@ let
 in
 {
   imports = [
+    ../../modules/zfs-datasets.nix
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
     ../../services/evaldb.nix
@@ -19,40 +20,29 @@ in
     (import ../../services/vibes.nix { mediaRoot = "/pool/vibes"; domain = "vibes.turb.io"; })
   ];
 
+  zfs.pools.pool.datasets = {
+    primary = {
+      properties.sync = "disabled";
+      mountpoint = "/mnt/sync/";
+    };
+    ollama = {
+      properties.sync = "disabled";
+    };
+  };
+
+  zfs.pools.pool.datasets.ollama = { perms.group = "ollama"; perms.mode = "775"; };
+  services.ollama = {
+    enable = true;
+    models = config.zfs.pools.pool.datasets.ollama.mountpoint;
+    user = "ollama";
+    group = "ollama";
+    environmentVariables = {
+      OLLAMA_MAX_LOADED_MODELS = "2";
+      OLLAMA_NUM_PARALLEL = "5";
+    };
+  };
+
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
-
-  # services.headscale = {
-  #   enable = true;
-  #   settings = {
-  #     server_url = "https://scale.turb.io";
-  #     dns.base_domain = "net.turb.io";
-  #   };
-  # };
-
-  # services.nginx.virtualHosts."scale.turb.io" = {
-  #   forceSSL = true;
-  #   enableACME = true;
-  #   locations."/" = {
-  #     proxyPass = "http://${config.services.headscale.address}:${toString config.services.headscale.port}";
-  #     extraConfig = ''
-  #       proxy_http_version 1.1;
-  #       proxy_set_header Upgrade $http_upgrade;
-  #       proxy_set_header Connection $connection_upgrade;
-  #       proxy_set_header Host $server_name;
-  #       proxy_redirect http:// https://;
-  #       proxy_buffering off;
-  #       proxy_set_header X-Real-IP $remote_addr;
-  #       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  #       proxy_set_header X-Forwarded-Proto $scheme;
-  #       add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
-  #     '';
-  #   };
-  #   locations."/.well-known/acme-challenge" = {
-  #     extraConfig = ''
-  #       allow all;
-  #     '';
-  #   };
-  # };
 
   security.acme.defaults.email = "acme@turb.io";
   security.acme.acceptTerms = true;
@@ -123,14 +113,12 @@ in
     2049
     10809
     5201
-    23
   ];
   networking.firewall.allowedTCPPorts = [
     111
     2049
     10809
     5201
-    23
   ];
   services.nfs.server = {
     enable = true;
@@ -387,6 +375,23 @@ in
       }
     )
   ];
+
+    systemd.timers."archive-webcam" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Unit = "archive-webcam.service";
+      };
+    };
+  systemd.services.archive-webcam = {
+    path = [
+      pkgs.rsync
+    ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      rsync -av /mnt/sync/webcamlog/ /mnt/sync/archive/webcamlog/ --exclude=".*" --remove-source-files
+    '';
+  };
 
   systemd.services.fanspeed = {
     enable = true;

@@ -69,9 +69,6 @@ vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition)
 
 vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
 
-vim.keymap.set('n', 'gr', require("renamer").rename)
-require('renamer').setup()
-
 vim.keymap.set('n', 'gn', vim.diagnostic.goto_next)
 vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
 
@@ -128,18 +125,21 @@ cmp.setup({
 		},
 	},
 	mapping = cmp.mapping.preset.insert({
-		['<C-b>'] = cmp.mapping.scroll_docs(-4),
-		['<C-f>'] = cmp.mapping.scroll_docs(4),
+		-- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+		['<Tab>'] = cmp.mapping.confirm({ select = false }),
 		['<C-Space>'] = cmp.mapping.complete(),
 		['<C-e>'] = cmp.mapping.abort(),
-		['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 		['<C-j>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
 		['<C-k>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
 	}),
-	sources = cmp.config.sources(
-		{ { name = 'nvim_lsp' }, },
-		{ { name = 'buffer' }, }
-	),
+	sources = {
+		{ name = 'nvim_lsp' },
+		{ name = 'minuet' },
+	},
+	performance = {
+		fetching_timeout = 10000,
+	},
+	experimental = { ghost_text = true },
 })
 
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
@@ -195,6 +195,9 @@ require("lsp_lines").setup()
 vim.diagnostic.config({
   virtual_text = false,
 })
+
+vim.keymap.set('n', 'gr', require("renamer").rename)
+require('renamer').setup()
 
 EOF
 

@@ -1,4 +1,4 @@
-{ pkgs, repos, config, ... }:
+{ pkgs, repos, config, lib, ... }:
 let
   plugins = with pkgs.vimPlugins; [
     nvim-nio
@@ -54,10 +54,11 @@ let
   ] ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else [ ]);
 in
 {
-
-  nixpkgs.config.allowUnfree = true; # copilot
+  nixpkgs.config.allowUnfree = true; # copilot-vim
 
   programs.nixvim = {
+    nixpkgs.pkgs = pkgs;
+
     enable = true;
 
     vimAlias = true;
@@ -68,30 +69,33 @@ in
     extraConfigVim = (builtins.readFile ./config/nvim/init.vim);
 
     plugins = {
+      # minuet.enable = true;
+      # minuet.settings = {
+      #   provider = "openai_fim_compatible";
+      #   n_completions = 1;
+      #   context_window = 512;
+      #   provider_options = {
+      #     openai_fim_compatible = {
+      #       api_key = "TERM";
+      #       end_point = "http://ollama.int.turb.io/v1/completions";
+      #       name = "Ollama";
+      #       model = "qwen2.5-coder:1.5b";
+      #       stream = true;
+      #       optional = {
+      #         max_tokens = 245;
+      #         top_p = 0.9;
+      #       };
+      #     };
+      #   };
+      # };
+      copilot-vim.enable = true;
+
       lsp.enable = true;
       web-devicons.enable = true;
 
       render-markdown.enable = true;
       render-markdown.autoLoad = true;
 
-      avante.enable = config.isDesktop; # too big (pulls in rust/llvm)
-      avante.settings = {
-        provder = "openai";
-        auto_suggestions_provider = "openai";
-        behaviour = {
-          auto_suggestions = false;
-          auto_set_highlight_group = true;
-          auto_set_keymaps = true;
-          auto_apply_diff_after_generation = false;
-          support_paste_from_clipboard = false;
-          minimize_diff = true;
-          enable_token_counting = true;
-          enable_cursor_planning_mode = true;
-        };
-        hints = {
-          enabled = true;
-        };
-      };
       nui.enable = true;
 
       #telescope.enable = true;
@@ -102,7 +106,6 @@ in
       };
 
       openscad.enable = config.isDesktop; # bruh... pulls in cups + gtk + qt and morjek:wweb-devicons
-      #copilot-vim.enable = true;
       gitgutter.enable = true;
     };
 

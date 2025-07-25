@@ -2,6 +2,7 @@
   hostname,
   localpkgs,
   pkgs,
+  lib,
   ...
 }:
 let
@@ -29,8 +30,6 @@ in
       "nixcache.turb.io"
     ];
   };
-
-  nixpkgs.config.allowUnfree = true;
 
   nix = {
     #autoOptimiseStore = true;
@@ -61,6 +60,8 @@ in
       builders-use-substitutes = true
     '';
   };
+
+  nixpkgs.config.allowUnfree = true; # welp
 
   networking.hostName = hostname;
 

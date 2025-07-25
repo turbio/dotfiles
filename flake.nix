@@ -4,9 +4,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    unstable.url = "github:nixos/nixpkgs";
     nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "unstable";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:rycee/home-manager/release-25.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     github-copilot-vim = {
@@ -68,7 +67,6 @@
       nixpkgs,
       home-manager,
       nixos-hardware,
-      unstable,
       disko,
       nixvim,
       ...
@@ -113,7 +111,6 @@
 
           specialArgs = {
             inherit hostname;
-            unstablepkgs = unstable.legacyPackages.${arch hostname};
             assignments = import ./assignments.nix;
 
             repos = inputs;

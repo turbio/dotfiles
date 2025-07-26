@@ -57,6 +57,9 @@ rec {
 
       nixpkgs-fmt
       alacritty
+      kitty
+      ghostty
+      neovide
       pavucontrol
       blueberry
       pass
@@ -87,7 +90,8 @@ rec {
       pulseaudio
 
       # waybar stuff
-      (waybar.override { withMediaPlayer = true; })
+      waybar
+      waybar-mpris
       playerctl
       libappindicator
       fuzzel
@@ -168,6 +172,8 @@ rec {
     nmap
     progress
     nixos-firewall-tool
+
+    comma
 
     shellcheck
   ];

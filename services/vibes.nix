@@ -24,7 +24,7 @@ in
 
   services.nginx.virtualHosts."${domain}" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
     locations."/" = {
       root = ./vibes/webroot;

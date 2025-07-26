@@ -61,6 +61,8 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    services.playerctld.enable = true;
+
     services.usbmuxd.enable = true;
 
     powerManagement.powertop.enable = true;
@@ -125,7 +127,7 @@ in
     fonts.packages = with pkgs; [
       terminus_font
       terminus_font_ttf
-      font-awesome
+      nerd-fonts.terminess-ttf
       noto-fonts
       noto-fonts-emoji
       roboto

@@ -1,5 +1,7 @@
 lua << EOF
 
+vim.o.guifont = "Terminus:h9"
+
 --Remap space as leader key
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.g.mapleader = ' '
@@ -72,15 +74,12 @@ vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
 vim.keymap.set('n', 'gn', vim.diagnostic.goto_next)
 vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
 
-vim.keymap.set('n', "ga", require("actions-preview").code_actions)
-
 vim.g.undotree_SplitWidth = 30
 vim.g.undotree_DiffAutoOpen = 0
 vim.g.undotree_WindowLayout = 3
 
 vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 0 })
 vim.api.nvim_set_hl(0, 'FloatBorder', { fg = "#5c5c5c", ctermbg = 0 })
-vim.api.nvim_set_hl(0, 'RenamerBorder', { link = 'FloatBorder' })
 
 require('lsp_signature').setup({
 	handler_opts = {
@@ -101,6 +100,7 @@ require('trouble').setup({
 local ELLIPSIS_CHAR = '…'
 local cmp = require('cmp')
 cmp.setup({
+	preselect = cmp.PreselectMode.None,
 	formatting = {
 		format = function(entry, vim_item)
 			if vim_item.menu and #vim_item.menu > 20 then
@@ -136,10 +136,6 @@ cmp.setup({
 		{ name = 'nvim_lsp' },
 		{ name = 'minuet' },
 	},
-	performance = {
-		fetching_timeout = 10000,
-	},
-	experimental = { ghost_text = true },
 })
 
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
@@ -148,11 +144,18 @@ function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   return orig_util_open_floating_preview(contents, syntax, opts, ...)
 end
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+vim.lsp.enable("clangd")
+vim.lsp.enable('gopls')
+vim.lsp.enable('rust_analyzer')
+vim.lsp.enable('nil_ls')
+vim.lsp.enable('hls')
 
-require('lspconfig').gopls.setup({ capabilities = capabilities })
-require('lspconfig').rust_analyzer.setup({ capabilities = capabilities })
-require('lspconfig').nil_ls.setup({ capabilities = capabilities })
+vim.api.nvim_create_autocmd("BufWritePre", {
+	callback = function()
+		vim.lsp.buf.format({ async = false })
+	end
+})
+
 
 -- keep search target centered
 vim.keymap.set('n', 'n', 'nzzzv')
@@ -195,9 +198,6 @@ require("lsp_lines").setup()
 vim.diagnostic.config({
   virtual_text = false,
 })
-
-vim.keymap.set('n', 'gr', require("renamer").rename)
-require('renamer').setup()
 
 EOF
 

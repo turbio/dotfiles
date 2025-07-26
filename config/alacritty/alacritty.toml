@@ -19,16 +19,6 @@ yellow = "0xE6DB74"
 cursor = "0xffffff"
 text = "0x000000"
 
-[colors.dim]
-black = "0x333333"
-blue = "0x6699cc"
-cyan = "0x66cccc"
-green = "0x99cc99"
-magenta = "0xcc99cc"
-red = "0xf2777a"
-white = "0xdddddd"
-yellow = "0xffcc66"
-
 [colors.normal]
 black = "0x272822"
 blue = "0x268BD2"
@@ -80,3 +70,6 @@ lines = 24
 [window.padding]
 x = 2
 y = 2
+
+[scrolling]
+multiplier = 4

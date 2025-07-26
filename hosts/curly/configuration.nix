@@ -147,19 +147,13 @@
     };
   };
 
-  #services.logind = {
-  #  lidSwitch = "hibernate";
-  #  extraConfig = ''
-  #    HandlePowerKey=hibernate
-  #  '';
-  #};
+  services.logind = {
+    lidSwitch = "hibernate";
+    extraConfig = ''
+      HandlePowerKey=hibernate
+    '';
+  };
 
   # todo try this dude
   # services.homed.enable = true;
-
-  services.physlock.enable = true;
-  services.physlock.lockOn.hibernate = false;
-  services.physlock.lockOn.suspend = true;
-  services.physlock.muteKernelMessages = false;
-  services.physlock.disableSysRq = true;
 }

@@ -28,7 +28,7 @@ func bootReq(w http.ResponseWriter, r *http.Request) {
 
 	_, err := os.Stat(*hosts+"/"+MAC)
 	if err != nil {
-		log.Printf("Host %s not found", MAC)
+		log.Printf("Host %s (%s) not found", MAC, *hosts+"/"+MAC)
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}

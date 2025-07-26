@@ -71,6 +71,9 @@ in
           "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
 
           "alacritty/alacritty.toml".source = ./config/alacritty/alacritty.toml;
+          "kitty/kitty.conf".source = ./config/kitty/kitty.conf;
+          "ghostty/config".source = ./config/ghostty/config;
+
           "dunstrc".source = ./config/dunstrc;
           "mako/config".source = ./config/mako/config;
           "fuzzel/fuzzel.ini".source = ./config/fuzzel/fuzzel.ini;
@@ -85,47 +88,7 @@ in
               ]
               (builtins.readFile ./config/sway/config)
           );
-          "waybar/config".text =
-            builtins.replaceStrings
-              [ "NIX_WAYBAR_YUBI_EXEC" "NIX_WAYBAR_YUBI_ONCLICK" ]
-              [
-                (builtins.toString (
-                  pkgs.writeShellScript "yubi-waybar-status" ''
-                    last=xxxxxx
-                    ${pkgs.systemd}/bin/udevadm monitor \
-                      --udev \
-                      --subsystem-match=usb \
-                      --tag-match=security-device \
-                      | while read l; do
-                        if [[ "$l" == *"add"* ]]; then
-                          ykout="$(${pkgs.yubikey-manager}/bin/ykman list)";
-                          if [[ "$ykout" != "" ]]; then
-                            last="$(echo $l | awk '{print $4}')";
-                            text=$(echo -n "$ykout" | sed 's/^\(.\+\) (.* \([0-9]\+\)$/\1 \2/')
-                            echo '{"text": "'"$text"'", "alt": "key"}';
-                          fi
-                        elif [[ "$l" == *"remove"* ]] && [[ "$l" == *"$last"* ]]; then
-                          echo;
-                        fi
-                      done
-                  ''
-                ))
-
-                (builtins.toString (
-                  pkgs.writeShellScript "yubi-waybar-click" ''
-                    ${pkgs.alacritty}/bin/alacritty \
-                      --title 'Yubikey Oath Codes' \
-                      --command sh -c " \
-                        echo Yubikey Oath Codes; \
-                        printf %80s |tr ' ' '-'; \
-                        echo -en 'Loading codoes...\r'; \
-                        ${pkgs.yubikey-manager}/bin/ykman oath accounts code; \
-                        read";
-                  ''
-                ))
-              ]
-              (builtins.readFile ./config/waybar/config);
-          "waybar/mediaplayer.py".source = ./config/waybar/mediaplayer.py;
+          "waybar/config".text = builtins.toJSON (import ./waybar.nix { inherit pkgs; });
           "waybar/style.css".source = ./config/waybar/style.css;
         })
       ];
@@ -156,7 +119,7 @@ in
         };
 
         shellInit = ''
-          set fish_color_autosuggestion black --bold
+          set fish_color_autosuggestion brblack
           set fish_color_command green
           set fish_color_error red
 
@@ -185,9 +148,9 @@ in
                 \e[0m│\e[0;32m                       / \`.   .' \"
                 \e[0m│\e[0;32m               .---.  <    > <    >  .---.
                 \e[0m│\e[0;32m               |    \\  \\ - ~ ~ - /  /    |
-                \e[0m│\e[1;30m   _____\e[0;32m        \\  ..-~             ~-..-~
-                \e[0m╰\e[1;30m  |     |\e[0;32m   \\~~~\\.'                    \`./~~~/
-                 \e[1;30m ---------\e[0;32m   \\__/                        \\__/
+                \e[0m│\e[90m   _____\e[0;32m        \\  ..-~             ~-..-~
+                \e[0m╰\e[90m  |     |\e[0;32m   \\~~~\\.'                    \`./~~~/
+                 \e[90m ---------\e[0;32m   \\__/                        \\__/
                  .'  O    \\     /               /       \\  \"
                 (_____,    `._.'               |         }  \\/~~~/
                  `----.          /       }     |        /    \\__/

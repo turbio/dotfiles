@@ -13,6 +13,7 @@ in
   networking.firewall.allowedTCPPorts = [
     80
     443
+    23
   ];
 
   networking.nftables = {
@@ -21,12 +22,11 @@ in
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iifname "eth0" tcp dport { 80, 443 } dnat to 100.100.57.46
+          iifname "eth0" tcp dport { 80, 443, 23 } dnat to 100.100.57.46
         }
 
         chain postrouting {
           type nat hook postrouting priority 100;
-          #iifname "eth0" tcp dport { 80, 443 } snat to 100.100.57.46
           oifname "tailscale0" masquerade
         }
       }

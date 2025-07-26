@@ -50,4 +50,8 @@
       path = "~/Pictures/webcamlog";
     };
   };
+
+  services.ollama.enable = true;
+  services.ollama.acceleration = "rocm";
+  services.ollama.rocmOverrideGfx = "11.0.0";
 }

@@ -11,7 +11,13 @@ let
     ''
   );
 
-  vhost404 = (
+  catchall404 = (
+    pkgs.writeTextDir "404.txt" ''
+      zooweemama
+    ''
+  );
+
+  turbioWildcard404 = (
     pkgs.writeTextDir "404.txt" ''
       404!
       ====
@@ -37,7 +43,7 @@ in
 
   services.nginx.virtualHosts."turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
     root = "${root}";
 
@@ -46,8 +52,12 @@ in
     };
 
     locations."=/404.txt" = {
+      return = "404";
       root = "${turbio404}";
       index = "404.txt";
+      extraConfig = ''
+        internal;
+      '';
     };
 
     extraConfig = ''
@@ -56,11 +66,11 @@ in
     '';
   };
 
-  services.nginx.virtualHosts."404.turb.io" = {
+  services.nginx.virtualHosts."*.turb.io" = {
     addSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
-    root = "${vhost404}";
+    root = "${turbioWildcard404}";
 
     locations."/" = {
       return = "404";
@@ -76,5 +86,14 @@ in
       error_page 404 /404.txt;
       charset utf-8;
     '';
+  };
+
+  services.nginx.virtualHosts."_" = {
+    default = true;
+    rejectSSL = true;
+    root = "${catchall404}";
+    locations."/" = {
+      return = "404";
+    };
   };
 }

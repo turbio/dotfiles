@@ -16,7 +16,7 @@ in
 {
   services.nginx.virtualHosts."protip.turb.io" = {
     addSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
     root = "${root}";
 

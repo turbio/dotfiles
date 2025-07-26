@@ -54,6 +54,8 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+DEFAULT_USER="$(whoami)"
+
 set -- "${POSITIONAL_ARGS[@]}"
 
 SELFHOST="$(hostname)"
@@ -101,7 +103,7 @@ fi
 
 echo -n "on "
 
-FLAGS="--use-remote-sudo --flake .#${WHOMST} --target-host turbio@${DEPLOY_ON}"
+FLAGS="--use-remote-sudo --flake .#${WHOMST} --target-host ${DEPLOY_ON}"
 
 if [ -n "$OFFLINE" ]; then
 	FLAGS="$FLAGS --offline"
@@ -118,7 +120,7 @@ else
 	# eg: "ssh://mac x86_64-darwin ; ssh://beastie i686-linux,x86_64-freebsd"
 
 	for item in "${BUILD_ON[@]}"; do
-		BUILDERS="ssh-ng://turbio@${item} x86_64-linux /home/turbio/.ssh/id_ed25519 32 2 kvm,big-parallel;$BUILDERS"
+		BUILDERS="ssh-ng://turbio@${item} x86_64-linux,aarch64-linux /home/turbio/.ssh/id_ed25519 32 2 kvm,big-parallel;$BUILDERS"
 	done
 
 	FLAGS="$FLAGS --use-substitutes"
@@ -134,21 +136,27 @@ if [ -z "$NO_NOM" ] && command -v nom 1>&2 2>/dev/null; then
 
 fi
 
-#echo "Building toplevel..."
-#
-#scratch_dir="$(mktemp --tmpdir -d "nixos-toplevel-$WHOMST-deploy-dots.XXXXXXXXXX")"
-#
-#nix \
-#	build \
-#	.#nixosConfigurations."$WHOMST".config.system.build.toplevel \
-#	--out-link "$scratch_dir/toplevel" \
-#	--builders "$BUILDERS" \
-#	-v \
-#	--builders-use-substitutes #--log-format internal-json #|& nom --json
-if [ -n "$BUILD_ONLY" ]; then
-	nix build ".#nixosConfigurations.${WHOMST}.config.system.build.toplevel" --no-link --builders "$BUILDERS" --builders-use-substitutes
-elif [ -n "$USE_NOM" ]; then
-	nixos-rebuild switch $FLAGS --builders "$BUILDERS" |& nom --json
-else
-	nixos-rebuild switch $FLAGS --builders "$BUILDERS" -v
-fi
+echo "Building toplevel..."
+
+scratch_dir="$(mktemp --tmpdir -d "nixos-toplevel-$WHOMST-deploy-dots.XXXXXXXXXX")"
+
+nix \
+	build \
+	.#nixosConfigurations."$WHOMST".config.system.build.toplevel \
+	--out-link "$scratch_dir/toplevel" \
+	--builders "$BUILDERS" \
+	-v \
+	--builders-use-substitutes #--log-format internal-json #|& nom --json
+
+nix-copy-closure -v --to "$DEPLOY_ON" "$scratch_dir/toplevel"
+
+toplevel="$(realpath "$scratch_dir/toplevel")"
+
+echo "Switching to new toplevel on target..."
+ssh "$DEPLOY_ON" sudo "$toplevel/bin/switch-to-configuration" switch
+
+# echo "Activating new toplevel on target system..."
+# ssh "$DEPLOY_ON" sudo "$toplevel/bin/switch-to-configuration" test
+# 
+# echo "Switching boot to new toplevel on taregt system..."
+# ssh "$DEPLOY_ON" sudo "$toplevel/bin/switch-to-configuration" boot

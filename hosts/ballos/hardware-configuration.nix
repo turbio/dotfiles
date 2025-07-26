@@ -28,7 +28,7 @@
   boot.kernelParams = [ "zfs.zfs_arc_sys_free=8589934592" ];
 
   boot.supportedFilesystems = [ "zfs" ];
-  boot.zfs.extraPools = [ "pool" ];
+  boot.zfs.extraPools = [ "tank" ];
   networking.hostId = "00ba1105";
 
   boot.initrd.availableKernelModules = [
@@ -97,24 +97,26 @@
     MulticastDNS=no
   '';
 
-  networking.useNetworkd = true;
-  systemd.network.enable = true;
-  systemd.network.networks."10-wan" = {
-    matchConfig.Name = "enp4s0";
-    networkConfig.DHCP = "yes";
-    networkConfig.IPv6AcceptRA = true;
-    linkConfig.RequiredForOnline = "routable";
-  };
-  systemd.network.networks."10-wg" = {
-    matchConfig.Name = "wg0";
-    networkConfig = {
-      Address = "10.100.0.10/24";
-      DHCP = "no";
-      #Gateway = "10.100.0.1";
-      #DNS = "10.100.0.1";
-    };
-    linkConfig.RequiredForOnline = "no";
-  };
+  # networking.useNetworkd = true;
+  # systemd.network.enable = true;
+  # systemd.network.networks."10-wan" = {
+  #   matchConfig.Name = "enp4s0";
+  #   networkConfig.DHCP = "yes";
+  #   networkConfig.IPv6AcceptRA = true;
+  #   linkConfig.RequiredForOnline = "routable";
+  # };
+
+
+  # systemd.network.networks."10-wg" = {
+  #   matchConfig.Name = "wg0";
+  #   networkConfig = {
+  #     Address = "10.100.0.10/24";
+  #     DHCP = "no";
+  #     #Gateway = "10.100.0.1";
+  #     #DNS = "10.100.0.1";
+  #   };
+  #   linkConfig.RequiredForOnline = "no";
+  # };
 
   #disko.devices.disk.keys = {
   #  type = "disk";

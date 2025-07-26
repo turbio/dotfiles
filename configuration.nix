@@ -34,7 +34,7 @@ in
   nix = {
     #autoOptimiseStore = true;
 
-    gc = {
+    gc = lib.mkIf (hostname != "ballos") {
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 30d";
@@ -44,9 +44,8 @@ in
     settings = {
       trusted-users = [ "turbio" ];
 
-      # todo(turbio): centralize self-hosted cache logic
-      # how should we handle pushing n stuff
-      substituters = if hostname != "ballos" then [
+      # todo(turbio): lol
+      substituters = if (hostname != "ballos" && hostname != "zote") then [
         "https://nixcache.turb.io"
       ] else [];
       trusted-public-keys = [
@@ -95,8 +94,8 @@ in
     # probably a bad idea lmao
     hashedPassword = "$6$UnnB5IybU$cBw9zHoM7xTdwyXnAAbeXOGoqQQtzbYsuPqTDjpGF3J3H3WaarzAEtoBxXOImZlmmzY2amSqSgwUbEP0.ma3w0"; # TODO(turbio): key management
 
-    #shell = pkgs.zsh;
-    shell = pkgs.fish;
+    shell = pkgs.zsh;
+    #shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio" # TODO(turbio): key management
     ];
@@ -108,9 +107,8 @@ in
       StrictHostKeyChecking accept-new
   '';
 
-  programs.fish = {
-    enable = true;
-  };
+  programs.fish.enable = true;
+  programs.zsh.enable = true;
 
   programs.mtr.enable = true;
 
@@ -134,6 +132,10 @@ in
     hide_running_in_container = false;
     hide_userland_threads = true;
     show_program_path = false;
+    column_meters_0 = ["LeftCPUs2" "Memory" "Swap" "DiskIO" "NetworkIO"];
+    column_meter_modes_0 = [1 1 1 2 2];
+    column_meters_1 = ["RightCPUs2" "Tasks" "LoadAverage" "Uptime"];
+    column_meter_modes_1 = [1 2 2 2];
   };
 
   /*
@@ -207,10 +209,9 @@ in
     };
   */
 
-  services.tailscale.enable = true;
-
+  # TODO(turbio):
+  services.tailscale.enable = lib.mkIf (hostname != "zote") true;
   networking.nameservers = [ "100.100.100.100" "8.8.8.8" "1.1.1.1" ];
-  networking.search = [ "tailffb1.ts.net" ];
   networking.nftables = {
     enable = true;
   };

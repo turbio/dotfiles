@@ -13,6 +13,8 @@ input {
     // Next sections include libinput settings.
     // Omitting settings disables them, or leaves them at their default values.
     touchpad {
+        // off
+
         tap
         // dwt
         // dwtp
@@ -164,15 +166,15 @@ binds {
 
     Mod+O      { focus-workspace-down; }
     Mod+I        { focus-workspace-up; }
-    Mod+Shift+O         { move-column-to-workspace-down; }
-    Mod+Shift+I         { move-column-to-workspace-up; }
+    Mod+Shift+O         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }
     // ...
 
-    Mod+Ctrl+Shift+O         { move-workspace-down; }
-    Mod+Ctrl+Shift+I         { move-workspace-up; }
+    Mod+Ctrl+Shift+O         { move-workspace-to-monitor-right; }
+    Mod+Ctrl+Shift+I         { move-workspace-to-monitor-left; }
 
     // You can bind mouse wheel scroll ticks using the following syntax.
     // These binds will change direction based on the natural-scroll setting.
@@ -248,7 +250,6 @@ binds {
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "xwayland-satellite"
-spawn-at-startup "nm-applet"
 spawn-at-startup "swaybg" "-i" ".config/wallpaper"
 spawn-at-startup "swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
 

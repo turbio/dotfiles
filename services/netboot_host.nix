@@ -20,6 +20,14 @@ in
     port = 8180;
   };
 
+  services.nfs.server = {
+    enable = true;
+    exports = ''
+      /nix/store 192.168.0.0/16(ro,no_subtree_check,async,no_root_squash)
+      /nix/store 100.100.0.0/16(ro,no_subtree_check,async,no_root_squash)
+    '';
+  };
+
   services.nbd.server = {
     enable = true;
     exports = {

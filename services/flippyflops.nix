@@ -17,7 +17,7 @@ in
 {
   services.nginx.virtualHosts."dots.turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
     locations."/" = {
       proxyPass = "http://${flippyflops.host}:${builtins.toString flippyflops.port}";

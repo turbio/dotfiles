@@ -76,10 +76,4 @@
       HandlePowerKey=hibernate
     '';
   };
-
-  services.physlock.enable = true;
-  services.physlock.lockOn.hibernate = false;
-  services.physlock.lockOn.suspend = false;
-  services.physlock.muteKernelMessages = true;
-  services.physlock.disableSysRq = true;
 }

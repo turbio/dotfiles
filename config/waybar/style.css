@@ -38,6 +38,7 @@ window#waybar.chromium {
     border: none;
 }
 
+
 #workspaces button {
     padding: 0 5px;
     background-color: transparent;
@@ -82,6 +83,8 @@ window#waybar.chromium {
 #tray,
 #mode,
 #idle_inhibitor,
+#custom-tailscale,
+#custom-hostname,
 #mpd {
     padding: 0 10px;
     margin: 0 4px;
@@ -136,7 +139,7 @@ label:focus {
     background-color: #90b1b1;
 }
 
-#network, #bluetooth {
+#network, #bluetooth, #custom-tailscale {
     background-color: #2980b9;
 }
 
@@ -180,6 +183,10 @@ label:focus {
 
 #temperature.critical {
     background-color: #eb4d4b;
+}
+
+#custom-hostname {
+    background-color: #51a37a;
 }
 
 #tray {

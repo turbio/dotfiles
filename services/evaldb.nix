@@ -62,13 +62,11 @@ let
   };
 
   port = 3005;
-
-  dbstore = "/pool/evaldb/";
 in
 {
   services.nginx.virtualHosts."evaldb.turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
     #default = true;
 
     locations."/" = {

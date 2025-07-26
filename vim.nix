@@ -15,8 +15,6 @@ let
     # fancy new neovim powered lsp
     nvim-lspconfig
     cmp-nvim-lsp
-    actions-preview-nvim
-    renamer-nvim
     lsp_signature-nvim
     trouble-nvim
 
@@ -71,24 +69,36 @@ in
     plugins = {
       # minuet.enable = true;
       # minuet.settings = {
+      #   n_completions = 5;
+      #   context_window = 1024;
       #   provider = "openai_fim_compatible";
-      #   n_completions = 1;
-      #   context_window = 512;
       #   provider_options = {
       #     openai_fim_compatible = {
       #       api_key = "TERM";
-      #       end_point = "http://ollama.int.turb.io/v1/completions";
-      #       name = "Ollama";
+      #       #end_point = "http://ollama.int.turb.io/v1/completions";
+      #       end_point = "http://localhost:11434/v1/completions";
+      #       name = "llm";
       #       model = "qwen2.5-coder:1.5b";
       #       stream = true;
       #       optional = {
       #         max_tokens = 245;
       #         top_p = 0.9;
+      #         stop = [ "\n\n" ];
       #       };
       #     };
       #   };
+
+      #   # virtualtext = {
+      #   #   auto_trigger_ft = [ "*" ];
+      #   #   show_on_completion_menu = true;
+      #   #   keymap = {
+      #   #     accept = "<C-j>";
+      #   #   };
+      #   # };
       # };
       copilot-vim.enable = true;
+
+      direnv.enable = true;
 
       lsp.enable = true;
       web-devicons.enable = true;

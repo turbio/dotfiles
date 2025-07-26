@@ -106,7 +106,7 @@ in
 {
   services.nginx.virtualHosts."progress.turb.io" = {
     addSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
 
     root = "${webroot}/root";
 

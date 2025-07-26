@@ -58,7 +58,6 @@
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
   outputs =
@@ -72,7 +71,9 @@
       ...
     }@inputs:
     let
-      arch = hostname: if hostname == "pando" then "aarch64-linux" else "x86_64-linux";
+      arch = hostname:
+      if hostname == "jenka" then "aarch64-linux"
+      else "x86_64-linux";
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
@@ -157,9 +158,9 @@
     rec {
       nixosConfigurations = mapEachHost <| mksystem [ ];
 
-      netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable.nix ];
-
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
+
+      netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_nfs.nix ];
 
       # Spits out the kernel and initrd for pxe booting a host.
       netbootableSystems = mapEachHost (
@@ -172,13 +173,12 @@
           initrd = "${output.netbootRamdisk}/initrd";
           cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
 
-          "squashfs.img" = output.squashfsStore;
-          "${h}-store" = output.ext4Store;
+          # "squashfs.img" = output.squashfsStore;
+          # "${h}-store" = output.ext4Store;
         }
       );
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
-
       packages.x86_64-linux =
         (
           mapEachHost (mksystem [({ ... }: {
@@ -204,9 +204,6 @@
       #   '';
 
       pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
-
-      # output a flashable raspi image
-      images.pando = nixosConfigurations.pando.config.system.build.sdImage;
 
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     };

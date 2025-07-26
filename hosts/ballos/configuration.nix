@@ -13,27 +13,321 @@ in
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
     ../../services/evaldb.nix
-    ../../services/jelly.nix
     ../../services/netboot_host.nix
     ./ipmi.nix
     (import ./acme-wildcard.nix { domain = "turb.io"; })
-    (import ../../services/vibes.nix { mediaRoot = "/pool/vibes"; domain = "vibes.turb.io"; })
+    (import ../../services/vibes.nix { mediaRoot = "/tank/enc/vibes"; domain = "vibes.turb.io"; })
   ];
 
-  zfs.pools.pool.datasets = {
-    primary = {
+  environment.enableAllTerminfo = true;
+
+  zfs.pools.tank.datasets = {
+    "enc/media" = {
+      perms.owner = "jellyfin";
+      perms.group = "media";
+      perms.mode = "775";
+      properties.sync = "standard";
+    };
+    "enc/jellyfin" = {
+      perms.owner = "jellyfin";
+      perms.group = "media";
+      perms.mode = "775";
+      properties.sync = "standard";
+    };
+    "enc/photos" = {
+      properties.sync = "standard";
+      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
+    };
+  };
+
+  services.nginx.virtualHosts."jelly.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+    http2 = true;
+
+    locations."/" = {
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:8096";
+    };
+  };
+  services.nginx.virtualHosts."see.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:5055";
+    };
+  };
+  services.nginx.virtualHosts."son.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:8989";
+    };
+  };
+  services.nginx.virtualHosts."rad.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:7878";
+    };
+  };
+  services.nginx.virtualHosts."prow.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:9696";
+    };
+  };
+  services.nginx.virtualHosts."bt.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+    '';
+    locations."/" = {
+      extraConfig = ''
+        proxy_set_header Host $host;
+      '';
+      proxyPass = "http://${config.containers.jellyfin.localAddress}:9472";
+    };
+  };
+
+  users.users.jellyfin = {
+    isSystemUser = true;
+    group = "media";
+    uid = 996;
+  };
+  users.groups.media = { gid = 994; };
+
+  # container traffic -> internet
+  # tbh we should quarantine this off to it's own interface
+  networking.nat = {
+    enable = true;
+    internalInterfaces = ["ve-*"];
+    externalInterface = "enp4s0";
+    enableIPv6 = true;
+  };
+
+  containers.jellyfin = {
+    ephemeral = true;
+    autoStart = true;
+    privateNetwork = true;
+    hostAddress = "192.168.100.10";
+    localAddress = "192.168.100.11";
+    privateUsers = "pick";
+    bindMounts = {
+      "/media" = {
+        mountPoint = "/media:idmap"; # nasty hax (https://github.com/NixOS/nixpkgs/issues/329530)
+        hostPath = "/tank/enc/media";
+        isReadOnly = false;
+      };
+      "/persist" = {
+        mountPoint = "/persist:idmap";
+        hostPath = "/tank/enc/jellyfin";
+        isReadOnly = false;
+      };
+    };
+    config = { ... }: {
+      imports = [
+        (import ../../services/jelly.nix {
+          internalIp = internalIp;
+          userId = config.users.users.jellyfin.uid;
+          groupId = config.users.groups.media.gid;
+          persistDataDir = "/persist";
+        })
+      ];
+
+      networking.firewall = {
+        enable = true;
+        allowedTCPPorts = [
+          8096 # jellyfin
+          9472 # qbittorrent
+          9696 # prowlarr
+          5055 # seerr
+          7878 # radarr
+          8989 # sonarr
+        ];
+      };
+      networking.useHostResolvConf = false;
+      services.resolved.enable = true;
+    };
+  };
+
+  networking.wireguard.enable = true;
+  networking.wireguard.interfaces = {
+    # "wg0" is the network interface name. You can name the interface arbitrarily.
+    wg0 = {
+      ips = [ "10.100.1.2/24" ];
+      listenPort = 51820; # to match firewall allowedUDPPorts (without this wg uses random port numbers)
+      allowedIPsAsRoutes = false;
+
+      # postSetup = ''
+      #   ${ip} rule add from 10.100.1.0/24 lookup 100
+      #   ${ip} route add default dev wg0 table 100
+      # '';
+
+      # postShutdown = ''
+      #   ${ip} rule del from 10.100.1.0/24 lookup 100
+      #   ${ip} route del default dev wg0 table 100
+      # '';
+
+      privateKeyFile = "/root/wireguard-keys/private";
+
+      peers = [
+        {
+          publicKey = "SnuLTHTNwJuW/7VHMcLLTPUOFhyZaTbpLtSTnrd3zwE=";
+          allowedIPs = [ "0.0.0.0/0" ];
+          endpoint = "185.216.68.61:51820";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
+
+    wg1 = {
+      ips = [ "10.100.2.2/24" ];
+      allowedIPsAsRoutes = false;
+
+      privateKeyFile = "/root/wireguard-keys2/private";
+
+      peers = [
+        {
+          publicKey = "NFxVkrIsKcW7Wp9ToLmwC4l1di1sXf+uZ3ipG9rq3X4=";
+          allowedIPs = [ "0.0.0.0/0" ];
+          endpoint = "185.216.68.66:51820";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
+
+    wg3 = {
+      ips = [ "10.100.3.2/24" ];
+      allowedIPsAsRoutes = false;
+
+      privateKeyFile = "/root/wireguard-keys-wg3/private";
+
+      peers = [
+        {
+          publicKey = "Ig1QRX9Brp1rTPRCYMbVFx2x6v1EyVmszVTm71XOITw=";
+          allowedIPs = [ "0.0.0.0/0" ];
+          endpoint = "144.202.10.83:51820";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
+
+    wg4 = {
+      ips = [ "10.100.4.2/24" ];
+      allowedIPsAsRoutes = false;
+
+      privateKeyFile = "/root/wireguard-keys-wg4/private";
+
+      peers = [
+        {
+          publicKey = "hjuO1aj0chglToYOGFSpQTcJs1BNeRr5hvrvAVyomxo=";
+          allowedIPs = [ "0.0.0.0/0" ];
+          endpoint = "167.172.206.235:51820";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
+  };
+
+  systemd.network.networks."10-wg4" = {
+    matchConfig.Name = "wg4";
+    networkConfig = {
+      Address = "10.100.4.2/24";
+    };
+    routes = [
+      {
+        Table = "204";
+        Destination = "0.0.0.0/0";
+      }
+    ];
+    routingPolicyRules = [
+      {
+        From = "10.100.4.0/24";
+        Table = "204";
+      }
+    ];
+  };
+
+  systemd.network.networks."10-wg" = {
+    matchConfig.Name = "wg0";
+    networkConfig = {
+      Address = "10.100.1.2/24";
+    };
+    routes = [
+      {
+        Table = "123";
+        Destination = "0.0.0.0/0";
+      }
+    ];
+    routingPolicyRules = [
+      {
+        From = "10.100.1.0/24";
+        Table = "123";
+      }
+    ];
+  };
+
+  systemd.network.networks."10-wg1" = {
+    matchConfig.Name = "wg1";
+    networkConfig = {
+      Address = "10.100.2.2/24";
+    };
+    routes = [
+      {
+        Table = "124";
+        Destination = "0.0.0.0/0";
+      }
+    ];
+    routingPolicyRules = [
+      {
+        From = "10.100.2.0/24";
+        Table = "124";
+      }
+    ];
+  };
+
+  systemd.network.networks."10-wg3" = {
+    matchConfig.Name = "wg3";
+    networkConfig = {
+      Address = "10.100.3.2/24";
+    };
+    routes = [
+      {
+        Table = "125";
+        Destination = "0.0.0.0/0";
+      }
+    ];
+    routingPolicyRules = [
+      {
+        From = "10.100.3.0/24";
+        Table = "125";
+      }
+    ];
+  };
+
+  zfs.pools.tank.datasets = {
+    "enc/primary" = {
       properties.sync = "disabled";
       mountpoint = "/mnt/sync/";
     };
-    ollama = {
+    "enc/ollama" = {
       properties.sync = "disabled";
     };
   };
 
-  zfs.pools.pool.datasets.ollama = { perms.group = "ollama"; perms.mode = "775"; };
+  zfs.pools.tank.datasets."enc/ollama" = { perms.group = "ollama"; perms.mode = "775"; };
   services.ollama = {
     enable = true;
-    models = config.zfs.pools.pool.datasets.ollama.mountpoint;
+    models = config.zfs.pools.tank.datasets."enc/ollama".mountpoint;
     user = "ollama";
     group = "ollama";
     environmentVariables = {
@@ -44,7 +338,6 @@ in
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  security.acme.defaults.email = "acme@turb.io";
   security.acme.acceptTerms = true;
 
   services.nix-serve = {
@@ -55,7 +348,8 @@ in
 
   services.nginx.virtualHosts."nixcache.turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
+
     locations."/" = {
       proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
       extraConfig = ''
@@ -92,7 +386,7 @@ in
   services.sanoid = {
     enable = true;
     datasets = {
-      "pool/primary" = {
+      "tank/enc/primary" = {
         hourly = 24;
         daily = 30;
         monthly = 12;
@@ -105,7 +399,8 @@ in
 
   networking.nftables = {
     enable = true;
-    ruleset = '''';
+    ruleset = ''
+    '';
   };
 
   networking.firewall.allowedUDPPorts = [
@@ -129,10 +424,19 @@ in
   };
 
   services.nginx = {
+    defaultListenAddresses = [
+      "100.100.57.46"
+    ];
+
     enable = true;
 
     appendConfig = ''
       worker_processes 32;
+      worker_rlimit_nofile 2048;
+    '';
+
+    eventsConfig = ''
+      worker_connections 1024;
     '';
 
     recommendedGzipSettings = true;
@@ -160,7 +464,8 @@ in
   # vpn internal traffic to us
   services.nginx.virtualHosts."ctrl.turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
+
     locations."/" = {
       proxyPass = "http://10.100.0.6";
       extraConfig = ''
@@ -171,7 +476,8 @@ in
   };
   services.nginx.virtualHosts."graph.turb.io" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "turb.io";
+
     locations."/" = {
       proxyPass = "http://10.100.0.6";
       extraConfig = ''
@@ -230,12 +536,13 @@ in
 
   services.syncthing = {
     enable = true;
+
     configDir = "/mnt/sync/config";
     dataDir = "/mnt/sync";
     settings.folders = {
       "photos" = {
         enable = true;
-        path = "/mnt/sync/photos";
+        path = "/tank/enc/photos";
       };
       "code" = {
         enable = true;
@@ -255,7 +562,7 @@ in
       };
       "webcamlog" = {
         enable = true;
-        path = "/mnt/sync/webcamlog";
+        path = "/tank/enc/webcamlog";
       };
     };
   };
@@ -287,7 +594,7 @@ in
   services.nginx.virtualHosts = {
     "graf.turb.io" = {
       forceSSL = true;
-      enableACME = true;
+      useACMEHost = "turb.io";
 
       locations."/" = {
         proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
@@ -376,22 +683,22 @@ in
     )
   ];
 
-    systemd.timers."archive-webcam" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Unit = "archive-webcam.service";
-      };
-    };
-  systemd.services.archive-webcam = {
-    path = [
-      pkgs.rsync
-    ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      rsync -av /mnt/sync/webcamlog/ /mnt/sync/archive/webcamlog/ --exclude=".*" --remove-source-files
-    '';
-  };
+  #systemd.timers."archive-webcam" = {
+  #  wantedBy = [ "timers.target" ];
+  #  timerConfig = {
+  #    OnCalendar = "daily";
+  #    Unit = "archive-webcam.service";
+  #  };
+  #};
+  #systemd.services.archive-webcam = {
+  #  path = [
+  #    pkgs.rsync
+  #  ];
+  #  serviceConfig.Type = "oneshot";
+  #  script = ''
+  #    rsync -av /mnt/sync/webcamlog/ /mnt/sync/archive/webcamlog/ --exclude=".*" --remove-source-files
+  #  '';
+  #};
 
   systemd.services.fanspeed = {
     enable = true;
@@ -429,6 +736,12 @@ in
     pushgateway.web.listen-address = "127.0.0.1:9091";
 
     scrapeConfigs = [
+      {
+        job_name = "flippyflops";
+        scrape_interval = "5s";
+        static_configs = [ { targets = [ "127.0.0.1:3001" ]; } ];
+        fallback_scrape_protocol = "OpenMetricsText1.0.0";
+      }
       {
         job_name = "big-ups";
         scrape_interval = "1s";
@@ -490,7 +803,7 @@ in
       }
       {
         job_name = "nodexporter";
-        scrape_interval = "5s";
+        scrape_interval = "30s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ]; }
         ];
@@ -532,14 +845,14 @@ in
       }
       {
         job_name = "zfs";
-        scrape_interval = "5s";
+        scrape_interval = "1m";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.zfs.port}" ]; }
         ];
       }
       {
         job_name = "process";
-        scrape_interval = "5s";
+        scrape_interval = "1m";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.process.port}" ]; }
         ];

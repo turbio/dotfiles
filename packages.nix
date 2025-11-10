@@ -1,145 +1,137 @@
-{ pkgs, unstable, fetchurl, ... }:
-let
-  mars-ide =
-    pkgs.callPackage
-      ({ lib, stdenvNoCC, fetchurl, makeWrapper, copyDesktopItems, makeDesktopItem, unzip, imagemagick, jre }:
-
-        stdenvNoCC.mkDerivation rec {
-          pname = "mars-mips";
-          version = "4.5";
-
-          src = fetchurl {
-            url = "https://courses.missouristate.edu/KenVollmar/MARS/MARS_${lib.replaceStrings ["."] ["_"] version}_Aug2014/Mars${lib.replaceStrings ["."] ["_"] version}.jar";
-            sha256 = "15kh1fahkkbbf4wvb6ijzny4fi5dh4pycxyzp5325dm2ddkhnd5c";
-          };
-
-          dontUnpack = true;
-
-          nativeBuildInputs = [ makeWrapper copyDesktopItems unzip imagemagick ];
-
-          desktopItems = [
-            (makeDesktopItem {
-              name = pname;
-              desktopName = "MARS";
-              exec = "mars-mips";
-              icon = "mars-mips";
-              comment = "An IDE for programming in MIPS assembly language";
-              categories = "Development;IDE;";
-            })
-          ];
-
-          installPhase = ''
-            runHook preInstall
-            export JAR=$out/share/java/${pname}/${pname}.jar
-            install -D $src $JAR
-            makeWrapper ${jre}/bin/java $out/bin/${pname} \
-              --add-flags "-jar $JAR"
-            unzip ${src} images/MarsThumbnail.gif
-            mkdir -p $out/share/pixmaps
-            convert images/MarsThumbnail.gif $out/share/pixmaps/mars-mips.png
-            runHook postInstall
-          '';
-
-          meta = with lib; {
-            description = "An IDE for programming in MIPS assembly language intended for educational-level use";
-            homepage = "https://courses.missouristate.edu/KenVollmar/MARS/";
-            license = licenses.mit;
-            maintainers = with maintainers; [ angustrau ];
-            platforms = platforms.all;
-          };
-        })
-      { };
-in
-{
-  desktop = with pkgs; [
-    discord
-    nixpkgs-fmt
-    firefox-wayland
-    chromium
-    alacritty
-    pavucontrol
-    blueberry
-    spotify
-    mako # notification daemon
-    pass
-    yubikey-manager
-    yubikey-agent
-    yubioath-desktop
-
-    lxappearance
-    gtk_engines
-    gtk-engine-murrine
-    gsettings-desktop-schemas
-    lsb-release
-
-    arc-theme
-
-    # wayland
-    wdisplays
-    flashfocus
-    xdg-utils
-    gnome.dconf-editor
-    swaylock
-    swayidle
-    # need pactl for sway stuff
-    pulseaudioLight
-
-    wineWowPackages.staging
-
-    # waybar stuff
-    (waybar.override { withMediaPlayer = true; })
-    playerctl
-    libappindicator
-
-    # gdbus
-    glib
-
-    docker-compose
-    vagrant
-    ansible
-
-    gnome.nautilus
-    gnome.file-roller
-
-    qemu
-
-    unstable.obs-studio-plugins.wlrobs
-    unstable.obs-studio
-    linuxPackages.v4l2loopback
+{ pkgs, ... }:
+rec {
+  extra = with pkgs; [
+    obs-studio-plugins.wlrobs
+    obs-studio
     zoom-us
-    gimp
-
-    slurp
-    grim
-    wl-clipboard
-
+    chromium
     aseprite
-    gnome.eog
-    mpv
+    cubicsdr
+    darktable
 
-    steam
-    bspwm
-    sxhkd
-
-    openscad
-
-    cargo
-    rustc
-    rustup
-    nodejs
+    #saleae-logic-2
+    qemu
 
     clang
     gcc
     go
+    rust-analyzer
 
-    wev
-    xorg.xev
-    xdotool
+    vagrant
+    steam
 
-    mars-ide
+    openscad
+    mars-mips
+
+    wineWowPackages.staging
 
     prusa-slicer
+    orca-slicer
+
+    element-desktop
+    discord
+
+    arduino
+
+    inkscape
+
+    wf-recorder
+
+    spotify
+
+    obsidian
   ];
+
+  desktop =
+    with pkgs;
+    [
+      #urbit
+
+      _1password-gui
+      _1password-cli
+
+      uhubctl
+      fwupd
+
+      nix-output-monitor
+
+      nixpkgs-fmt
+      alacritty
+      kitty
+      ghostty
+      neovide
+      pavucontrol
+      blueberry
+      pass
+      gtk_engines
+      gtk-engine-murrine
+      gsettings-desktop-schemas
+      lsb-release
+
+      arc-theme
+
+      # wayland
+      wdisplays
+      flashfocus
+      xdg-utils
+      dconf-editor
+      swaylock
+      swayidle
+      mako
+      swaybg
+      xwayland-satellite # x under niri
+      syncthingtray
+      trayscale
+
+      # network manager tray
+      networkmanagerapplet
+
+      # need pactl for sway stuff
+      pulseaudio
+
+      # waybar stuff
+      waybar
+      waybar-mpris
+      playerctl
+      libappindicator
+      fuzzel
+
+      polkit
+      polkit_gnome
+
+      # gdbus
+      glib
+
+      docker-compose
+
+      nautilus
+      file-roller
+
+      linuxPackages.v4l2loopback
+      gimp
+
+      slurp
+      grim
+      wl-clipboard
+
+      eog
+      mpv
+
+      wev
+      xorg.xev
+      xdotool
+
+      ocl-icd
+
+      ffmpeg
+      gnome-power-manager
+      gparted
+      gnupg
+      imagemagick
+      lan-mouse
+      logisim
+    ]
+    ++ extra;
 
   core = with pkgs; [
     wget
@@ -147,7 +139,9 @@ in
     htop
     busybox
     zsh
-    ag
+    fish
+    silver-searcher
+    pv
 
     gnumake
     gdb
@@ -157,14 +151,30 @@ in
     cloc
 
     ncdu
+    dfc
 
     bind.dnsutils
     linuxPackages.perf
     iptables
+    nftables
 
     entr
 
     man-pages
     man-pages-posix
+
+    tmux
+    wireguard-tools
+
+    iperf
+    iotop
+    nethogs
+    nmap
+    progress
+    nixos-firewall-tool
+
+    comma
+
+    shellcheck
   ];
 }

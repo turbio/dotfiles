@@ -1,3 +1,0 @@
-#!/bin/env bash
-fswebcam -r 640x480 --jpeg 85 -D 1 --no-banner /home/mason/Pictures/cam/$(date "+%G_%m_%d_%H:%M:%S").jpg
-#DISPLAY=:0 scrot -z /home/mason/Pictures/capture/scrot/$(date "+%G_%m_%d_%H:%M:%S").png

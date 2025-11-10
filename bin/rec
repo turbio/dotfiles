@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-    wf-recorder -g "$(slurp)" -f ~/rec.mp4
+    wf-recorder -y -g "$(slurp)" -f ~/rec.mp4
     mkdir -p ~/Videos/rec
     cp ~/rec.mp4 ~/Videos/rec/rec_$(date +%Y_%m_%d_%H:%M:%S).mp4
     cat ~/rec.mp4 | wl-copy

@@ -7,3 +7,4 @@ vim/ycm_config.pyc
 */__pycache__/
 hostname.nix
 /result
+hosts/panda/vanio/target

@@ -10,3 +10,9 @@ Okay but hear me out, they're actually pretty nifty. These dotfiles configure al
 </p>
 
 ![screenshot of sway desktop](/screenshot.png)
+
+To actually get this whole thing installed from a live image ya wanna go through the regular nixos install steps *BUT* run
+```
+sudo nixos-install --flake /mnt/etc/nixos#<hostname>
+```
+when it's time to build the system.

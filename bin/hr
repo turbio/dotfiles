@@ -1,0 +1,12 @@
+#/usr/bin/env bash
+
+cols=$(tput cols);
+if [ -z "$cols" ]; then
+	cols=80;
+fi
+
+i=1;
+while [ $i -le $cols ]; do
+	i=$((i+1));
+	printf "%s" "${1:--}";
+done

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+current_name="$(niri msg -j workspaces | jq '.[] | select (.is_focused and .is_active) | .name' -r)"
+
+next_name="$(echo "$current_name" | fuzzel --dmenu)"
+
+if [ -z "$next_name" ]; then
+	niri msg action unset-workspace-name
+else
+	niri msg action set-workspace-name "$next_name"
+fi

@@ -1,6 +1,8 @@
 set fish_prompt_pwd_dir_length 0
 
 function fish_prompt
+
+    # last status
     set -l last_status $status
 
     if not test $last_status -eq 0
@@ -8,10 +10,15 @@ function fish_prompt
         echo -n ' '$last_status' '
     end
 
-    # PWD
+    # hostname
+    set_color normal -b green
+    echo -n ' '(prompt_hostname)' '
+
+    # pwd
     set_color normal -b blue
     echo -n ' '(prompt_pwd)' '
 
+    # bg jobs
     set joblist (jobs -l -c)
     if test -n "$joblist"
         set_color normal -b purple

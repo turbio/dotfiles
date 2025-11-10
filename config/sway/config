@@ -12,9 +12,6 @@ set $mod Mod4
 # Your preferred terminal emulator
 set $term 'alacritty'
 
-# Your preferred application launcher
-set $menu alacritty -d 80 5 -e launcher
-
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/sway/)
@@ -39,7 +36,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+q kill
 
 # start your launcher
-bindsym $mod+space exec $menu
+bindsym $mod+space exec fuzzel --show drun
 
 # Drag floating windows by holding down $mod and left mouse button.
 # Resize them with right mouse button + $mod.
@@ -69,11 +66,11 @@ bindsym $mod+Shift+k move up
 bindsym $mod+Shift+l move right
 
 # Workspaces:
-bindsym $mod+i workspace prev
-bindsym $mod+o workspace next
+bindsym $mod+i workspace prev_on_output
+bindsym $mod+o workspace next_on_output
 
-bindsym $mod+Shift+i move container to workspace prev; workspace prev
-bindsym $mod+Shift+o move container to workspace next; workspace next
+bindsym $mod+Shift+i move container to workspace prev_on_output; workspace prev_on_output
+bindsym $mod+Shift+o move container to workspace next_on_output; workspace next_on_output
 
 
 bindsym $mod+1 workspace 1
@@ -99,19 +96,26 @@ bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-# Layout stuff:
-bindsym $mod+Control+h split horizontal
-bindsym $mod+Control+j splitv
-bindsym $mod+Control+k splitv
-bindsym $mod+Control+l splith
-
-bindsym $mod+comma layout stacking
-bindsym $mod+period layout tabbed
+#bindsym $mod+comma layout stacking
+#bindsym $mod+period layout tabbed
 bindsym $mod+slash layout toggle split
 bindsym $mod+f fullscreen
 bindsym $mod+s floating enable
 bindsym $mod+t floating disable
+
 bindsym $mod+p focus parent
+bindsym $mod+n focus next
+bindsym $mod+u focus floating
+bindsym $mod+d focus tiling
+
+bindsym $mod+comma exec swaymsg rename workspace to $(swaymsg -t get_workspaces | jq '.[] | select(.focused == true).num | if . > 0 then . else 1 end') $(fuzzel --dmenu)
+#bindsym $mod+u exec swaymsg workspace $(swaymsg -t get_workspaces | jq '.[] | select(.focused == true).num | if . > 0 then . else 1 end')
+
+#bindsym $mod+y focus output left
+#bindsym $mod+Shift+y move container to output left
+#
+#bindsym $mod+u focus output right
+#bindsym $mod+Shift+u move container to output right
 
 # media keys
 bindsym XF86AudioPlay exec playerctl play-pause && mpc toggle
@@ -123,30 +127,39 @@ bindsym XF86MonBrightnessDown exec light -U 10 && notify-send.sh -R /tmp/notify_
 
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume '@DEFAULT_SINK@' +5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume '@DEFAULT_SINK@' -5% && notify-send.sh -R /tmp/notify_vol -u low -t 500 "volume $(pactl-get-sink-volume) / 100"
-bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle && playerctl -a pause
+bindsym XF86AudioMute exec pactl set-sink-mute '@DEFAULT_SINK@' toggle
 bindsym XF86AudioMicMute exec pactl set-source-mute 1 toggle
 
-bindsym $mod+y sticky toggle
-
 # Scratchpad:
-bindsym $mod+Shift+minus move scratchpad
-bindsym $mod+minus scratchpad show
+#bindsym $mod+Shift+minus move scratchpad
+#bindsym $mod+minus scratchpad show
 
-client.focused #7f7f7f #7f7f7f #ffffff
-client.unfocused #303030 #303030 #ffffff
-default_border none
+client.focused          #ff00ff #ff00ff #ff00ff #ff0000 #ffffff88
+client.focused_inactive #ff00ff #ff00ff #ff00ff #ff0000 #ffffff44
+client.unfocused        #ff00ff #ff00ff #ff00ff #ff0000 #ffffff44
 
-titlebar_border_thickness 0
+#client.focused #7f7f7f #7f7f7f #ffffff
+#client.unfocused #303030 #303030 #ffffff
+#default_border none
+
+#titlebar_border_thickness 0
 #titlebar_padding 1 
 
 font Terminus (ttf) 9
 
-gaps inner 12
-default_border pixel 2
+gaps inner 10
+default_border pixel 4
+
+#default_border none
 
 for_window [title=".*"] floating enable
 
-bindsym $mod+semicolon exec rofi-pass
+# holy yikes
+for_window [title="^Syncthing Tray( \(.*\))?$"] floating enable, border none, resize set 20 ppt 400, move position 80 ppt -10
+
+input "type:keyboard" {
+	xkb_options ctrl:nocaps
+}
 
 input 2:7:SynPS/2_Synaptics_TouchPad {
 	events disabled
@@ -156,16 +169,46 @@ input "9610:32:HAILUCK_CO.,LTD_USB_KEYBOARD_Touchpad" {
 	tap enabled
 }
 
+input '2:10:TPPS/2_Elan_TrackPoint' {
+	pointer_accel 1
+	scroll_factor 2.5
+}
+
+output eDP-1 scale 1.0
+
+input "2362:628:PIXA3854:00_093A:0274_Touchpad" {
+	accel_profile adaptive
+	click_method clickfinger
+	drag enabled
+	tap enabled
+	middle_emulation enabled
+	scroll_method two_finger
+
+	# palm rejection
+	dwt disabled
+
+	pointer_accel 0.2
+}
+
 exec mako
 exec waybar
 exec lxsession
+exec syncthingtray --wait
 
 exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 
-exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+seat seat0 xcursor_theme Adwaita
+
+#exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 #  this is some retarded shit
-exec systemctl --user restart xdg-desktop-portal-gtk.service
-exec systemctl --user restart xdg-desktop-portal-wlr.service
+#exec systemctl --user restart xdg-desktop-portal-gtk.service
+#exec systemctl --user restart xdg-desktop-portal-wlr.service
+
+#exec NIX_REPLACE_GNOME_POLKIT
+
+exec dbus-sway-environment
+exec configure-gtk
+
 
 #bar {
 #	status_command i3status

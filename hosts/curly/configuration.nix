@@ -1,5 +1,7 @@
 { pkgs, ... }:
 {
+  systemd.network.wait-online.enable = false;
+
   virtualisation.docker.enable = true;
 
   boot.loader.systemd-boot.enable = true;
@@ -15,7 +17,7 @@
     settings.folders = {
       "code" = {
         enable = true;
-        path = "~/code";
+        path = "~/src";
       };
       "notes" = {
         enable = true;

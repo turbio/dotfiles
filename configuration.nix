@@ -40,14 +40,17 @@ in
       options = "--delete-older-than 30d";
     };
 
-
     settings = {
       trusted-users = [ "turbio" ];
 
       # todo(turbio): lol
-      substituters = if (hostname != "ballos" && hostname != "zote") then [
-        "https://nixcache.turb.io"
-      ] else [];
+      substituters =
+        if (hostname != "ballos" && hostname != "zote") then
+          [
+            "https://nixcache.turb.io"
+          ]
+        else
+          [ ];
       trusted-public-keys = [
         "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" # TODO(turbio): key management
       ];
@@ -55,7 +58,7 @@ in
 
     #package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators
+      experimental-features = nix-command flakes pipe-operators recursive-nix
       builders-use-substitutes = true
     '';
   };
@@ -132,10 +135,32 @@ in
     hide_running_in_container = false;
     hide_userland_threads = true;
     show_program_path = false;
-    column_meters_0 = ["LeftCPUs2" "Memory" "Swap" "DiskIO" "NetworkIO"];
-    column_meter_modes_0 = [1 1 1 2 2];
-    column_meters_1 = ["RightCPUs2" "Tasks" "LoadAverage" "Uptime"];
-    column_meter_modes_1 = [1 2 2 2];
+    column_meters_0 = [
+      "LeftCPUs2"
+      "Memory"
+      "Swap"
+      "DiskIO"
+      "NetworkIO"
+    ];
+    column_meter_modes_0 = [
+      1
+      1
+      1
+      2
+      2
+    ];
+    column_meters_1 = [
+      "RightCPUs2"
+      "Tasks"
+      "LoadAverage"
+      "Uptime"
+    ];
+    column_meter_modes_1 = [
+      1
+      2
+      2
+      2
+    ];
   };
 
   /*
@@ -211,7 +236,11 @@ in
 
   # TODO(turbio):
   services.tailscale.enable = lib.mkIf (hostname != "zote") true;
-  networking.nameservers = [ "100.100.100.100" "8.8.8.8" "1.1.1.1" ];
+  networking.nameservers = [
+    "100.100.100.100"
+    "8.8.8.8"
+    "1.1.1.1"
+  ];
   networking.nftables = {
     enable = true;
   };

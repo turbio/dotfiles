@@ -110,8 +110,20 @@ in
           }:
           {
             publicKey = pubkey;
-            allowedIPs = (if router then [ "0.0.0.0/0" ] else if will_route then [ "${ip}/32" ] else [ ]);
-            endpoint = if endpoint != null && !will_route then "${endpoint}:51820" else /*if !will_route then "${hostname}.lan:51820" else*/ null;
+            allowedIPs = (
+              if router then
+                [ "0.0.0.0/0" ]
+              else if will_route then
+                [ "${ip}/32" ]
+              else
+                [ ]
+            );
+            endpoint =
+              if endpoint != null && !will_route then
+                "${endpoint}:51820"
+              # if !will_route then "${hostname}.lan:51820" else
+              else
+                null;
             persistentKeepalive = 25;
             #dynamicEndpointRefreshSeconds = 30;
           }

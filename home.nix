@@ -46,7 +46,6 @@ let
   };
 in
 {
-
   home-manager.useGlobalPkgs = true;
 
   home-manager.users.turbio =
@@ -69,15 +68,8 @@ in
           # bspwm
           "bspwm/bspwmrc".source = ./config/bspwm/bspwmrc;
           "sxhkd/sxhkdrc".source = ./config/sxhkd/sxhkdrc;
-
-          "alacritty/alacritty.toml".source = ./config/alacritty/alacritty.toml;
           "kitty/kitty.conf".source = ./config/kitty/kitty.conf;
-          "ghostty/config".source = ./config/ghostty/config;
-
           "dunstrc".source = ./config/dunstrc;
-          "mako/config".source = ./config/mako/config;
-          "fuzzel/fuzzel.ini".source = ./config/fuzzel/fuzzel.ini;
-          "niri/config.kdl".source = ./config/niri/config.kdl;
           "wallpaper".source = wallpaper;
           "sway/config".text = (
             builtins.replaceStrings
@@ -88,8 +80,6 @@ in
               ]
               (builtins.readFile ./config/sway/config)
           );
-          "waybar/config".text = builtins.toJSON (import ./waybar.nix { inherit pkgs; });
-          "waybar/style.css".source = ./config/waybar/style.css;
         })
       ];
 

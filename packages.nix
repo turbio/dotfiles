@@ -45,7 +45,7 @@ rec {
   desktop =
     with pkgs;
     [
-      #urbit
+      urbit
 
       _1password-gui
       _1password-cli
@@ -56,9 +56,7 @@ rec {
       nix-output-monitor
 
       nixpkgs-fmt
-      alacritty
       kitty
-      ghostty
       neovide
       pavucontrol
       blueberry
@@ -76,10 +74,6 @@ rec {
       xdg-utils
       dconf-editor
       swaylock
-      swayidle
-      mako
-      swaybg
-      xwayland-satellite # x under niri
       syncthingtray
       trayscale
 
@@ -90,11 +84,9 @@ rec {
       pulseaudio
 
       # waybar stuff
-      waybar
       waybar-mpris
       playerctl
       libappindicator
-      fuzzel
 
       polkit
       polkit_gnome
@@ -109,6 +101,13 @@ rec {
 
       linuxPackages.v4l2loopback
       gimp
+
+      niri
+      ghostty
+      mako
+      alacritty
+      fuzzel
+      waybar
 
       slurp
       grim

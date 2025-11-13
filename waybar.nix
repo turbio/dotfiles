@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }:
+{
   position = "top";
   height = 30;
   layer = "top";
@@ -95,7 +96,7 @@
 
   "custom/media" = {
     return-type = "json";
-    exec = "waybar-mpris --autofocus --play ' ' --pause ' ' --order SYMBOL:ARTIST:TITLE";
+    exec = "${lib.getExe pkgs.waybar-mpris} --autofocus --play ' ' --pause ' ' --order SYMBOL:ARTIST:TITLE";
     on-click = "waybar-mpris --send toggle";
     on-scroll-up = "waybar-mpris --send player-next";
     on-scroll-down = "waybar-mpris --send player-prev";
@@ -103,7 +104,7 @@
   };
 
   "custom/tailscale" = {
-    exec = "tailscale status --json | jq --unbuffered --compact-output '.Self.TailscaleIPs | first | if . then {text: ., alt: \"connected\"} else {text: \"disconnected\", alt: \"disconnected\"} end'";
+    exec = "${lib.getExe pkgs.tailscale} status --json | jq --unbuffered --compact-output '.Self.TailscaleIPs | first | if . then {text: ., alt: \"connected\"} else {text: \"disconnected\", alt: \"disconnected\"} end'";
     format = "{icon} {text}";
     format-icons = {
       connected = "󰌘";
@@ -160,7 +161,7 @@
     format-disconnected = "Disconnected ⚠";
     format-ethernet = "󰈀 {ifname}: {ipaddr}/{cidr}";
     format-linked = "󰈀 {ifname} (No IP)";
-    format-wifi = " {essid} ({signalStrength}%)";
+    format-wifi = "  {essid} ({signalStrength}%)";
     on-click = "nm-connection-editor";
   };
 
@@ -173,9 +174,9 @@
     format-icons = {
       car = "";
       default = [
-        ""
-        ""
-        ""
+        " "
+        " "
+        " "
       ];
       hands-free = "";
       headphone = "";

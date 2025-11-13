@@ -6,6 +6,7 @@ in
   lib,
   localpkgs,
   pkgs,
+  wrappers,
   ...
 }:
 let
@@ -61,6 +62,18 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    # chromecast
+    networking.firewall = {
+      allowedUDPPorts = [ 5353 ]; # For device discovery
+      allowedUDPPortRanges = [
+        {
+          from = 32768;
+          to = 61000;
+        }
+      ]; # For Streaming
+      allowedTCPPorts = [ 8010 ]; # For gnomecast server
+    };
+
     services.playerctld.enable = true;
 
     services.usbmuxd.enable = true;
@@ -136,7 +149,7 @@ in
     programs.adb.enable = true;
     users.users.turbio.extraGroups = [ "adbusers" ];
 
-    programs.niri.enable = desktop == "niri";
+    #programs.niri.enable = desktop == "niri";
 
     programs.sway = lib.mkIf (desktop == "sway") {
       enable = true;

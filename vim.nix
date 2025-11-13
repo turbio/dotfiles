@@ -1,55 +1,64 @@
-{ pkgs, repos, config, lib, ... }:
+{
+  pkgs,
+  repos,
+  config,
+  lib,
+  ...
+}:
 let
-  plugins = with pkgs.vimPlugins; [
-    nvim-nio
-    vim-nix
-    lightline-vim
-    vim-jsx-typescript
-    typescript-vim
-    yats-vim # more typescript?
+  plugins =
+    with pkgs.vimPlugins;
+    [
+      nvim-nio
+      vim-nix
+      lightline-vim
+      vim-jsx-typescript
+      typescript-vim
+      yats-vim # more typescript?
 
-    dressing-nvim
-    plenary-nvim
-    nui-nvim
+      dressing-nvim
+      plenary-nvim
+      nui-nvim
 
-    # fancy new neovim powered lsp
-    nvim-lspconfig
-    cmp-nvim-lsp
-    lsp_signature-nvim
-    trouble-nvim
+      # fancy new neovim powered lsp
+      nvim-lspconfig
+      cmp-nvim-lsp
+      lsp_signature-nvim
+      trouble-nvim
 
-    nvim-treesitter # and ast based syntax highlighting
-    nvim-cmp
-    #render-markdown-nvim
+      nvim-treesitter # and ast based syntax highlighting
+      nvim-cmp
+      #render-markdown-nvim
 
-    #vim-gitgutter
-    vim-fugitive
+      #vim-gitgutter
+      vim-fugitive
 
-    vim-endwise # auto adds end/endif/etc
-    undotree # time travel isn't linear
-    nerdtree # happy lil file tree
-    vim-sleuth # auto configures intentation based on what the file looks like
-    nerdcommenter # gives me some easy shortcuts to comment/uncomment
-    vim-misc # ?????
-    echodoc-vim # print function signatures in command line
-    popup-nvim # [wip] pop api from vim in neovim
-    #telescope-nvim # alternative fzf
+      vim-endwise # auto adds end/endif/etc
+      undotree # time travel isn't linear
+      nerdtree # happy lil file tree
+      vim-sleuth # auto configures intentation based on what the file looks like
+      nerdcommenter # gives me some easy shortcuts to comment/uncomment
+      vim-misc # ?????
+      echodoc-vim # print function signatures in command line
+      popup-nvim # [wip] pop api from vim in neovim
+      #telescope-nvim # alternative fzf
 
-    codewindow-nvim
+      codewindow-nvim
 
-    indent-blankline-nvim
+      indent-blankline-nvim
 
-    (pkgs.vimUtils.buildVimPlugin {
-      pname = "muble";
-      version = "1";
-      src = repos.muble-vim;
-    })
-    (pkgs.vimUtils.buildVimPlugin {
-      pname = "lsp_lines.nvim";
-      version = "1";
-      src = repos.lsp-lines-nvim;
-    })
-  ] ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else [ ]);
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "muble";
+        version = "1";
+        src = repos.muble-vim;
+      })
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "lsp_lines.nvim";
+        version = "1";
+        src = repos.lsp-lines-nvim;
+      })
+    ]
+    ++ (if pkgs.stdenv.hostPlatform == "x86_64-linux" then [ vim-go ] else [ ]);
 in
 {
   nixpkgs.config.allowUnfree = true; # copilot-vim
@@ -130,7 +139,7 @@ in
     ripgrep
 
     # should all my machines really have nix tooling???
-    nil
+    nixd
     nixfmt-rfc-style
   ];
 

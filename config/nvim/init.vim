@@ -147,7 +147,7 @@ end
 vim.lsp.enable("clangd")
 vim.lsp.enable('gopls')
 vim.lsp.enable('rust_analyzer')
-vim.lsp.enable('nil_ls')
+vim.lsp.enable('nixd')
 vim.lsp.enable('hls')
 
 vim.api.nvim_create_autocmd("BufWritePre", {

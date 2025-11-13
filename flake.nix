@@ -29,7 +29,6 @@
       flake = false;
       url = "github:zsh-users/zsh-history-substring-search";
     };
-
     livewallpaper = {
       flake = false;
       url = "github:turbio/live_wallpaper/nixfix";
@@ -46,13 +45,9 @@
       flake = false;
       url = "github:turbio/flippyflops";
     };
+    wrappers.url = "github:turbio/wrappers";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
-
-    nil-ls = {
-      url = "github:oxalica/nil/577d160da311cc7f5042038456a0713e9863d09e";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -68,52 +63,42 @@
       nixos-hardware,
       disko,
       nixvim,
+      wrappers,
       ...
     }@inputs:
     let
-      arch = hostname:
-      if hostname == "jenka" then "aarch64-linux"
-      else "x86_64-linux";
+      arch = hostname: if hostname == "jenka" then "aarch64-linux" else "x86_64-linux";
+
+      wrappedOverlay = final: prev: wrapped prev;
+
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
           system = arch hostname;
-          modules =
-            [
-              #./modules/wg-vpn.nix
-              ./configuration.nix
-              ./desktop.nix
-              ./home.nix
-              ./vim.nix
-              ./services/syncthing.nix
-              (./hosts + "/${hostname}" + /configuration.nix)
-              (./hosts + "/${hostname}" + /hardware-configuration.nix)
-              ./cachix.nix
-              #./vpn.nix
-              disko.nixosModules.disko
-              home-manager.nixosModules.home-manager
-              nixvim.nixosModules.nixvim
-            ]
-            ++ extraModules
-            ++ (if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ] else [ ])
-            ++ [
-              (
-                { pkgs, ... }:
-                {
-                  nixpkgs.overlays = [
-                    (final: prev: {
-                      nil = inputs.nil-ls.outputs.packages.x86_64-linux.nil; # TODO(turbio): until nil has a release including pipe-operators (https://github.com/oxalica/nil/commit/52304da8e9748feff559ec90cb1f4873eda5cee1)
-                      #saleae-logic-2 = pkgs.callPackage ./packages/saleae-logic-2.nix { };
-                    })
-                  ];
-                }
-              )
-            ];
+          modules = [
+            #./modules/wg-vpn.nix
+            ./configuration.nix
+            ./desktop.nix
+            ./home.nix
+            ./vim.nix
+            ./services/syncthing.nix
+            (./hosts + "/${hostname}" + /configuration.nix)
+            (./hosts + "/${hostname}" + /hardware-configuration.nix)
+            ./cachix.nix
+            #./vpn.nix
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            nixvim.nixosModules.nixvim
+            {
+              nixpkgs.overlays = [ wrappedOverlay ];
+            }
+          ]
+          ++ extraModules
+          ++ (if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ] else [ ]);
 
           specialArgs = {
-            inherit hostname;
+            inherit hostname wrappers;
             assignments = import ./assignments.nix;
-
             repos = inputs;
           };
         };
@@ -127,6 +112,7 @@
             --debug --dhcp-no-bind \
             --port 64172 --status-port 64172 "$@"
         '';
+
       pxeModules = [
         (
           { modulesPath, ... }:
@@ -148,14 +134,32 @@
         })
         |> builtins.listToAttrs;
 
-      suffix = fix: attrs:
-        nixpkgs.lib.attrsets.mapAttrs'
-          (n: v:
-            { name = "${n}-${fix}"; value = v; }
-          )
-          attrs;
+      suffix =
+        fix: attrs:
+        nixpkgs.lib.attrsets.mapAttrs' (n: v: {
+          name = "${n}-${fix}";
+          value = v;
+        }) attrs;
+
+      lib = nixpkgs.lib;
+
+      wrapped =
+        pkgs:
+        import ./wrappers.nix { inherit pkgs lib; }
+        |> (nixpkgs.lib.mapAttrs (
+          name: config:
+          wrappers.wrapperModules.${name}.apply {
+            config = {
+              inherit pkgs;
+            }
+            // config;
+          }
+          |> (a: a.wrapper)
+        ));
     in
     rec {
+      overlays.default = wrappedOverlay;
+
       nixosConfigurations = mapEachHost <| mksystem [ ];
 
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
@@ -181,14 +185,20 @@
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
       packages.x86_64-linux =
         (
-          mapEachHost (mksystem [({ ... }: {
-            disko.devices.disk.main.imageSize = "60G"; # should be enough right
-          })])
+          mapEachHost (mksystem [
+            (
+              { ... }:
+              {
+                disko.devices.disk.main.imageSize = "60G"; # should be enough right
+              }
+            )
+          ])
           |> nixpkgs.lib.filterAttrs (n: sys: n == "curly")
-          |> nixpkgs.lib.filterAttrs (n: sys: sys.config.disko.devices.disk != {})
+          |> nixpkgs.lib.filterAttrs (n: sys: sys.config.disko.devices.disk != { })
           |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
           |> suffix "disko-image-script"
-        );
+        )
+        // (wrapped nixpkgs.legacyPackages.x86_64-linux);
 
       # activate-uki.ballos =
       #   let

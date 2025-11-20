@@ -236,6 +236,7 @@ in
 
   # TODO(turbio):
   services.tailscale.enable = lib.mkIf (hostname != "zote") true;
+  services.tailscale.useRoutingFeatures = "both";
   networking.nameservers = [
     "100.100.100.100"
     "8.8.8.8"

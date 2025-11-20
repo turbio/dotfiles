@@ -69,7 +69,24 @@
     let
       arch = hostname: if hostname == "jenka" then "aarch64-linux" else "x86_64-linux";
 
-      wrappedOverlay = final: prev: wrapped prev;
+      lib = nixpkgs.lib;
+
+      wrappedOverlay =
+        final: prev:
+        import ./wrappers.nix {
+          inherit lib;
+          pkgs = final;
+        }
+        |> (nixpkgs.lib.mapAttrs (
+          name: config:
+          wrappers.wrapperModules.${name}.apply {
+            config = {
+              pkgs = prev;
+            }
+            // config;
+          }
+          |> (a: a.wrapper)
+        ));
 
       mksystem =
         extraModules: hostname:
@@ -97,7 +114,7 @@
           ++ (if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ] else [ ]);
 
           specialArgs = {
-            inherit hostname wrappers;
+            inherit hostname;
             assignments = import ./assignments.nix;
             repos = inputs;
           };
@@ -140,22 +157,6 @@
           name = "${n}-${fix}";
           value = v;
         }) attrs;
-
-      lib = nixpkgs.lib;
-
-      wrapped =
-        pkgs:
-        import ./wrappers.nix { inherit pkgs lib; }
-        |> (nixpkgs.lib.mapAttrs (
-          name: config:
-          wrappers.wrapperModules.${name}.apply {
-            config = {
-              inherit pkgs;
-            }
-            // config;
-          }
-          |> (a: a.wrapper)
-        ));
     in
     rec {
       overlays.default = wrappedOverlay;
@@ -198,7 +199,7 @@
           |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
           |> suffix "disko-image-script"
         )
-        // (wrapped nixpkgs.legacyPackages.x86_64-linux);
+        // (wrappedOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux);
 
       # activate-uki.ballos =
       #   let

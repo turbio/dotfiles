@@ -315,7 +315,7 @@
           Mod+Shift+Equal { set-window-height "+10%"; }
 
           Mod+Slash {
-              spawn "${./bin/niri-rename-workspace}"";
+              spawn "${./bin/niri-rename-workspace}";
           }
       }
 

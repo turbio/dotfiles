@@ -6,7 +6,6 @@ in
   lib,
   localpkgs,
   pkgs,
-  wrappers,
   ...
 }:
 let

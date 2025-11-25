@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
@@ -64,6 +65,7 @@
       disko,
       nixvim,
       wrappers,
+      unstable,
       ...
     }@inputs:
     let
@@ -71,7 +73,7 @@
 
       lib = nixpkgs.lib;
 
-      wrappedOverlay =
+      wrappersOverlay =
         final: prev:
         import ./wrappers.nix {
           inherit lib;
@@ -87,6 +89,10 @@
           }
           |> (a: a.wrapper)
         ));
+
+      unstableTailscaleOverlay = final: prev: {
+        tailscale = unstable.legacyPackages.${final.system}.tailscale;
+      };
 
       mksystem =
         extraModules: hostname:
@@ -107,7 +113,10 @@
             home-manager.nixosModules.home-manager
             nixvim.nixosModules.nixvim
             {
-              nixpkgs.overlays = [ wrappedOverlay ];
+              nixpkgs.overlays = [
+                wrappersOverlay
+                unstableTailscaleOverlay
+              ];
             }
           ]
           ++ extraModules
@@ -159,7 +168,7 @@
         }) attrs;
     in
     rec {
-      overlays.default = wrappedOverlay;
+      overlays.default = wrappersOverlay;
 
       nixosConfigurations = mapEachHost <| mksystem [ ];
 
@@ -199,7 +208,7 @@
           |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
           |> suffix "disko-image-script"
         )
-        // (wrappedOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux);
+        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux);
 
       # activate-uki.ballos =
       #   let

@@ -19,17 +19,6 @@
       size = 32 * 1024;
     }
   ];
-  #boot.resumeDevice = "/swapfile";
-  #boot.kernelParams = [ "resume_offset=63858427" ];
-
-  fileSystems."/sync" = {
-    device = "ballos:/mnt/sync";
-    fsType = "nfs";
-    options = [
-      "rw"
-      "noatime"
-    ];
-  };
 
   services.syncthing = {
     enable = true;
@@ -49,9 +38,75 @@
       enable = true;
       path = "~/Pictures/webcamlog";
     };
+    settings.folders."notes" = {
+      enable = true;
+      path = "~/notes";
+    };
   };
 
   services.ollama.enable = true;
   services.ollama.acceleration = "rocm";
   services.ollama.rocmOverrideGfx = "11.0.0";
+
+  disko.devices.disk.main = {
+    type = "disk";
+    content = {
+      type = "gpt";
+      partitions = {
+        ESP = {
+          type = "EF00";
+          size = "500M";
+          content = {
+            type = "filesystem";
+            format = "vfat";
+            mountpoint = "/boot";
+            mountOptions = [ "umask=0077" ];
+          };
+        };
+        persist = {
+          size = "100%";
+          content = {
+            type = "luks";
+            name = "crypted";
+            initrdUnlock = true;
+            # holy shit dude nasty hacks dependent on lack of escaping
+            # aaaaaand they verify the path starts with a '/' lmao
+            # https://github.com/nix-community/disko/blob/76c0a6dba345490508f36c1aa3c7ba5b6b460989/lib/types/luks.nix#L29
+            passwordFile = "/<(echo -n password)";
+            content = {
+              type = "lvm_pv";
+              vg = "pool";
+            };
+          };
+        };
+      };
+    };
+  };
+
+  disko.devices.lvm_vg = {
+    pool = {
+      type = "lvm_vg";
+      lvs = {
+        root = {
+          size = "100%";
+          content = {
+            type = "filesystem";
+            format = "ext4";
+            #mountpoint = "/persist";
+            mountpoint = "/";
+            mountOptions = [
+              "defaults"
+            ];
+          };
+        };
+        swap = {
+          size = "32G";
+          content = {
+            type = "swap";
+            resumeDevice = true;
+          };
+        };
+      };
+    };
+  };
 }

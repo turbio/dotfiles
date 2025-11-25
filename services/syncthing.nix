@@ -39,6 +39,7 @@
             "gero"
             "iphone"
             "curly"
+            "itoh"
           ];
         };
         "ios_photos" = {
@@ -81,7 +82,7 @@
           id = "GOL62KY-JI4LNIQ-73LQB46-N5PDIXH-FSRZVDJ-TKIR5G3-FPRRZ3T-SBR5SA3";
         };
         itoh = {
-          id = "UQWKK6L-ECHOK23-QNNH5PC-BDY6RL4-AILT6PX-QDG27VN-BLT664L-7ERCGAD";
+          id = "6SH2YN7-U5D7HOJ-NE4QYNS-E3MIXKO-XIWYIUA-TZBEAHU-4LH3XFK-VHLBGAQ";
         };
         curly = {
           id = "CIVDHUC-7N4ASZ6-DSOFH3X-NPI3TQA-7SDUNV4-JFSUDEC-GRPFWEA-GRXLIQJ";

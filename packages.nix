@@ -75,7 +75,6 @@ rec {
       dconf-editor
       swaylock
       syncthingtray
-      trayscale
 
       # network manager tray
       networkmanagerapplet

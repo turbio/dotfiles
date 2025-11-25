@@ -37,15 +37,5 @@
 
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/c7be2435-386b-45cb-97c0-1e96fe7b23d9";
-    fsType = "btrfs";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/6E1E-6CE3";
-    fsType = "vfat";
-  };
-
   swapDevices = [ ];
 }

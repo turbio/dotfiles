@@ -1,6 +1,11 @@
 {
   description = "dotfiles";
 
+  nixConfig = {
+    abort-on-warn = true;
+    extra-experimental-features = [ "pipe-operators" ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";

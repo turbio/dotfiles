@@ -165,7 +165,7 @@ in
             src = repos.zsh-history-substring-search;
           }
         ];
-        initExtra = (builtins.readFile ./config/zsh/zshrc);
+        initContent = (builtins.readFile ./config/zsh/zshrc);
       };
 
       home.sessionVariables = {

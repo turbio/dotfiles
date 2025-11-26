@@ -24,8 +24,6 @@
   ];
   boot.kernelModules = [ "kvm-intel" ];
 
-  hardware.opengl.enable = true;
-
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;

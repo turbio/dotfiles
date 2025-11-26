@@ -128,9 +128,9 @@ in
     programs.steam.enable = true;
     programs.dconf.enable = true;
 
-    hardware.pulseaudio.enable = false;
+    services.pulseaudio.enable = false;
 
-    hardware.opengl.enable = true;
+    hardware.graphics.enable = true;
 
     networking.networkmanager.enable = true;
 
@@ -167,17 +167,26 @@ in
     security.polkit.enable = true;
 
     services.dbus.enable = true;
-    xdg = {
-      portal = {
-        enable = true;
-        #wlr.enable = true;
+    xdg.portal = {
+      enable = true;
+      wlr.enable = true;
+      xdgOpenUsePortal = true;
 
-        #gtkUsePortal = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+        xdg-desktop-portal-gnome
+      ];
 
-        extraPortals = with pkgs; [
-          #xdg-desktop-portal-wlr
-          xdg-desktop-portal-gtk
-        ];
+      config = {
+        niri = {
+          default = [
+            "gnome"
+            "gtk"
+          ];
+          "org.freedesktop.impl.portal.Access" = [ "gtk" ];
+          "org.freedesktop.impl.portal.Notification" = [ "gtk" ];
+          "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+        };
       };
     };
   };

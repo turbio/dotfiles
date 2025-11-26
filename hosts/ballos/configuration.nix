@@ -16,7 +16,10 @@ in
     ../../services/netboot_host.nix
     ./ipmi.nix
     (import ./acme-wildcard.nix { domain = "turb.io"; })
-    (import ../../services/vibes.nix { mediaRoot = "/tank/enc/vibes"; domain = "vibes.turb.io"; })
+    (import ../../services/vibes.nix {
+      mediaRoot = "/tank/enc/vibes";
+      domain = "vibes.turb.io";
+    })
   ];
 
   environment.enableAllTerminfo = true;
@@ -103,13 +106,15 @@ in
     group = "media";
     uid = 996;
   };
-  users.groups.media = { gid = 994; };
+  users.groups.media = {
+    gid = 994;
+  };
 
   # container traffic -> internet
   # tbh we should quarantine this off to it's own interface
   networking.nat = {
     enable = true;
-    internalInterfaces = ["ve-*"];
+    internalInterfaces = [ "ve-*" ];
     externalInterface = "enp4s0";
     enableIPv6 = true;
   };
@@ -133,30 +138,33 @@ in
         isReadOnly = false;
       };
     };
-    config = { ... }: {
-      imports = [
-        (import ../../services/jelly.nix {
-          internalIp = internalIp;
-          userId = config.users.users.jellyfin.uid;
-          groupId = config.users.groups.media.gid;
-          persistDataDir = "/persist";
-        })
-      ];
-
-      networking.firewall = {
-        enable = true;
-        allowedTCPPorts = [
-          8096 # jellyfin
-          9472 # qbittorrent
-          9696 # prowlarr
-          5055 # seerr
-          7878 # radarr
-          8989 # sonarr
+    config =
+      { ... }:
+      {
+        imports = [
+          (import ../../services/jelly.nix {
+            internalIp = internalIp;
+            userId = config.users.users.jellyfin.uid;
+            groupId = config.users.groups.media.gid;
+            persistDataDir = "/persist";
+          })
         ];
+
+        networking.firewall = {
+          enable = true;
+          allowedTCPPorts = [
+            8096 # jellyfin
+            9472 # qbittorrent
+            9696 # prowlarr
+            5055 # seerr
+            7878 # radarr
+            8989 # sonarr
+          ];
+        };
+        networking.useHostResolvConf = false;
+        services.resolved.enable = true;
+        system.stateVersion = "25.05";
       };
-      networking.useHostResolvConf = false;
-      services.resolved.enable = true;
-    };
   };
 
   networking.wireguard.enable = true;
@@ -324,7 +332,10 @@ in
     };
   };
 
-  zfs.pools.tank.datasets."enc/ollama" = { perms.group = "ollama"; perms.mode = "775"; };
+  zfs.pools.tank.datasets."enc/ollama" = {
+    perms.group = "ollama";
+    perms.mode = "775";
+  };
   services.ollama = {
     enable = true;
     models = config.zfs.pools.tank.datasets."enc/ollama".mountpoint;
@@ -399,8 +410,7 @@ in
 
   networking.nftables = {
     enable = true;
-    ruleset = ''
-    '';
+    ruleset = '''';
   };
 
   networking.firewall.allowedUDPPorts = [

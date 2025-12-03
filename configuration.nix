@@ -79,7 +79,6 @@ in
     extraGroups = [
       "wheel"
       "networkmanager"
-      "docker"
       "audio"
       "video"
       "wireshark"

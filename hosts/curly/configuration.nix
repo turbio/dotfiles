@@ -2,8 +2,6 @@
 {
   systemd.network.wait-online.enable = false;
 
-  virtualisation.docker.enable = true;
-
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 0;

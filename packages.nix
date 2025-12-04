@@ -152,7 +152,7 @@ rec {
     dfc
 
     bind.dnsutils
-    linuxPackages.perf
+    perf
     iptables
     nftables
 

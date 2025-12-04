@@ -141,7 +141,7 @@ in
       terminus_font_ttf
       nerd-fonts.terminess-ttf
       noto-fonts
-      noto-fonts-emoji
+      noto-fonts-color-emoji
       roboto
     ];
 

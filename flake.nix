@@ -7,12 +7,12 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    nixvim.url = "github:nix-community/nixvim";
+    nixvim.url = "github:nix-community/nixvim/nixos-25.11";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager.url = "github:rycee/home-manager/release-25.05";
+    home-manager.url = "github:rycee/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     github-copilot-vim = {
       flake = false;
@@ -120,7 +120,6 @@
             {
               nixpkgs.overlays = [
                 wrappersOverlay
-                unstableTailscaleOverlay
               ];
             }
           ]

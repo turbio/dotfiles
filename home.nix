@@ -182,9 +182,9 @@ in
           enable = true;
         };
         enable = true;
-        userEmail = "git@turb.io";
-        userName = "turbio";
-        extraConfig = {
+        settings.user.email = "git@turb.io";
+        settings.user.name = "turbio";
+        settings = {
           pull = {
             ff = "only";
           };
@@ -199,7 +199,7 @@ in
 
       programs.firefox = lib.mkIf config.isDesktop {
         enable = true;
-        package = pkgs.firefox-wayland;
+        package = pkgs.firefox;
         profiles."lbgu1zmc.default" = {
           settings = {
             "toolkit.legacyUserProfileCustomizations.stylesheets" = true;

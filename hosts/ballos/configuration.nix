@@ -450,7 +450,6 @@ in
     '';
 
     recommendedGzipSettings = true;
-    recommendedZstdSettings = true;
     recommendedBrotliSettings = true;
     recommendedTlsSettings = true;
     recommendedOptimisation = true;

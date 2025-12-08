@@ -28,7 +28,7 @@
     dataDir = "/home/turbio";
     settings.folders."code" = {
       enable = true;
-      path = "~/code";
+      path = "~/src";
     };
     settings.folders."clips" = {
       enable = true;

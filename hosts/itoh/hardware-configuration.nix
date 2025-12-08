@@ -36,4 +36,6 @@
   boot.extraModulePackages = [ ];
 
   swapDevices = [ ];
+
+  boot.kernelParams = [ "usbcore.autosuspend=-1" ];
 }

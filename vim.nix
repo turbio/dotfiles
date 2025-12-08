@@ -21,7 +21,6 @@ let
       nui-nvim
 
       # fancy new neovim powered lsp
-      nvim-lspconfig
       cmp-nvim-lsp
       lsp_signature-nvim
       trouble-nvim
@@ -64,6 +63,14 @@ in
   nixpkgs.config.allowUnfree = true; # copilot-vim
 
   programs.nixvim = {
+    extraPackages = with pkgs; [
+      ripgrep
+
+      # should all my machines really have nix tooling???
+      nixd
+      nixfmt-rfc-style
+    ];
+
     nixpkgs.pkgs = pkgs;
 
     enable = true;
@@ -76,40 +83,11 @@ in
     extraConfigVim = (builtins.readFile ./config/nvim/init.vim);
 
     plugins = {
-      # minuet.enable = true;
-      # minuet.settings = {
-      #   n_completions = 5;
-      #   context_window = 1024;
-      #   provider = "openai_fim_compatible";
-      #   provider_options = {
-      #     openai_fim_compatible = {
-      #       api_key = "TERM";
-      #       #end_point = "http://ollama.int.turb.io/v1/completions";
-      #       end_point = "http://localhost:11434/v1/completions";
-      #       name = "llm";
-      #       model = "qwen2.5-coder:1.5b";
-      #       stream = true;
-      #       optional = {
-      #         max_tokens = 245;
-      #         top_p = 0.9;
-      #         stop = [ "\n\n" ];
-      #       };
-      #     };
-      #   };
-
-      #   # virtualtext = {
-      #   #   auto_trigger_ft = [ "*" ];
-      #   #   show_on_completion_menu = true;
-      #   #   keymap = {
-      #   #     accept = "<C-j>";
-      #   #   };
-      #   # };
-      # };
       copilot-vim.enable = true;
 
       direnv.enable = true;
 
-      lsp.enable = true;
+      lspconfig.enable = true;
       web-devicons.enable = true;
 
       render-markdown.enable = true;
@@ -128,37 +106,21 @@ in
       gitgutter.enable = true;
     };
 
+    lsp.inlayHints.enable = true;
+    lsp.servers = {
+      clangd.enable = true;
+      gopls.enable = true;
+      rust_analyzer.enable = true;
+      nixd.enable = true;
+      hls.enable = true;
+      ts_ls.enable = true;
+      bashls.enable = true;
+    };
+
     extraPlugins = plugins;
   };
 
   environment.variables = {
     EDITOR = "vim";
-  };
-
-  environment.systemPackages = with pkgs; [
-    ripgrep
-
-    # should all my machines really have nix tooling???
-    nixd
-    nixfmt-rfc-style
-  ];
-
-  programs.neovim = {
-    enable = false;
-
-    withRuby = true;
-    withPython3 = true;
-    withNodeJs = true;
-
-    defaultEditor = true;
-    vimAlias = true;
-    viAlias = false;
-
-    configure = {
-      customRC = (builtins.readFile ./config/nvim/init.vim);
-      packages.myVimPackage = {
-        start = plugins;
-      };
-    };
   };
 }

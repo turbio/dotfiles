@@ -144,12 +144,6 @@ function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   return orig_util_open_floating_preview(contents, syntax, opts, ...)
 end
 
-vim.lsp.enable("clangd")
-vim.lsp.enable('gopls')
-vim.lsp.enable('rust_analyzer')
-vim.lsp.enable('nixd')
-vim.lsp.enable('hls')
-
 vim.api.nvim_create_autocmd("BufWritePre", {
 	callback = function()
 		vim.lsp.buf.format({ async = false })

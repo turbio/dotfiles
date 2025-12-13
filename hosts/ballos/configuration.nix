@@ -351,29 +351,55 @@ in
 
   security.acme.acceptTerms = true;
 
-  services.nix-serve = {
-    enable = true;
-    secretKeyFile = "/var/cache-priv-key.pem"; # TODO: state
-    # secretKeyFile = "/keys/nix-cache-priv-key.pem"; # TODO: state
-  };
+  /*
+    services.nix-serve = {
+      package = pkgs.nix-serve-ng;
+      enable = true;
+      secretKeyFile = "/var/cache-priv-key.pem"; # TODO: state
+    };
+
+    services.nginx.virtualHosts."nixcache.turb.io" = {
+      forceSSL = true;
+      useACMEHost = "turb.io";
+
+      locations."/" = {
+        proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
+      };
+      locations."/.well-known/acme-challenge" = {
+        extraConfig = ''
+          allow all;
+        '';
+      };
+    };
+  */
 
   services.nginx.virtualHosts."nixcache.turb.io" = {
-    forceSSL = true;
+    addSSL = true;
     useACMEHost = "turb.io";
 
-    locations."/" = {
-      proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
-      extraConfig = ''
-        allow ${internalIp};
-        deny all;
-      '';
+    root = "/tank/enc/nixcache";
 
-    };
-    locations."/.well-known/acme-challenge" = {
+    locations."/nar/" = {
       extraConfig = ''
-        allow all;
+        open_file_cache          max=1000 inactive=20s;
+        open_file_cache_valid    30s;
+        open_file_cache_min_uses 2;
+        open_file_cache_errors   on;
       '';
     };
+
+    extraConfig = ''
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+
+      keepalive_timeout 65;
+      keepalive_requests 1000;
+
+      gzip off;
+
+      autoindex off;
+    '';
   };
 
   users.groups.locate = { };

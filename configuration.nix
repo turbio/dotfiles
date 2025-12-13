@@ -27,7 +27,6 @@ in
       "ollama.int.turb.io"
       "sync.int.turb.io"
       "home.int.turb.io"
-      "nixcache.turb.io"
     ];
   };
 
@@ -58,7 +57,7 @@ in
 
     #package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators recursive-nix
+      experimental-features = nix-command flakes pipe-operators auto-allocate-uids no-url-literals
       builders-use-substitutes = true
     '';
   };

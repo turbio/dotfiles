@@ -147,13 +147,43 @@
     };
   };
 
-  services.logind = {
-    lidSwitch = "hibernate";
-    extraConfig = ''
-      HandlePowerKey=hibernate
-    '';
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleHibernateKey = "hibernate";
+    HandlePowerKey = "suspend-then-hibernate";
+    HandleSuspendKey = "suspend-then-hibernate";
   };
 
-  # todo try this dude
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=1h
+  '';
+
+  security.pam.services.swaylock = { };
+
+  environment.systemPackages = with pkgs; [
+    swaylock
+  ];
+
+  systemd.user.services.swayidle = {
+    description = "Idle & sleep locker";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+
+    # Make sure these binaries are in PATH for the service
+    path = with pkgs; [
+      swaylock
+      niri
+    ];
+
+    serviceConfig = {
+      ExecStart = ''
+        ${pkgs.swayidle}/bin/swayidle -w \
+          timeout 600 'swaylock -f' \
+          before-sleep 'swaylock -f'
+      '';
+      Restart = "on-failure";
+    };
+  };
+
   # services.homed.enable = true;
 }

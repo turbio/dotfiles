@@ -193,7 +193,6 @@ input "2362:628:PIXA3854:00_093A:0274_Touchpad" {
 exec mako
 exec waybar
 exec lxsession
-exec syncthingtray --wait
 
 exec swayidle timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 

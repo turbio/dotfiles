@@ -138,7 +138,7 @@ rec {
     busybox
     zsh
     fish
-    silver-searcher
+    #silver-searcher
     pv
 
     gnumake
@@ -174,7 +174,5 @@ rec {
     comma
 
     shellcheck
-
-    hishtory
   ];
 }

@@ -143,6 +143,7 @@ in
       noto-fonts
       noto-fonts-color-emoji
       roboto
+      fira-mono
     ];
 
     programs.adb.enable = true;

@@ -74,7 +74,14 @@
       ...
     }@inputs:
     let
-      arch = hostname: if hostname == "jenka" then "aarch64-linux" else "x86_64-linux";
+      arch =
+        hostname:
+        if hostname == "jenka" then
+          "aarch64-linux"
+        else if hostname == "zote" then
+          "x86_64-linux-musl"
+        else
+          "x86_64-linux";
 
       lib = nixpkgs.lib;
 
@@ -95,8 +102,54 @@
           |> (a: a.wrapper)
         ));
 
-      unstableTailscaleOverlay = final: prev: {
-        tailscale = unstable.legacyPackages.${final.system}.tailscale;
+      muslOverlay = final: prev: {
+        logrotate = prev.logrotate.overrideAttrs (
+          finalAttrs: prevAttrs: {
+            preCheck =
+              prevAttrs.preCheck or ""
+              + ''
+                # test-0112 expects glibc's "Operation not supported" error string
+                # but musl uses a different message
+                sed -i '2iexit 77' test/test-0112.sh
+              '';
+          }
+        );
+
+        lkl = prev.lkl.overrideAttrs (
+          finalAttrs: prevAttrs: {
+            buildInputs = prevAttrs.buildInputs ++ [ final.argp-standalone ];
+            env = prevAttrs.env or { } // {
+              NIX_LDFLAGS = (prevAttrs.env.NIX_LDFLAGS or "") + " -largp";
+            };
+            postPatch =
+              prevAttrs.postPatch or ""
+              + ''
+                # musl doesn't include these headers transitively like glibc does
+                sed -i '1i#include <sys/types.h>' tools/lkl/include/lkl.h
+                sed -i '1i#include <limits.h>' tools/lkl/cptofs.c tools/lkl/fs2tar.c tools/lkl/tests/disk.c
+
+                # Disable glibc-specific components that don't work with musl:
+                # - hijack library uses glibc's ioctl signature (unsigned long vs int)
+                # - test-dlmopen uses dlmopen which is glibc-only
+                sed -i '/liblkl-hijack/d; /liblkl-zpoline/d; /libhijack-priv/d; /test-dlmopen/d' tools/lkl/Targets
+              '';
+            # Don't try to install hijack library since we disabled building it
+            installPhase = ''
+              mkdir -p $out/bin $lib/lib $dev
+
+              cp tools/lkl/bin/lkl-hijack.sh $out/bin
+              sed -i $out/bin/lkl-hijack.sh \
+                  -e "s,LD_LIBRARY_PATH=.*,LD_LIBRARY_PATH=$lib/lib,"
+
+              cp tools/lkl/{cptofs,fs2tar,lklfuse} $out/bin
+              ln -s cptofs $out/bin/cpfromfs
+              cp -r tools/lkl/include $dev/
+              cp tools/lkl/liblkl.a \
+                 tools/lkl/lib/liblkl.so \
+                 $lib/lib
+            '';
+          }
+        );
       };
 
       mksystem =
@@ -107,7 +160,7 @@
             #./modules/wg-vpn.nix
             ./configuration.nix
             ./desktop.nix
-            ./home.nix
+            (if hostname == "zote" then { } else ./home.nix)
             ./vim.nix
             ./services/syncthing.nix
             (./hosts + "/${hostname}" + /configuration.nix)
@@ -115,7 +168,24 @@
             ./cachix.nix
             #./vpn.nix
             disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
+            (if hostname == "zote" then { } else home-manager.nixosModules.home-manager)
+            (
+              if hostname == "zote" then
+                { config, pkgs, ... }:
+                {
+                  services.udisks2.enable = false;
+                  services.fwupd.enable = lib.mkForce false;
+                  #i18n.supportedLocales = [ ];
+                  i18n.defaultLocale = "C.UTF-8";
+                  i18n.glibcLocales = pkgs.writeTextDir "path" "TODO";
+
+                  nixpkgs.overlays = [
+                    muslOverlay
+                  ];
+                }
+              else
+                { }
+            )
             nixvim.nixosModules.nixvim
             {
               nixpkgs.overlays = [
@@ -212,7 +282,13 @@
           |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
           |> suffix "disko-image-script"
         )
-        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux);
+        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+        // {
+          musled = import nixpkgs {
+            system = "x86_64-linux-musl";
+            overlays = [ muslOverlay ];
+          };
+        };
 
       # activate-uki.ballos =
       #   let

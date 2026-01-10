@@ -2,6 +2,8 @@
 {
   isDesktop = true;
 
+  virtualisation.virtualbox.host.enable = true;
+
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   boot.loader.systemd-boot.enable = true;
@@ -42,6 +44,10 @@
       enable = true;
       path = "~/notes";
     };
+  };
+
+  services.cachefilesd = {
+    enable = true;
   };
 
   services.ollama.enable = true;

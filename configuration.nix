@@ -1,4 +1,5 @@
 {
+  config,
   hostname,
   localpkgs,
   pkgs,
@@ -43,15 +44,16 @@ in
       trusted-users = [ "turbio" ];
 
       # todo(turbio): lol
-      substituters =
-        if (hostname != "ballos" && hostname != "zote") then
-          [
-            "https://nixcache.turb.io"
-          ]
-        else
-          [ ];
+      substituters = [
+        "https://nix-community.cachix.org"
+        "https://cache.nixos.org/"
+      ]
+
+      ++ lib.optional (hostname != "ballos" && hostname != "zote") "https://nixcache.turb.io";
+
       trusted-public-keys = [
         "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" # TODO(turbio): key management
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
     };
 
@@ -93,7 +95,7 @@ in
     uid = 1000;
 
     # probably a bad idea lmao
-    hashedPassword = "$6$UnnB5IybU$cBw9zHoM7xTdwyXnAAbeXOGoqQQtzbYsuPqTDjpGF3J3H3WaarzAEtoBxXOImZlmmzY2amSqSgwUbEP0.ma3w0"; # TODO(turbio): key management
+    hashedPasswordFile = config.age.secrets.userpassword.path;
 
     shell = pkgs.zsh;
     #shell = pkgs.fish;

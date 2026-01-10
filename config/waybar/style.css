@@ -80,6 +80,7 @@ window#waybar.chromium {
 #custom-media,
 #custom-yubi,
 #custom-lock,
+#custom-kbd-toggle,
 #tray,
 #mode,
 #idle_inhibitor,
@@ -202,6 +203,15 @@ label:focus {
 #idle_inhibitor.activated {
     background-color: #ecf0f1;
     color: #2d3436;
+}
+
+#custom-kbd-toggle {
+    background-color: #2d3436;
+}
+
+#custom-kbd-toggle.disabled {
+    background-color: #e74c3c;
+    color: #ffffff;
 }
 
 #mpd {

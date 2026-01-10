@@ -38,6 +38,8 @@ func bootReq(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	store := " store_url={{ URL \"file://"+*hosts+"/"+MAC+"/nix-store.squashfs\" }}"
+
 	resp := struct {
 		Kernel string   `json:"kernel"`
 		Initrd []string `json:"initrd"`
@@ -48,7 +50,7 @@ func bootReq(w http.ResponseWriter, r *http.Request) {
 		Initrd: []string{
 			"file://"+*hosts+"/"+MAC+"/initrd",
 		},
-		Cmdline: string(cmdline),
+		Cmdline: string(cmdline) + store,
 		Message: "heyo!",
 	}
 

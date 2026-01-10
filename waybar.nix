@@ -10,6 +10,7 @@
   ];
   modules-right = [
     "custom/media"
+    "custom/kbd-toggle"
     "idle_inhibitor"
     "temperature"
     "memory"
@@ -47,12 +48,7 @@
       ""
       ""
     ];
-    on-scroll-down = "light -U 1";
-    on-scroll-up = "light -A 1";
-    states = [
-      0
-      50
-    ];
+    scroll-step = 1;
   };
 
   battery = {
@@ -101,6 +97,98 @@
     on-scroll-up = "waybar-mpris --send player-next";
     on-scroll-down = "waybar-mpris --send player-prev";
     escape = true;
+  };
+
+  "custom/kbd-toggle" = {
+    exec = builtins.toString (
+      pkgs.writeShellScript "kbd-toggle-status" ''
+        STATE_FILE="/tmp/kbd-toggle-state"
+        GRAB_PID_FILE="/tmp/kbd-toggle-grab.pid"
+
+        get_sway_kbd_state() {
+          KBD_ID=$(${pkgs.sway}/bin/swaymsg -t get_inputs -r 2>/dev/null | \
+            ${pkgs.jq}/bin/jq -r '.[] | select(.type == "keyboard") | select(.name | test("AT Translated|Internal|internal")) | .identifier' | \
+            head -1)
+          if [ -n "$KBD_ID" ]; then
+            ${pkgs.sway}/bin/swaymsg -t get_inputs -r | ${pkgs.jq}/bin/jq -r ".[] | select(.identifier == \"$KBD_ID\") | .libinput.send_events"
+          fi
+        }
+
+        get_grab_state() {
+          if [ -f "$GRAB_PID_FILE" ] && kill -0 "$(cat "$GRAB_PID_FILE")" 2>/dev/null; then
+            echo "disabled"
+          else
+            echo "enabled"
+          fi
+        }
+
+        while true; do
+          if [ -n "$SWAYSOCK" ]; then
+            STATE=$(get_sway_kbd_state)
+          else
+            STATE=$(get_grab_state)
+          fi
+
+          if [ "$STATE" = "disabled" ]; then
+            echo '{"text": "󰌐", "alt": "disabled", "tooltip": "Internal keyboard disabled", "class": "disabled"}'
+          else
+            echo '{"text": "󰌌", "alt": "enabled", "tooltip": "Internal keyboard enabled"}'
+          fi
+          sleep 1
+        done
+      ''
+    );
+    format = "{}";
+    return-type = "json";
+    on-click = builtins.toString (
+      pkgs.writeShellScript "kbd-toggle-click" ''
+        GRAB_PID_FILE="/tmp/kbd-toggle-grab.pid"
+
+        if [ -n "$SWAYSOCK" ]; then
+          # Sway: use swaymsg input control
+          KBD_ID=$(${pkgs.sway}/bin/swaymsg -t get_inputs -r | \
+            ${pkgs.jq}/bin/jq -r '.[] | select(.type == "keyboard") | select(.name | test("AT Translated|Internal|internal")) | .identifier' | \
+            head -1)
+
+          if [ -z "$KBD_ID" ]; then
+            ${pkgs.libnotify}/bin/notify-send "Keyboard Toggle" "No internal keyboard found"
+            exit 1
+          fi
+
+          STATE=$(${pkgs.sway}/bin/swaymsg -t get_inputs -r | ${pkgs.jq}/bin/jq -r ".[] | select(.identifier == \"$KBD_ID\") | .libinput.send_events")
+          if [ "$STATE" = "disabled" ]; then
+            ${pkgs.sway}/bin/swaymsg input "$KBD_ID" events enabled
+            ${pkgs.libnotify}/bin/notify-send "Keyboard" "Internal keyboard enabled"
+          else
+            ${pkgs.sway}/bin/swaymsg input "$KBD_ID" events disabled
+            ${pkgs.libnotify}/bin/notify-send "Keyboard" "Internal keyboard disabled"
+          fi
+        else
+          # Niri/other: use evtest --grab to capture keyboard events
+          if [ -f "$GRAB_PID_FILE" ] && kill -0 "$(cat "$GRAB_PID_FILE")" 2>/dev/null; then
+            # Currently disabled, enable by killing grab process
+            kill "$(cat "$GRAB_PID_FILE")" 2>/dev/null
+            rm -f "$GRAB_PID_FILE"
+            ${pkgs.libnotify}/bin/notify-send "Keyboard" "Internal keyboard enabled"
+          else
+            # Find internal keyboard device
+            KBD_DEV=$(${pkgs.libinput}/bin/libinput list-devices | \
+              grep -B5 -A5 -i "AT Translated\|Internal" | \
+              grep "Kernel:" | head -1 | awk '{print $2}')
+
+            if [ -z "$KBD_DEV" ]; then
+              ${pkgs.libnotify}/bin/notify-send "Keyboard Toggle" "No internal keyboard found"
+              exit 1
+            fi
+
+            # Grab keyboard in background (requires input group membership)
+            ${pkgs.evtest}/bin/evtest --grab "$KBD_DEV" > /dev/null 2>&1 &
+            echo $! > "$GRAB_PID_FILE"
+            ${pkgs.libnotify}/bin/notify-send "Keyboard" "Internal keyboard disabled"
+          fi
+        fi
+      ''
+    );
   };
 
   "custom/tailscale" = {

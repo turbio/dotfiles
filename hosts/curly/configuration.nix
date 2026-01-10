@@ -1,5 +1,7 @@
 { pkgs, ... }:
 {
+  virtualisation.virtualbox.host.enable = true;
+
   systemd.network.wait-online.enable = false;
 
   boot.loader.systemd-boot.enable = true;

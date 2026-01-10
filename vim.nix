@@ -2,7 +2,6 @@
   pkgs,
   repos,
   config,
-  lib,
   ...
 }:
 let
@@ -106,7 +105,7 @@ in
       gitgutter.enable = true;
     };
 
-    lsp.inlayHints.enable = true;
+    lsp.inlayHints.enable = false;
     lsp.servers = {
       clangd.enable = true;
       gopls.enable = true;

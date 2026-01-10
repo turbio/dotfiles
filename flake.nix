@@ -8,12 +8,16 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixvim.url = "github:nix-community/nixvim/nixos-25.11";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:rycee/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     github-copilot-vim = {
       flake = false;
       url = "github:github/copilot.vim";
@@ -59,22 +63,29 @@
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       home-manager,
       nixos-hardware,
       disko,
       nixvim,
       wrappers,
-      unstable,
+      agenix,
       ...
     }@inputs:
     let
-      arch = hostname: if hostname == "jenka" then "aarch64-linux" else "x86_64-linux";
+      arch =
+        hostname:
+        if (hostname == "jenka" || hostname == "backle" || hostname == "cackle") then
+          "aarch64-linux"
+        else
+          "x86_64-linux";
 
       lib = nixpkgs.lib;
 
@@ -95,36 +106,47 @@
           |> (a: a.wrapper)
         ));
 
-      unstableTailscaleOverlay = final: prev: {
-        tailscale = unstable.legacyPackages.${final.system}.tailscale;
-      };
-
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
           system = arch hostname;
-          modules = [
-            #./modules/wg-vpn.nix
-            ./configuration.nix
-            ./desktop.nix
-            ./home.nix
-            ./vim.nix
-            ./services/syncthing.nix
-            (./hosts + "/${hostname}" + /configuration.nix)
-            (./hosts + "/${hostname}" + /hardware-configuration.nix)
-            ./cachix.nix
-            #./vpn.nix
-            disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
-            nixvim.nixosModules.nixvim
-            {
-              nixpkgs.overlays = [
-                wrappersOverlay
-              ];
+          modules =
+            lib.optional (hostname == "ballos") {
+              age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
+              age.secrets."rfc2136-acme".owner = "acme";
             }
-          ]
-          ++ extraModules
-          ++ (if hostname == "gero" then [ nixos-hardware.nixosModules.framework-13-7040-amd ] else [ ]);
+            ++ lib.optional (hostname == "aackle" || hostname == "backle") {
+              age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
+              age.secrets."rfc2136-acme".owner = "named";
+
+              age.secrets."rfc2136-xfer".file = ./secrets/rfc2136-xfer.age;
+              age.secrets."rfc2136-xfer".owner = "named";
+            }
+            ++ [
+              agenix.nixosModules.default
+              {
+                age.secrets.userpassword.file = ./secrets/userpassword.age;
+              }
+              #./modules/wg-vpn.nix
+              ./configuration.nix
+              ./desktop.nix
+              ./home.nix
+              ./services/syncthing.nix
+              (./hosts + "/${hostname}" + /configuration.nix)
+              (./hosts + "/${hostname}" + /hardware-configuration.nix)
+              #./vpn.nix
+              disko.nixosModules.disko
+              home-manager.nixosModules.home-manager
+              nixvim.nixosModules.nixvim
+              {
+                nixpkgs.overlays = [
+                  wrappersOverlay
+                ];
+              }
+            ]
+            ++ (lib.optional (hostname != "balrog" && hostname != "backle" && hostname != "aackle") ./vim.nix)
+            ++ extraModules
+            ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd);
 
           specialArgs = {
             inherit hostname;
@@ -190,8 +212,8 @@
           bzImage = "${output.netbootKernel}/bzImage";
           initrd = "${output.netbootRamdisk}/initrd";
           cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
+          "nix-store.squashfs" = output.squashfsStore;
 
-          # "squashfs.img" = output.squashfsStore;
           # "${h}-store" = output.ext4Store;
         }
       );
@@ -212,7 +234,15 @@
           |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
           |> suffix "disko-image-script"
         )
-        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux);
+        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+        // {
+          devvm = import ./devvm.nix {
+            inherit mksystem;
+            inherit lib;
+            inherit (inputs) microvm;
+            pkgs = import nixpkgs { system = "x86_64-linux"; };
+          };
+        };
 
       # activate-uki.ballos =
       #   let

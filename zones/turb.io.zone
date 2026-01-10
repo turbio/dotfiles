@@ -1,15 +1,21 @@
-turb.io. 300 IN A 35.208.90.40
-*.turb.io. 300 IN A 35.208.90.40
+; gateway machines
+aackle.turb.io. 300 IN A 104.154.135.160
+backle.turb.io. 300 IN A 146.235.204.90
+cackle.turb.io. 300 IN A 163.192.60.165
+
+turb.io. 300 IN A 104.154.135.160
+turb.io. 300 IN A 146.235.204.90
+turb.io. 300 IN A 163.192.60.165
+*.turb.io. 300 IN A 104.154.135.160
+*.turb.io. 300 IN A 146.235.204.90
+*.turb.io. 300 IN A 163.192.60.165
 
 ; ns
 turb.io. 21600 IN SOA ns1.turb.io. hostmaster.turb.io. 1 21600 3600 259200 300
 turb.io. 21600 IN NS ns1.turb.io.
 turb.io. 21600 IN NS ns2.turb.io.
-ns1.turb.io 300 IN A 35.208.90.40
-ns2.turb.io 300 IN A 35.208.90.40
-
-; vpn gateway
-gateway.turb.io. 300 IN A 35.208.90.40
+ns1.turb.io. 300 IN A 104.154.135.160
+ns2.turb.io. 300 IN A 146.235.204.90
 
 ; internal. TODO: don't
 *.int.turb.io. 300 IN A 100.100.57.46
@@ -20,10 +26,31 @@ turb.io. 300 IN TXT "google-site-verification=AcajvYUFYcjku1QXkdYyIpZcYB7ENXt9Xe
 ; fastmail
 turb.io. 300 IN MX 10 in1-smtp.messagingengine.com.
 turb.io. 300 IN MX 20 in2-smtp.messagingengine.com.
+*.turb.io. 300 IN MX 10 in1-smtp.messagingengine.com.
+*.turb.io. 300 IN MX 20 in2-smtp.messagingengine.com.
+
 fm1._domainkey.turb.io. 300 IN CNAME fm1.turb.io.dkim.fmhosted.com.
 fm2._domainkey.turb.io. 300 IN CNAME fm2.turb.io.dkim.fmhosted.com.
 fm3._domainkey.turb.io. 300 IN CNAME fm3.turb.io.dkim.fmhosted.com.
 turb.io. 300 IN TXT "v=spf1 include:spf.messagingengine.com ?all"
+_dmarc.turb.io. 300 IN TXT "v=DMARC1; p=none;"
+
+mail.turb.io. 300 IN A  103.168.172.65
+mail.turb.io. 300 IN MX 10 in1-smtp.messagingengine.com.
+mail.turb.io. 300 IN MX 20 in2-smtp.messagingengine.com.
+
+_autodiscover._tcp.turb.io. 3600 IN SRV 0  1 443 autodiscover.fastmail.com.
+_caldav._tcp.turb.io.       3600 IN SRV 0  0 0   .
+_caldavs._tcp.turb.io.      3600 IN SRV 0  1 443 d3054272.caldav.fastmail.com.
+_carddav._tcp.turb.io.      3600 IN SRV 0  0 0   .
+_carddavs._tcp.turb.io.     3600 IN SRV 0  1 443 d3054272.carddav.fastmail.com.
+_imap._tcp.turb.io.         3600 IN SRV 0  0 0   .
+_imaps._tcp.turb.io.        3600 IN SRV 0  1 993 imap.fastmail.com.
+_jmap._tcp.turb.io.         3600 IN SRV 0  1 443 api.fastmail.com.
+_pop3._tcp.turb.io.         3600 IN SRV 0  0 0   .
+_pop3s._tcp.turb.io.        3600 IN SRV 10 1 995 pop.fastmail.com.
+_submission._tcp.turb.io.   3600 IN SRV 0  0 0   .
+_submissions._tcp.turb.io.  3600 IN SRV 0  1 465 smtp.fastmail.com.
 
 ; ???
 balrog.turb.io. 300 IN A 35.208.90.40

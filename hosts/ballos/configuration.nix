@@ -16,6 +16,9 @@ in
     ../../services/netboot_host.nix
     ./ipmi.nix
     (import ./acme-wildcard.nix { domain = "turb.io"; })
+    (import ./acme-wildcard.nix { domain = "turbi.ooo"; })
+    (import ./acme-wildcard.nix { domain = "masonclayton.com"; })
+    (import ./acme-wildcard.nix { domain = "nice.meme"; })
     (import ../../services/vibes.nix {
       mediaRoot = "/tank/enc/vibes";
       domain = "vibes.turb.io";
@@ -99,6 +102,60 @@ in
       '';
       proxyPass = "http://${config.containers.jellyfin.localAddress}:9472";
     };
+  };
+
+  services.nginx.virtualHosts."nice.meme" = {
+    http2 = true;
+    forceSSL = true;
+    useACMEHost = "nice.meme";
+    root = ./nice.meme;
+    extraConfig = ''
+      error_page 404 =200 /index.html;
+      charset utf-8;
+    '';
+    locations."/".extraConfig = ''
+      if ($is_llm) {
+        rewrite ^ /llm.html break;
+      }
+    '';
+    locations."= /llm.html".extraConfig = ''
+      internal;
+    '';
+  };
+  services.nginx.virtualHosts."*.nice.meme" = {
+    forceSSL = true;
+    useACMEHost = "nice.meme";
+    root = ./nice.meme;
+    extraConfig = ''
+      error_page 404 =200 /index.html;
+      charset utf-8;
+    '';
+    locations."/".extraConfig = ''
+      if ($is_llm) {
+        rewrite ^ /llm.html break;
+      }
+    '';
+    locations."= /llm.html".extraConfig = ''
+      internal;
+    '';
+  };
+
+  services.nginx.virtualHosts."turbi.ooo" = {
+    forceSSL = true;
+    useACMEHost = "turbi.ooo";
+    root = pkgs.writeTextDir "index.html" ''
+      wow
+
+      what a deal
+    '';
+  };
+
+  services.nginx.virtualHosts."masonclayton.com" = {
+    forceSSL = true;
+    useACMEHost = "masonclayton.com";
+    root = pkgs.writeTextDir "index.html" ''
+      heyo
+    '';
   };
 
   users.users.jellyfin = {
@@ -493,6 +550,11 @@ in
                         'rt=$request_time ';
       access_log syslog:server=unix:/dev/log vhosts;
       access_log /var/log/nginx/access.log vhosts;
+
+      map $http_user_agent $is_llm {
+        default 0;
+        ~*ChatGPT-User 1;
+      }
     '';
   };
 
@@ -597,7 +659,7 @@ in
       };
       "webcamlog" = {
         enable = true;
-        path = "/tank/enc/webcamlog";
+        path = config.zfs.pools.tank.datasets."enc/webcamlog".mountpoint;
       };
     };
   };
@@ -718,22 +780,30 @@ in
     )
   ];
 
-  #systemd.timers."archive-webcam" = {
-  #  wantedBy = [ "timers.target" ];
-  #  timerConfig = {
-  #    OnCalendar = "daily";
-  #    Unit = "archive-webcam.service";
-  #  };
-  #};
-  #systemd.services.archive-webcam = {
-  #  path = [
-  #    pkgs.rsync
-  #  ];
-  #  serviceConfig.Type = "oneshot";
-  #  script = ''
-  #    rsync -av /mnt/sync/webcamlog/ /mnt/sync/archive/webcamlog/ --exclude=".*" --remove-source-files
-  #  '';
-  #};
+  zfs.pools.tank.datasets = {
+    "enc/webcamlog" = { };
+    "enc/webcamlog-archive" = { };
+  };
+  systemd.timers."auto-archive-webcam" = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Unit = "auto-archive-webcam.service";
+    };
+  };
+  systemd.services.auto-archive-webcam = {
+    path = [
+      pkgs.rsync
+    ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      rsync -av \
+        ${config.zfs.pools.tank.datasets."enc/webcamlog".mountpoint}/ \
+        ${config.zfs.pools.tank.datasets."enc/webcamlog-archive".mountpoint} \
+        --exclude=".*" \
+        --remove-source-files
+    '';
+  };
 
   systemd.services.fanspeed = {
     enable = true;

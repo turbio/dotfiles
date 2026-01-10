@@ -1,0 +1,11 @@
+turbi.ooo. 300 IN A 104.154.135.160
+turbi.ooo. 300 IN A 146.235.204.90
+turbi.ooo. 300 IN A 163.192.60.165
+*.turbi.ooo. 300 IN A 104.154.135.160
+*.turbi.ooo. 300 IN A 146.235.204.90
+*.turbi.ooo. 300 IN A 163.192.60.165
+
+; ns
+turbi.ooo. 21600 IN SOA ns1.turb.io. hostmaster.turb.io. 2 21600 3600 259200 300
+turbi.ooo. 21600 IN NS ns1.turb.io.
+turbi.ooo. 21600 IN NS ns2.turb.io.

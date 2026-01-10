@@ -174,7 +174,5 @@ rec {
     comma
 
     shellcheck
-
-    hishtory
   ];
 }

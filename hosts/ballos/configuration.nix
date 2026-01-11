@@ -674,6 +674,56 @@ in
       domain = "graf.turb.io";
       protocol = "socket";
     };
+
+    provision.datasources.settings.datasources = [
+      {
+        name = "Loki";
+        type = "loki";
+        uid = "loki";
+        url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+        isDefault = false;
+      }
+    ];
+
+    provision.dashboards.settings.providers = [
+      {
+        name = "NixOS";
+        options.path = pkgs.linkFarm "grafana-dashboards" [
+          {
+            name = "nginx-logs.json";
+            path = pkgs.writeText "nginx-logs.json" (builtins.toJSON {
+              title = "Nginx Logs";
+              uid = "nginx-logs";
+              editable = false;
+              panels = [
+                {
+                  type = "logs";
+                  title = "Access Logs";
+                  gridPos = { x = 0; y = 0; w = 24; h = 20; };
+                  datasource = { type = "loki"; uid = "loki"; };
+                  targets = [
+                    {
+                      expr = ''{syslog_identifier="nginx"}'';
+                      refId = "A";
+                    }
+                  ];
+                  options = {
+                    showTime = true;
+                    showLabels = true;
+                    wrapLogMessage = true;
+                    sortOrder = "Descending";
+                    enableLogDetails = true;
+                  };
+                }
+              ];
+              templating.list = [];
+              time = { from = "now-1h"; to = "now"; };
+              refresh = "5s";
+            });
+          }
+        ];
+      }
+    ];
   };
 
   virtualisation.oci-containers = lib.mkIf false {
@@ -1071,4 +1121,98 @@ in
   #    #cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} /efi/EFI/Linux/${config.system.boot.loader.ukiFile}
   #  ;
   #};
+
+  zfs.pools.tank.datasets."enc/loki" = {
+    perms.owner = "loki";
+    perms.group = "loki";
+    perms.mode = "750";
+  };
+
+  services.loki = {
+    enable = true;
+    dataDir = config.zfs.pools.tank.datasets."enc/loki".mountpoint;
+    configuration = {
+      auth_enabled = false;
+      server.http_listen_port = 3100;
+
+      ingester = {
+        lifecycler = {
+          address = "127.0.0.1";
+          ring = {
+            kvstore.store = "inmemory";
+            replication_factor = 1;
+          };
+          final_sleep = "0s";
+        };
+        chunk_idle_period = "5m";
+        chunk_retain_period = "30s";
+      };
+
+      schema_config.configs = [{
+        from = "2025-01-01";
+        store = "tsdb";
+        object_store = "filesystem";
+        schema = "v13";
+        index = {
+          prefix = "index_";
+          period = "24h";
+        };
+      }];
+
+      storage_config = {
+        tsdb_shipper = {
+          active_index_directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/tsdb-index";
+          cache_location = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/tsdb-cache";
+        };
+        filesystem.directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/chunks";
+      };
+
+      limits_config = {
+        reject_old_samples = true;
+        reject_old_samples_max_age = "168h";
+      };
+
+      compactor = {
+        working_directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/compactor";
+        compactor_ring.kvstore.store = "inmemory";
+        retention_enabled = false;
+      };
+    };
+  };
+
+  services.promtail = {
+    enable = true;
+    configuration = {
+      server = {
+        http_listen_port = 9080;
+        grpc_listen_port = 0;
+      };
+      clients = [{ url = "http://127.0.0.1:3100/loki/api/v1/push"; }];
+      scrape_configs = [{
+        job_name = "journal";
+        journal = {
+          max_age = "12h";
+          labels.job = "systemd-journal";
+        };
+        relabel_configs = [
+          {
+            source_labels = ["__journal__systemd_unit"];
+            target_label = "unit";
+          }
+          {
+            source_labels = ["__journal_syslog_identifier"];
+            target_label = "syslog_identifier";
+          }
+          {
+            source_labels = ["__journal__hostname"];
+            target_label = "hostname";
+          }
+          {
+            source_labels = ["__journal_priority_keyword"];
+            target_label = "level";
+          }
+        ];
+      }];
+    };
+  };
 }

@@ -114,6 +114,7 @@ in
       hls.enable = true;
       ts_ls.enable = true;
       bashls.enable = true;
+      nushell.enable = true;
     };
 
     extraPlugins = plugins;

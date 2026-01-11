@@ -2,6 +2,7 @@ let
   desktop = "niri"; # one of: "sway", "niri"
 in
 {
+  hostname,
   config,
   lib,
   localpkgs,
@@ -95,7 +96,7 @@ in
 
     services.tzupdate.enable = true;
 
-    systemd.timers."webcam-log" = {
+    systemd.timers."webcam-log" = lib.mkIf (hostname != "itoh") {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnBootSec = "1m";

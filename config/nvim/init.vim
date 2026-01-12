@@ -68,6 +68,7 @@ codewindow.apply_default_keybinds()
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
 vim.keymap.set('n', 'gf', vim.lsp.buf.format)
 vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition)
+vim.keymap.set('n', 'gc', vim.lsp.buf.references)
 
 vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
 

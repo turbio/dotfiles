@@ -54,13 +54,6 @@ vim.opt.ignorecase = true
 
 vim.opt.gdefault = true
 
-require('ibl').setup({
-	indent = {
-		char = '┊',
-		tab_char = '┊',
-	},
-})
-
 local codewindow = require('codewindow')
 codewindow.setup()
 codewindow.apply_default_keybinds()
@@ -75,69 +68,8 @@ vim.keymap.set('n', 'gh', vim.lsp.buf.hover)
 vim.keymap.set('n', 'gn', vim.diagnostic.goto_next)
 vim.keymap.set('n', 'gN', vim.diagnostic.goto_prev)
 
-vim.g.undotree_SplitWidth = 30
-vim.g.undotree_DiffAutoOpen = 0
-vim.g.undotree_WindowLayout = 3
-
 vim.api.nvim_set_hl(0, 'NormalFloat', { ctermfg = 15, ctermbg = 0 })
 vim.api.nvim_set_hl(0, 'FloatBorder', { fg = "#5c5c5c", ctermbg = 0 })
-
-require('lsp_signature').setup({
-	handler_opts = {
-		border = "rounded",
-	},
-	hint_prefix = {
-		above = "↙ ",
-		current = "← ",
-		below = "↖ "
-	}
-})
-
-require('trouble').setup({
-	icons = false,
-})
-
--- fancy completion
-local ELLIPSIS_CHAR = '…'
-local cmp = require('cmp')
-cmp.setup({
-	preselect = cmp.PreselectMode.None,
-	formatting = {
-		format = function(entry, vim_item)
-			if vim_item.menu and #vim_item.menu > 20 then
-				vim_item.menu = vim_item.menu:sub(1, 20) .. ELLIPSIS_CHAR
-			end
-
-			return vim_item
-		end,
-	},
-	window = {
-		completion = {
-			border = "rounded", -- or nil
-			scrollbar = true,
-			winblender = 0,
-			winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
-		},
-		documentation = {
-			border = "rounded", -- or nil
-			scrollbar = true,
-			winblender = 0,
-			winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
-		},
-	},
-	mapping = cmp.mapping.preset.insert({
-		-- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-		['<Tab>'] = cmp.mapping.confirm({ select = false }),
-		['<C-Space>'] = cmp.mapping.complete(),
-		['<C-e>'] = cmp.mapping.abort(),
-		['<C-j>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-		['<C-k>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
-	}),
-	sources = {
-		{ name = 'nvim_lsp' },
-		{ name = 'minuet' },
-	},
-})
 
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
 function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
@@ -187,13 +119,6 @@ vim.keymap.set({ 'i' }, 'jK', '<ESC>')
 vim.keymap.set({ 'i' }, 'Jk', '<ESC>')
 vim.keymap.set({ 'i' }, 'JK', '<ESC>')
 
--- virtual inline diagnostic messages
-require("lsp_lines").setup()
-
-vim.diagnostic.config({
-  virtual_text = false,
-})
-
 EOF
 
 highlight SignColumn guibg=none
@@ -235,19 +160,6 @@ cmap w!! w !sudo tee > /dev/null %
 nmap <leader>= gg=G``:echo "reindent global"<CR>
 
 set signcolumn=yes
-let g:gitgutter_realtime = 0
-let g:gitgutter_eager = 0
-
-let g:gitgutter_sign_added = '+'
-let g:gitgutter_sign_modified = '~'
-let g:gitgutter_sign_removed = '-'
-let g:gitgutter_sign_modified_removed = '~'
-let g:gitgutter_sign_removed_first_line = '^'
-
-let g:indentLine_char = '┊'
-let g:indentLine_first_char='┊'
-let g:indentLine_concealcursor=0
-let g:indentLine_showFirstIndentLevel=1
 
 filetype plugin indent on
 
@@ -262,8 +174,6 @@ if exists('+breakindent')
 	set breakindent " preserves the indent level of wrapped lines
 	set showbreak=↪ " illustrate wrapped lines
 endif"
-
-let NERDTreeMinimalUI=1
 
 tnoremap jk <C-\><C-n>
 
@@ -300,11 +210,7 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-let g:lightline = {
-      \ 'component_function': {
-      \   'filename': 'LightlineFilename',
-      \ },
-      \ }
+" lightline filename function (referenced in nixvim config)
 function! LightlineFilename()
   return expand('%:t') !=# '' ? expand('%') : '[No Name]'
 endfunction

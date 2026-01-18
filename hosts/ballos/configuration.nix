@@ -33,12 +33,14 @@ in
       perms.group = "media";
       perms.mode = "775";
       properties.sync = "standard";
+      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
     "enc/jellyfin" = {
       perms.owner = "jellyfin";
       perms.group = "media";
       perms.mode = "775";
       properties.sync = "standard";
+      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
     "enc/photos" = {
       properties.sync = "standard";
@@ -51,56 +53,61 @@ in
     useACMEHost = "turb.io";
     http2 = true;
 
+    extraConfig = ''
+      resolver 127.0.0.53;
+      set $jellyfin_url "http://mote.lan:8096";
+    '';
+
     locations."/" = {
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:8096";
+      extraConfig = ''
+        proxy_pass $jellyfin_url;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Protocol $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+
+        # Disable buffering when the nginx proxy gets very resource heavy upon streaming
+        proxy_buffering off;
+      '';
+    };
+    locations."/socket" = {
+      extraConfig = ''
+        proxy_pass $jellyfin_url;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Protocol $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+      '';
     };
   };
   services.nginx.virtualHosts."see.int.turb.io" = {
     extraConfig = ''
       allow ${internalIp};
       deny all;
+      resolver 127.0.0.53;
+      set $u "http://mote.lan:5055";
     '';
-    locations."/" = {
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:5055";
-    };
-  };
-  services.nginx.virtualHosts."son.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      deny all;
-    '';
-    locations."/" = {
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:8989";
-    };
-  };
-  services.nginx.virtualHosts."rad.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      deny all;
-    '';
-    locations."/" = {
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:7878";
-    };
-  };
-  services.nginx.virtualHosts."prow.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      deny all;
-    '';
-    locations."/" = {
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:9696";
-    };
+    locations."/".proxyPass = "$u";
   };
   services.nginx.virtualHosts."bt.int.turb.io" = {
     extraConfig = ''
       allow ${internalIp};
       deny all;
+      resolver 127.0.0.53;
+      set $u "http://mote.lan:9472";
     '';
     locations."/" = {
       extraConfig = ''
         proxy_set_header Host $host;
       '';
-      proxyPass = "http://${config.containers.jellyfin.localAddress}:9472";
+      proxyPass = "$u";
     };
   };
 
@@ -176,53 +183,54 @@ in
     enableIPv6 = true;
   };
 
-  containers.jellyfin = {
-    ephemeral = true;
-    autoStart = true;
-    privateNetwork = true;
-    hostAddress = "192.168.100.10";
-    localAddress = "192.168.100.11";
-    privateUsers = "pick";
-    bindMounts = {
-      "/media" = {
-        mountPoint = "/media:idmap"; # nasty hax (https://github.com/NixOS/nixpkgs/issues/329530)
-        hostPath = "/tank/enc/media";
-        isReadOnly = false;
-      };
-      "/persist" = {
-        mountPoint = "/persist:idmap";
-        hostPath = "/tank/enc/jellyfin";
-        isReadOnly = false;
-      };
-    };
-    config =
-      { ... }:
-      {
-        imports = [
-          (import ../../services/jelly.nix {
-            internalIp = internalIp;
-            userId = config.users.users.jellyfin.uid;
-            groupId = config.users.groups.media.gid;
-            persistDataDir = "/persist";
-          })
-        ];
-
-        networking.firewall = {
-          enable = true;
-          allowedTCPPorts = [
-            8096 # jellyfin
-            9472 # qbittorrent
-            9696 # prowlarr
-            5055 # seerr
-            7878 # radarr
-            8989 # sonarr
-          ];
+  /*
+    containers.jellyfin = {
+      ephemeral = true;
+      autoStart = true;
+      privateNetwork = true;
+      hostAddress = "192.168.100.10";
+      localAddress = "192.168.100.11";
+      privateUsers = "pick";
+      bindMounts = {
+        "/media" = {
+          mountPoint = "/media:idmap"; # nasty hax (https://github.com/NixOS/nixpkgs/issues/329530)
+          hostPath = "/tank/enc/media";
+          isReadOnly = false;
         };
-        networking.useHostResolvConf = false;
-        services.resolved.enable = true;
-        system.stateVersion = "25.05";
+        "/persist" = {
+          mountPoint = "/persist:idmap";
+          hostPath = "/tank/enc/jellyfin";
+          isReadOnly = false;
+        };
       };
-  };
+      config =
+        { ... }:
+        {
+          imports = [
+            (import ../../services/jelly.nix {
+              userId = config.users.users.jellyfin.uid;
+              groupId = config.users.groups.media.gid;
+              persistDataDir = "/persist";
+            })
+          ];
+
+          networking.firewall = {
+            enable = true;
+            allowedTCPPorts = [
+              8096 # jellyfin
+              9472 # qbittorrent
+              9696 # prowlarr
+              5055 # seerr
+              7878 # radarr
+              8989 # sonarr
+            ];
+          };
+          networking.useHostResolvConf = false;
+          services.resolved.enable = true;
+          system.stateVersion = "25.05";
+        };
+    };
+  */
 
   networking.wireguard.enable = true;
   networking.wireguard.interfaces = {
@@ -691,35 +699,48 @@ in
         options.path = pkgs.linkFarm "grafana-dashboards" [
           {
             name = "nginx-logs.json";
-            path = pkgs.writeText "nginx-logs.json" (builtins.toJSON {
-              title = "Nginx Logs";
-              uid = "nginx-logs";
-              editable = false;
-              panels = [
-                {
-                  type = "logs";
-                  title = "Access Logs";
-                  gridPos = { x = 0; y = 0; w = 24; h = 20; };
-                  datasource = { type = "loki"; uid = "loki"; };
-                  targets = [
-                    {
-                      expr = ''{syslog_identifier="nginx"}'';
-                      refId = "A";
-                    }
-                  ];
-                  options = {
-                    showTime = true;
-                    showLabels = true;
-                    wrapLogMessage = true;
-                    sortOrder = "Descending";
-                    enableLogDetails = true;
-                  };
-                }
-              ];
-              templating.list = [];
-              time = { from = "now-1h"; to = "now"; };
-              refresh = "5s";
-            });
+            path = pkgs.writeText "nginx-logs.json" (
+              builtins.toJSON {
+                title = "Nginx Logs";
+                uid = "nginx-logs";
+                editable = false;
+                panels = [
+                  {
+                    type = "logs";
+                    title = "Access Logs";
+                    gridPos = {
+                      x = 0;
+                      y = 0;
+                      w = 24;
+                      h = 20;
+                    };
+                    datasource = {
+                      type = "loki";
+                      uid = "loki";
+                    };
+                    targets = [
+                      {
+                        expr = ''{syslog_identifier="nginx"}'';
+                        refId = "A";
+                      }
+                    ];
+                    options = {
+                      showTime = true;
+                      showLabels = true;
+                      wrapLogMessage = true;
+                      sortOrder = "Descending";
+                      enableLogDetails = true;
+                    };
+                  }
+                ];
+                templating.list = [ ];
+                time = {
+                  from = "now-1h";
+                  to = "now";
+                };
+                refresh = "5s";
+              }
+            );
           }
         ];
       }
@@ -1148,16 +1169,18 @@ in
         chunk_retain_period = "30s";
       };
 
-      schema_config.configs = [{
-        from = "2025-01-01";
-        store = "tsdb";
-        object_store = "filesystem";
-        schema = "v13";
-        index = {
-          prefix = "index_";
-          period = "24h";
-        };
-      }];
+      schema_config.configs = [
+        {
+          from = "2025-01-01";
+          store = "tsdb";
+          object_store = "filesystem";
+          schema = "v13";
+          index = {
+            prefix = "index_";
+            period = "24h";
+          };
+        }
+      ];
 
       storage_config = {
         tsdb_shipper = {
@@ -1187,32 +1210,34 @@ in
         http_listen_port = 9080;
         grpc_listen_port = 0;
       };
-      clients = [{ url = "http://127.0.0.1:3100/loki/api/v1/push"; }];
-      scrape_configs = [{
-        job_name = "journal";
-        journal = {
-          max_age = "12h";
-          labels.job = "systemd-journal";
-        };
-        relabel_configs = [
-          {
-            source_labels = ["__journal__systemd_unit"];
-            target_label = "unit";
-          }
-          {
-            source_labels = ["__journal_syslog_identifier"];
-            target_label = "syslog_identifier";
-          }
-          {
-            source_labels = ["__journal__hostname"];
-            target_label = "hostname";
-          }
-          {
-            source_labels = ["__journal_priority_keyword"];
-            target_label = "level";
-          }
-        ];
-      }];
+      clients = [ { url = "http://127.0.0.1:3100/loki/api/v1/push"; } ];
+      scrape_configs = [
+        {
+          job_name = "journal";
+          journal = {
+            max_age = "12h";
+            labels.job = "systemd-journal";
+          };
+          relabel_configs = [
+            {
+              source_labels = [ "__journal__systemd_unit" ];
+              target_label = "unit";
+            }
+            {
+              source_labels = [ "__journal_syslog_identifier" ];
+              target_label = "syslog_identifier";
+            }
+            {
+              source_labels = [ "__journal__hostname" ];
+              target_label = "hostname";
+            }
+            {
+              source_labels = [ "__journal_priority_keyword" ];
+              target_label = "level";
+            }
+          ];
+        }
+      ];
     };
   };
 }

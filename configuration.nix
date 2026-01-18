@@ -94,7 +94,6 @@ in
     ];
     uid = 1000;
 
-    # probably a bad idea lmao
     hashedPasswordFile = config.age.secrets.userpassword.path;
 
     shell = pkgs.zsh;

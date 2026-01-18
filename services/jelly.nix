@@ -1,5 +1,15 @@
-{ internalIp, userId, groupId, persistDataDir }:
-{ config, pkgs, lib, ... }: {
+{
+  userId,
+  groupId,
+  persistDataDir,
+}:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   users.groups.media.gid = groupId;
 
   users.users.jellyfin = {
@@ -7,7 +17,6 @@
     group = "media";
     isSystemUser = true;
   };
-
 
   services.jellyfin = {
     group = "media";

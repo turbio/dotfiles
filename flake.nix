@@ -213,8 +213,19 @@
           initrd = "${output.netbootRamdisk}/initrd";
           cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
           "nix-store.squashfs" = output.squashfsStore;
+        }
+      );
 
-          # "${h}-store" = output.ext4Store;
+      # Just the initrd (no squashfs) for quick iteration on boot scripts
+      netbootableInitrds = mapEachHost (
+        h:
+        let
+          output = netbootableConfigurations.${h}.config.system.build;
+        in
+        nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-initrd-${h}" {
+          bzImage = "${output.netbootKernel}/bzImage";
+          initrd = "${output.netbootRamdisk}/initrd";
+          cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
         }
       );
 
@@ -242,6 +253,22 @@
             inherit (inputs) microvm;
             pkgs = import nixpkgs { system = "x86_64-linux"; };
           };
+
+          vim =
+            let
+              pkgs = import nixpkgs {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+            in
+            nixvim.legacyPackages.x86_64-linux.makeNixvimWithModule {
+              inherit pkgs;
+              module = import ./vimconfig.nix {
+                inherit pkgs;
+                repos = inputs;
+                isDesktop = false;
+              };
+            };
         };
 
       # activate-uki.ballos =

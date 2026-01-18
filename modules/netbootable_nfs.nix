@@ -3,11 +3,18 @@
   lib,
   pkgs,
   modulesPath,
-  hostname,
   ...
 }:
+let
+  scratchPath = "/scratch";
+  scratchInitrdPath = "/sysroot${scratchPath}";
+  squashfsInitrdPath = "${scratchInitrdPath}/nix-store.squashfs";
+  rwStoreInitrdPath = "${scratchInitrdPath}/rw-store";
+  rwStorePath = "${scratchPath}/rw-store";
+in
 {
-  users.users.root.password = "pass";
+  # Show journal on tty1 instead of login prompt for debugging
+  services.journald.console = "/dev/tty1";
 
   boot.loader.grub.enable = false;
 
@@ -47,6 +54,9 @@
     pkgs.iproute2
     pkgs.unixtools.ping
     pkgs.curl
+    config.boot.initrd.systemd.package.util-linux
+    pkgs.coreutils
+    pkgs.e2fsprogs
   ];
 
   boot.initrd.network = {
@@ -63,7 +73,7 @@
 
   services.rpcbind.enable = true;
 
-  fileSystems = lib.mkImageMediaOverride {
+  fileSystems = {
     "/" = {
       device = "tmpfs";
       fsType = "tmpfs";
@@ -103,7 +113,7 @@
     #};
 
     "/nix/.ro-store" = {
-      device = "/sysroot/var/lib/netboot/nix-store.squashfs";
+      device = squashfsInitrdPath;
       fsType = "squashfs";
       options = [
         "loop"
@@ -114,9 +124,12 @@
     };
 
     "/nix/.rw-store" = {
-      device = "tmpfs";
-      fsType = "tmpfs";
-      options = [ "mode=0755" ];
+      device = rwStorePath;
+      fsType = "none";
+      options = [
+        "bind"
+        "x-systemd.requires=setup-scratch.service"
+      ];
       neededForBoot = true;
     };
 
@@ -133,56 +146,133 @@
 
   };
 
-  boot.initrd.systemd.services.fetch-store-squashfs =
-    let
-      cacheDir = "/sysroot/var/lib/netboot";
-      squashPath = "${cacheDir}/nix-store.squashfs";
-    in
-    {
-      description = "Fetch nix-store.squashfs to disk (for later mounting)";
-      wantedBy = [ "initrd-switch-root.target" ];
-      before = [ "initrd-switch-root.target" ];
-      after = [
-        "sysroot.mount"
-        "network-online.target"
-      ];
-      wants = [
-        "sysroot.mount"
-        "network-online.target"
-      ];
+  /*
+    boot.initrd.systemd.mounts = [
+      {
+        where = scratch.path;
+        what = "/dev/disk/by-label/scratch";
+        type = "auto";
+        options = "x-mount.mkdir";
+        wantedBy = [ "initrd-switch-root.target" ];
+        before = [ "initrd-switch-root.target" ];
+        after = [ "sysroot.mount" ];
+        wants = [ "sysroot.mount" ];
+        unitConfig = {
+          ConditionPathExists = "/dev/disk/by-label/scratch";
+          DefaultDependencies = false;
+        };
+      }
+      {
+        where = scratch.path;
+        what = "tmpfs";
+        type = "tmpfs";
+        options = "mode=0755,x-mount.mkdir";
+        wantedBy = [ "initrd-switch-root.target" ];
+        before = [ "initrd-switch-root.target" ];
+        after = [ "sysroot.mount" ];
+        wants = [ "sysroot.mount" ];
+        unitConfig = {
+          ConditionPathExists = "!/dev/disk/by-label/scratch";
+          DefaultDependencies = false;
+        };
+      }
+    ];
+  */
 
-      unitConfig.DefaultDependencies = false;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-      path = [
-        pkgs.curl
-        pkgs.coreutils
-      ];
+  # Set up /scratch - either from partition labeled "scratch" or tmpfs fallback.
+  boot.initrd.systemd.services.setup-scratch = {
+    description = "Set up scratch space";
+    wantedBy = [ "initrd-switch-root.target" ];
+    before = [ "initrd-switch-root.target" ];
+    after = [ "sysroot.mount" ];
+    wants = [ "sysroot.mount" ];
 
-      script = ''
-        set -euxo pipefail
-        url=""
-        for param in $(cat /proc/cmdline); do
-          case "$param" in
-            store_url=*) url="''${param#store_url=}" ;;
-          esac
-        done
-        test -n "$url"
-
-        mkdir -p ${cacheDir}
-        if [ ! -s ${squashPath} ]; then
-          curl -fL "$url" -o ${squashPath}
-        fi
-      '';
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
     };
+    path = [
+      config.boot.initrd.systemd.package.util-linux
+      pkgs.coreutils
+      pkgs.e2fsprogs
+    ];
 
-  boot.kernelParams = [
-    "systemd.debug-shell=1"
-    "systemd.log_level=debug"
-    "boot.shell_on_fail=1"
-  ];
+    script = ''
+      set -euo pipefail
+
+      mkdir -p ${scratchInitrdPath}
+      scratch_dev=$(blkid -L scratch 2>/dev/null || true)
+
+      if [ -n "$scratch_dev" ]; then
+        mkfs.ext4 -F -L scratch "$scratch_dev"
+        mount "$scratch_dev" ${scratchInitrdPath}
+      else
+        echo "WARNING: No scratch partition - using tmpfs"
+        mount -t tmpfs -o mode=0755 tmpfs ${scratchInitrdPath}
+      fi
+
+      mkdir -p ${rwStoreInitrdPath}/store
+      mkdir -p ${rwStoreInitrdPath}/work
+    '';
+  };
+
+  boot.initrd.systemd.services.fetch-store-squashfs = {
+    description = "Fetch nix-store.squashfs";
+    wantedBy = [ "initrd-switch-root.target" ];
+    before = [ "initrd-switch-root.target" ];
+    after = [
+      "sysroot.mount"
+      "network-online.target"
+      "setup-scratch.service"
+    ];
+    wants = [
+      "sysroot.mount"
+      "network-online.target"
+      "setup-scratch.service"
+    ];
+
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    path = [
+      pkgs.curl
+      pkgs.coreutils
+    ];
+
+    script = ''
+      set -euo pipefail
+      url=""
+      for param in $(cat /proc/cmdline); do
+        case "$param" in
+          store_url=*) url="''${param#store_url=}" ;;
+        esac
+      done
+      test -n "$url"
+
+      # Parse Content-Length header using bash (no awk/grep in initrd)
+      download_size=""
+      while IFS=': ' read -r header value; do
+        case "$header" in
+          [Cc]ontent-[Ll]ength) download_size=$(echo "$value" | tr -d '\r') ;;
+        esac
+      done < <(curl -sfI "$url")
+      available=$(df -B1 --output=avail ${scratchInitrdPath} | tail -1 | tr -d ' ')
+
+      if [ -n "$download_size" ] && [ -n "$available" ]; then
+        download_mb=$((download_size / 1024 / 1024))
+        available_mb=$((available / 1024 / 1024))
+        echo "Downloading $download_mb MB ($available_mb MB available)"
+        if [ "$download_size" -gt "$available" ]; then
+          echo "WARNING: Download ($download_mb MB) exceeds available space ($available_mb MB)"
+        fi
+      fi
+
+      curl -fL "$url" -o ${squashfsInitrdPath}
+    '';
+  };
 
   boot.initrd.systemd = {
     emergencyAccess = true;
@@ -195,7 +285,12 @@
   );
   system.build.squashfsStore = pkgs.callPackage "${modulesPath}/../lib/make-squashfs.nix" {
     storeContents = [ config.system.build.toplevel ];
-    comp = "zstd -Xcompression-level 19";
+    comp = "zstd -Xcompression-level 22";
   };
 
+  boot.postBootCommands = ''
+    ${config.nix.package}/bin/nix-store --load-db < /nix/store/nix-path-registration
+    touch /etc/NIXOS
+    ${config.nix.package}/bin/nix-env -p /nix/var/nix/profiles/system --set /run/current-system
+  '';
 }

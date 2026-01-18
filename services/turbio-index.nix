@@ -13,7 +13,10 @@ let
 
   catchall404 = (
     pkgs.writeTextDir "404.txt" ''
-      zooweemama
+      404!
+      ====
+
+      hmh?
     ''
   );
 

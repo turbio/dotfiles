@@ -135,6 +135,7 @@ rec {
     wget
     git
     htop
+    btop
     busybox
     zsh
     fish

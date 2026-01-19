@@ -698,6 +698,10 @@ in
         name = "NixOS";
         options.path = pkgs.linkFarm "grafana-dashboards" [
           {
+            name = "node-exporter-full.json";
+            path = ./node_exporter_full.json;
+          }
+          {
             name = "nginx-logs.json";
             path = pkgs.writeText "nginx-logs.json" (
               builtins.toJSON {
@@ -981,7 +985,36 @@ in
         job_name = "nodexporter";
         scrape_interval = "30s";
         static_configs = [
-          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ]; }
+          {
+            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
+            labels = {
+              host = "ballos";
+            };
+          }
+          {
+            targets = [ "mote.lan:9100" ];
+            labels = {
+              host = "mote";
+            };
+          }
+          {
+            targets = [ "aackle:9100" ];
+            labels = {
+              host = "aackle";
+            };
+          }
+          {
+            targets = [ "backle:9100" ];
+            labels = {
+              host = "backle";
+            };
+          }
+          {
+            targets = [ "cackle:9100" ];
+            labels = {
+              host = "cackle";
+            };
+          }
         ];
       }
       {

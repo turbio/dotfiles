@@ -63,4 +63,11 @@
       8989 # sonarr
     ];
   };
+
+  services.prometheus.exporters.node = {
+    enable = true;
+    enabledCollectors = [ "systemd" ];
+    listenAddress = "0.0.0.0";
+    port = 9100;
+  };
 }

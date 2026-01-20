@@ -6,11 +6,6 @@
 
   boot.supportedFilesystems = [ "nfs" ];
 
-  services.cachefilesd = {
-    enable = true;
-    cacheDir = "/scratch/cachefilesd";
-  };
-
   fileSystems."/persist" = {
     device = "ballos.lan:/tank/enc/jellyfin";
     fsType = "nfs";
@@ -26,14 +21,6 @@
       "lookupcache=all"
       "actimeo=60"
     ];
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /scratch/jellycache 0755 jellyfin media -"
-  ];
-  fileSystems."/persist/jellyfin/cache" = {
-    device = "/scratch/jellycache";
-    options = [ "bind" ];
   };
 
   users.users.jellyfin = {

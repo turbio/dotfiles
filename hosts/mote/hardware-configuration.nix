@@ -5,13 +5,6 @@
   ...
 }:
 {
-  swapDevices = [
-    {
-      label = "swap";
-      options = [ "nofail" ];
-    }
-  ];
-
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ../../modules/netbootable_nfs.nix

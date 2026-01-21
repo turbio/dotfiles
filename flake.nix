@@ -13,6 +13,9 @@
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:rycee/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
     microvm = {
       url = "github:microvm-nix/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,6 +61,7 @@
     wrappers.url = "github:turbio/wrappers";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
+    raspberry-pi-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -77,6 +81,7 @@
       nixvim,
       wrappers,
       agenix,
+      nix-index-database,
       ...
     }@inputs:
     let
@@ -123,6 +128,7 @@
               age.secrets."rfc2136-xfer".owner = "named";
             }
             ++ [
+              nix-index-database.nixosModules.default
               agenix.nixosModules.default
               {
                 age.secrets.userpassword.file = ./secrets/userpassword.age;
@@ -146,7 +152,10 @@
             ]
             ++ (lib.optional (hostname != "balrog" && hostname != "backle" && hostname != "aackle") ./vim.nix)
             ++ extraModules
-            ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd);
+            ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd)
+            ++ (lib.optional (hostname == "mote") {
+              nixpkgs.config.contentAddressedByDefault = true;
+            });
 
           specialArgs = {
             inherit hostname;

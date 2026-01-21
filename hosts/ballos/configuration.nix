@@ -19,9 +19,25 @@ in
     (import ./acme-wildcard.nix { domain = "turbi.ooo"; })
     (import ./acme-wildcard.nix { domain = "masonclayton.com"; })
     (import ./acme-wildcard.nix { domain = "nice.meme"; })
-    (import ../../services/vibes.nix {
+    (import ../../services/vibes {
       mediaRoot = "/tank/enc/vibes";
       domain = "vibes.turb.io";
+      useACMEHost = "turb.io";
+    })
+    (import ../../services/vibes {
+      mediaRoot = "/tank/enc/vibes";
+      domain = "nice.meme";
+      pageTitle = "nice meme";
+      useACMEHost = "nice.meme";
+      extraHead = ''
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-6E4JY4KNSC');
+        </script>
+      '';
     })
   ];
 
@@ -111,24 +127,24 @@ in
     };
   };
 
-  services.nginx.virtualHosts."nice.meme" = {
-    http2 = true;
-    forceSSL = true;
-    useACMEHost = "nice.meme";
-    root = ./nice.meme;
-    extraConfig = ''
-      error_page 404 =200 /index.html;
-      charset utf-8;
-    '';
-    locations."/".extraConfig = ''
-      if ($is_llm) {
-        rewrite ^ /llm.html break;
-      }
-    '';
-    locations."= /llm.html".extraConfig = ''
-      internal;
-    '';
-  };
+  # services.nginx.virtualHosts."nice.meme" = {
+  #   http2 = true;
+  #   forceSSL = true;
+  #   useACMEHost = "nice.meme";
+  #   root = ./nice.meme;
+  #   extraConfig = ''
+  #     error_page 404 =200 /index.html;
+  #     charset utf-8;
+  #   '';
+  #   locations."/".extraConfig = ''
+  #     if ($is_txt) {
+  #       rewrite ^ /llm.html break;
+  #     }
+  #   '';
+  #   locations."= /llm.html".extraConfig = ''
+  #     internal;
+  #   '';
+  # };
   services.nginx.virtualHosts."*.nice.meme" = {
     forceSSL = true;
     useACMEHost = "nice.meme";
@@ -136,14 +152,6 @@ in
     extraConfig = ''
       error_page 404 =200 /index.html;
       charset utf-8;
-    '';
-    locations."/".extraConfig = ''
-      if ($is_llm) {
-        rewrite ^ /llm.html break;
-      }
-    '';
-    locations."= /llm.html".extraConfig = ''
-      internal;
     '';
   };
 
@@ -558,11 +566,6 @@ in
                         'rt=$request_time ';
       access_log syslog:server=unix:/dev/log vhosts;
       access_log /var/log/nginx/access.log vhosts;
-
-      map $http_user_agent $is_llm {
-        default 0;
-        ~*ChatGPT-User 1;
-      }
     '';
   };
 
@@ -1013,6 +1016,12 @@ in
             targets = [ "cackle:9100" ];
             labels = {
               host = "cackle";
+            };
+          }
+          {
+            targets = [ "zote.lan:9100" ];
+            labels = {
+              host = "zote";
             };
           }
         ];

@@ -69,7 +69,12 @@ in
   networking.useDHCP = true;
 
   boot.resumeDevice = lib.mkImageMediaOverride "";
-  swapDevices = lib.mkImageMediaOverride [ ];
+  swapDevices = [
+    {
+      label = "swap";
+      options = [ "nofail" ];
+    }
+  ];
 
   services.rpcbind.enable = true;
 
@@ -144,6 +149,15 @@ in
       };
     };
 
+    "/tmp" = {
+      device = "${scratchPath}/tmp";
+      fsType = "none";
+      options = [
+        "bind"
+        "x-systemd.requires=setup-scratch.service"
+      ];
+      neededForBoot = true;
+    };
   };
 
   /*
@@ -214,6 +228,7 @@ in
 
       mkdir -p ${rwStoreInitrdPath}/store
       mkdir -p ${rwStoreInitrdPath}/work
+      mkdir -p -m 1777 ${scratchInitrdPath}/tmp
     '';
   };
 

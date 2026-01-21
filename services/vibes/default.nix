@@ -1,14 +1,33 @@
-{ mediaRoot, domain }: { config, pkgs, lib, ... }:
+{
+  mediaRoot,
+  domain,
+  pageTitle ? "vibes",
+  useACMEHost ? domain,
+  extraHead ? "",
+}:
+{
+  pkgs,
+  ...
+}:
 let
   vibesbin = pkgs.buildGoModule {
     name = "vibes";
     version = "0.0.1";
-    src = ./vibes;
+    src = ./.;
     vendorHash = null;
     postPatch = ''
       go mod init vibes
     '';
   };
+
+  webroot = pkgs.linkFarm "vibes-webroot" [
+    {
+      name = "index.html";
+      path = pkgs.replaceVars ./webroot/index.html {
+        inherit pageTitle extraHead;
+      };
+    }
+  ];
 
   port = "3010";
 in
@@ -23,11 +42,11 @@ in
   };
 
   services.nginx.virtualHosts."${domain}" = {
-    forceSSL = true;
-    useACMEHost = "turb.io";
+    inherit useACMEHost;
+    forceSSL = useACMEHost != null;
 
     locations."/" = {
-      root = ./vibes/webroot;
+      root = webroot;
       index = "index.html";
     };
 

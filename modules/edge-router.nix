@@ -21,6 +21,18 @@
           oifname "tailscale0" masquerade
         }
       }
+
+      table ip6 vpn {
+        chain prerouting {
+          type nat hook prerouting priority -100;
+          iiftype ether tcp dport { 80, 443, 23 } dnat to fd7a:115c:a1e0::2233:392e
+        }
+
+        chain postrouting {
+          type nat hook postrouting priority 100;
+          oifname "tailscale0" masquerade
+        }
+      }
     '';
   };
 

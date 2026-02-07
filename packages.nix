@@ -172,8 +172,6 @@ rec {
     progress
     nixos-firewall-tool
 
-    comma
-
     shellcheck
   ];
 }

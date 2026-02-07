@@ -28,27 +28,29 @@ in
     '';
   };
 
-  services.nbd.server = {
-    enable = true;
-    exports = {
-      star-store = {
-        allowAddresses = [ "192.168.0.0/16" ];
-        path = "/mnt/sync/netboot/star-store";
-      };
-      star-persist = {
-        allowAddresses = [ "192.168.0.0/16" ];
-        path = "/mnt/sync/netboot/star-persist";
-      };
-      itoh-store = {
-        allowAddresses = [ "192.168.0.0/16" ];
-        path = "/mnt/sync/netboot/itoh-store";
-      };
-      itoh-persist = {
-        allowAddresses = [ "192.168.0.0/16" ];
-        path = "/mnt/sync/netboot/itoh-persist";
+  /*
+    services.nbd.server = {
+      enable = true;
+      exports = {
+        star-store = {
+          allowAddresses = [ "192.168.0.0/16" ];
+          path = "/mnt/sync/netboot/star-store";
+        };
+        star-persist = {
+          allowAddresses = [ "192.168.0.0/16" ];
+          path = "/mnt/sync/netboot/star-persist";
+        };
+        itoh-store = {
+          allowAddresses = [ "192.168.0.0/16" ];
+          path = "/mnt/sync/netboot/itoh-store";
+        };
+        itoh-persist = {
+          allowAddresses = [ "192.168.0.0/16" ];
+          path = "/mnt/sync/netboot/itoh-persist";
+        };
       };
     };
-  };
+  */
 
   users.groups.pixiectrl = { };
   users.users.pixiectrl = {

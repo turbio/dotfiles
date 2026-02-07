@@ -1,21 +1,32 @@
 ; gateway machines
-aackle.turb.io. 300 IN A 104.154.135.160
+aackle.turb.io. 300 IN A 35.209.100.97
+aackle.turb.io. 300 IN AAAA 2600:1900:4000:e9d7::
 backle.turb.io. 300 IN A 146.235.204.90
+backle.turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
 cackle.turb.io. 300 IN A 163.192.60.165
+cackle.turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 
-turb.io. 300 IN A 104.154.135.160
+turb.io. 300 IN A 35.209.100.97
 turb.io. 300 IN A 146.235.204.90
 turb.io. 300 IN A 163.192.60.165
-*.turb.io. 300 IN A 104.154.135.160
+turb.io. 300 IN AAAA 2600:1900:4000:e9d7::
+turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
+turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
+*.turb.io. 300 IN A 35.209.100.97
 *.turb.io. 300 IN A 146.235.204.90
 *.turb.io. 300 IN A 163.192.60.165
+*.turb.io. 300 IN AAAA 2600:1900:4000:e9d7::
+*.turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
+*.turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 
 ; ns
 turb.io. 21600 IN SOA ns1.turb.io. hostmaster.turb.io. 1 21600 3600 259200 300
 turb.io. 21600 IN NS ns1.turb.io.
 turb.io. 21600 IN NS ns2.turb.io.
-ns1.turb.io. 300 IN A 104.154.135.160
+ns1.turb.io. 300 IN A 35.209.100.97
+ns1.turb.io. 300 IN AAAA 2600:1900:4000:e9d7::
 ns2.turb.io. 300 IN A 146.235.204.90
+ns2.turb.io. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
 
 ; internal. TODO: don't
 *.int.turb.io. 300 IN A 100.100.57.46

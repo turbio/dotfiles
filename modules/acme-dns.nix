@@ -17,6 +17,7 @@ let
     "turbi.ooo"
     "masonclayton.com"
     "nice.meme"
+    "molters.xyz"
   ];
 in
 {

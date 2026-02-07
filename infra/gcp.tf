@@ -8,10 +8,15 @@ data "google_compute_network" "default" {
   project = var.gcp_project
 }
 
-data "google_compute_subnetwork" "default" {
-  name    = "default"
-  region  = "us-central1"
-  project = var.gcp_project
+# Manage the subnet to enable dual-stack IPv4/IPv6
+resource "google_compute_subnetwork" "default" {
+  name             = "default"
+  region           = "us-central1"
+  project          = var.gcp_project
+  network          = data.google_compute_network.default.self_link
+  ip_cidr_range    = "10.128.0.0/20"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "EXTERNAL"
 }
 
 # -----------------------------------------------------------------------------
@@ -36,10 +41,15 @@ resource "google_compute_instance" "aackle" {
 
   network_interface {
     network    = data.google_compute_network.default.self_link
-    subnetwork = data.google_compute_subnetwork.default.self_link
+    subnetwork = google_compute_subnetwork.default.self_link
+    stack_type = "IPV4_IPV6"
 
     access_config {
       network_tier = "STANDARD"
+    }
+
+    ipv6_access_config {
+      network_tier = "PREMIUM"
     }
   }
 
@@ -81,6 +91,19 @@ resource "google_compute_firewall" "allow_all" {
   }
 
   source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_firewall" "allow_all_v6" {
+  name     = "allow-all-v6"
+  network  = data.google_compute_network.default.self_link
+  project  = var.gcp_project
+  priority = 1
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = ["::/0"]
 }
 
 # Default rules (SSH, HTTP, HTTPS)
@@ -127,4 +150,8 @@ output "aackle_external_ip" {
 
 output "aackle_internal_ip" {
   value = google_compute_instance.aackle.network_interface[0].network_ip
+}
+
+output "aackle_ipv6" {
+  value = google_compute_instance.aackle.network_interface[0].ipv6_access_config[0].external_ipv6
 }

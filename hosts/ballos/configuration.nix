@@ -19,6 +19,7 @@ in
     (import ./acme-wildcard.nix { domain = "turbi.ooo"; })
     (import ./acme-wildcard.nix { domain = "masonclayton.com"; })
     (import ./acme-wildcard.nix { domain = "nice.meme"; })
+    (import ./acme-wildcard.nix { domain = "molters.xyz"; })
     (import ../../services/vibes {
       mediaRoot = "/tank/enc/vibes";
       domain = "vibes.turb.io";
@@ -103,6 +104,33 @@ in
       '';
     };
   };
+  services.nginx.virtualHosts."prow.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+      resolver 127.0.0.53;
+      set $u "http://mote.lan:9696";
+    '';
+    locations."/".proxyPass = "$u";
+  };
+  services.nginx.virtualHosts."rad.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+      resolver 127.0.0.53;
+      set $u "http://mote.lan:7878";
+    '';
+    locations."/".proxyPass = "$u";
+  };
+  services.nginx.virtualHosts."son.int.turb.io" = {
+    extraConfig = ''
+      allow ${internalIp};
+      deny all;
+      resolver 127.0.0.53;
+      set $u "http://mote.lan:8989";
+    '';
+    locations."/".proxyPass = "$u";
+  };
   services.nginx.virtualHosts."see.int.turb.io" = {
     extraConfig = ''
       allow ${internalIp};
@@ -171,6 +199,47 @@ in
     root = pkgs.writeTextDir "index.html" ''
       heyo
     '';
+  };
+
+  services.nginx.virtualHosts."molters.xyz" = {
+    forceSSL = true;
+    useACMEHost = "molters.xyz";
+    extraConfig = ''
+      resolver 127.0.0.53;
+      set $zote_url "http://zote.lan";
+    '';
+    locations."/" = {
+      extraConfig = ''
+        proxy_pass $zote_url;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+      '';
+    };
+  };
+  services.nginx.virtualHosts."*.molters.xyz" = {
+    forceSSL = true;
+    useACMEHost = "molters.xyz";
+    extraConfig = ''
+      resolver 127.0.0.53;
+      set $zote_url "http://zote.lan";
+    '';
+    locations."/" = {
+      extraConfig = ''
+        proxy_pass $zote_url;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+      '';
+    };
   };
 
   users.users.jellyfin = {
@@ -509,7 +578,7 @@ in
 
   networking.nftables = {
     enable = true;
-    ruleset = '''';
+    ruleset = "";
   };
 
   networking.firewall.allowedUDPPorts = [
@@ -535,6 +604,7 @@ in
   services.nginx = {
     defaultListenAddresses = [
       "100.100.57.46"
+      "[fd7a:115c:a1e0::2233:392e]"
     ];
 
     enable = true;

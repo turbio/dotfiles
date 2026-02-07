@@ -11,6 +11,7 @@ resource "oci_core_vcn" "main" {
   cidr_blocks    = ["10.0.0.0/16"]
   display_name   = "vcn-20220811-1636"
   dns_label      = "vcn08111642"
+  is_ipv6enabled = true
 }
 
 resource "oci_core_internet_gateway" "main" {
@@ -30,6 +31,12 @@ resource "oci_core_route_table" "main" {
     destination_type  = "CIDR_BLOCK"
     network_entity_id = oci_core_internet_gateway.main.id
   }
+
+  route_rules {
+    destination       = "::/0"
+    destination_type  = "CIDR_BLOCK"
+    network_entity_id = oci_core_internet_gateway.main.id
+  }
 }
 
 resource "oci_core_security_list" "main" {
@@ -37,7 +44,7 @@ resource "oci_core_security_list" "main" {
   vcn_id         = oci_core_vcn.main.id
   display_name   = "Default Security List for vcn-20220811-1636"
 
-  # Egress: Allow all outbound
+  # Egress: Allow all outbound (IPv4)
   egress_security_rules {
     destination      = "0.0.0.0/0"
     destination_type = "CIDR_BLOCK"
@@ -45,9 +52,25 @@ resource "oci_core_security_list" "main" {
     stateless        = false
   }
 
-  # Ingress: Allow all (matches current config)
+  # Egress: Allow all outbound (IPv6)
+  egress_security_rules {
+    destination      = "::/0"
+    destination_type = "CIDR_BLOCK"
+    protocol         = "all"
+    stateless        = false
+  }
+
+  # Ingress: Allow all (IPv4)
   ingress_security_rules {
     source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "all"
+    stateless   = false
+  }
+
+  # Ingress: Allow all (IPv6)
+  ingress_security_rules {
+    source      = "::/0"
     source_type = "CIDR_BLOCK"
     protocol    = "all"
     stateless   = false
@@ -129,12 +152,21 @@ resource "oci_core_security_list" "main" {
       type = 3
     }
   }
+
+  # ICMPv6 - Allow all (needed for IPv6 neighbor discovery, etc.)
+  ingress_security_rules {
+    source      = "::/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "58" # ICMPv6
+    stateless   = false
+  }
 }
 
 resource "oci_core_subnet" "main" {
   compartment_id             = var.oci_tenancy_ocid
   vcn_id                     = oci_core_vcn.main.id
   cidr_block                 = "10.0.0.0/24"
+  ipv6cidr_block             = cidrsubnet(oci_core_vcn.main.ipv6cidr_blocks[0], 8, 0)
   display_name               = "subnet-20251120-0141"
   dns_label                  = "subnet11200142"
   route_table_id             = oci_core_route_table.main.id
@@ -265,6 +297,29 @@ resource "oci_core_instance" "cackle" {
 }
 
 # -----------------------------------------------------------------------------
+# IPv6 addresses for existing instances
+# -----------------------------------------------------------------------------
+
+# Look up the VNIC attachments to get VNIC IDs
+data "oci_core_vnic_attachments" "backle" {
+  compartment_id = var.oci_tenancy_ocid
+  instance_id    = oci_core_instance.backle.id
+}
+
+data "oci_core_vnic_attachments" "cackle" {
+  compartment_id = var.oci_tenancy_ocid
+  instance_id    = oci_core_instance.cackle.id
+}
+
+resource "oci_core_ipv6" "backle" {
+  vnic_id = data.oci_core_vnic_attachments.backle.vnic_attachments[0].vnic_id
+}
+
+resource "oci_core_ipv6" "cackle" {
+  vnic_id = data.oci_core_vnic_attachments.cackle.vnic_attachments[0].vnic_id
+}
+
+# -----------------------------------------------------------------------------
 # Outputs
 # -----------------------------------------------------------------------------
 output "backle_public_ip" {
@@ -275,10 +330,18 @@ output "backle_private_ip" {
   value = oci_core_instance.backle.private_ip
 }
 
+output "backle_ipv6" {
+  value = oci_core_ipv6.backle.ip_address
+}
+
 output "cackle_public_ip" {
   value = oci_core_instance.cackle.public_ip
 }
 
 output "cackle_private_ip" {
   value = oci_core_instance.cackle.private_ip
+}
+
+output "cackle_ipv6" {
+  value = oci_core_ipv6.cackle.ip_address
 }

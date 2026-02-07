@@ -1,9 +1,15 @@
 turbi.ooo. 300 IN A 104.154.135.160
 turbi.ooo. 300 IN A 146.235.204.90
 turbi.ooo. 300 IN A 163.192.60.165
+turbi.ooo. 300 IN AAAA 2600:1900:4000:e9d7::
+turbi.ooo. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
+turbi.ooo. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 *.turbi.ooo. 300 IN A 104.154.135.160
 *.turbi.ooo. 300 IN A 146.235.204.90
 *.turbi.ooo. 300 IN A 163.192.60.165
+*.turbi.ooo. 300 IN AAAA 2600:1900:4000:e9d7::
+*.turbi.ooo. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
+*.turbi.ooo. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 
 ; ns
 turbi.ooo. 21600 IN SOA ns1.turb.io. hostmaster.turb.io. 2 21600 3600 259200 300

@@ -16,6 +16,10 @@ in
   services.bind = {
     enable = true;
 
+    extraOptions = ''
+      version none;
+    '';
+
     inherit zones;
   };
 }

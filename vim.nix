@@ -1,5 +1,10 @@
 # NixOS module for nixvim
-{ pkgs, repos, config, ... }:
+{
+  pkgs,
+  repos,
+  config,
+  ...
+}:
 let
   nixvimConfig = import ./vimconfig.nix {
     inherit pkgs repos;

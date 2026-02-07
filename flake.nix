@@ -154,7 +154,7 @@
             ++ extraModules
             ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd)
             ++ (lib.optional (hostname == "mote") {
-              nixpkgs.config.contentAddressedByDefault = true;
+              #nixpkgs.config.contentAddressedByDefault = true;
             });
 
           specialArgs = {
@@ -294,6 +294,21 @@
       #   '';
 
       pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
+
+      devShells.x86_64-linux.infra =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in
+        pkgs.mkShell {
+          packages = [
+            pkgs.google-cloud-sdk
+            pkgs.oci-cli
+            pkgs.opentofu
+          ];
+          shellHook = ''
+            echo "Infrastructure shell - gcloud, oci, tofu available"
+          '';
+        };
 
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     };

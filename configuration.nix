@@ -59,10 +59,12 @@ in
 
     #package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators auto-allocate-uids no-url-literals ca-derivations
+      experimental-features = nix-command flakes pipe-operators auto-allocate-uids no-url-literals
       builders-use-substitutes = true
     '';
   };
+
+  programs.nix-index-database.comma.enable = true;
 
   nixpkgs.config.allowUnfree = true; # welp
 
@@ -236,6 +238,7 @@ in
   # TODO(turbio):
   services.tailscale.enable = lib.mkIf (hostname != "zote") true;
   services.tailscale.useRoutingFeatures = "both";
+  networking.firewall.allowedUDPPorts = [ 48000 ]; # TODO: ts relay
   networking.nameservers = [
     "100.100.100.100"
     "8.8.8.8"

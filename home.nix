@@ -175,7 +175,6 @@ in
         _JAVA_AWT_WM_NONREPARENTING = "1";
       };
 
-      programs.nix-index.enable = true;
 
       programs.git = {
         lfs = {

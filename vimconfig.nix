@@ -1,6 +1,10 @@
 # Shared nixvim configuration
 # Used by both NixOS module (vim.nix) and standalone package (flake.nix)
-{ pkgs, repos, isDesktop ? false }:
+{
+  pkgs,
+  repos,
+  isDesktop ? false,
+}:
 let
   extraVimPlugins =
     with pkgs.vimPlugins;
@@ -21,7 +25,6 @@ in
 {
   extraPackages = with pkgs; [
     ripgrep
-    nixd
     nixfmt-rfc-style
   ];
 
@@ -40,8 +43,6 @@ in
 
     treesitter = {
       enable = true;
-      settings.highlight.enable = true;
-      grammarPackages = pkgs.vimPlugins.nvim-treesitter.passthru.allGrammars;
     };
 
     render-markdown.enable = true;
@@ -143,14 +144,27 @@ in
         };
         sources = [
           { name = "nvim_lsp"; }
-          { name = "minuet"; }
         ];
       };
     };
 
     neo-tree = {
       enable = true;
-      settings.window.width = 30;
+      settings = {
+        window = {
+          width = 30;
+          mappings = {
+            "/" = "none";
+          };
+        };
+        filesystem = {
+          window = {
+            mappings = {
+              "/" = "none";
+            };
+          };
+        };
+      };
     };
 
     lsp-lines.enable = true;
@@ -161,11 +175,11 @@ in
     clangd.enable = true;
     gopls.enable = true;
     rust_analyzer.enable = true;
-    nixd.enable = true;
     hls.enable = true;
     ts_ls.enable = true;
     bashls.enable = true;
     nushell.enable = true;
+    nixd.enable = true;
   };
 
   extraPlugins = extraVimPlugins;

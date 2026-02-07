@@ -77,6 +77,7 @@ window#waybar.chromium {
 #network,
 #bluetooth,
 #pulseaudio,
+#custom-claude,
 #custom-media,
 #custom-yubi,
 #custom-lock,
@@ -176,6 +177,19 @@ label:focus {
     background-color: #dc95f7;
     color: rgba(0, 0, 0, .6);
     min-width: 150px;
+}
+
+#custom-claude {
+    background-color: #da7756;
+    color: #f4f3ee;
+}
+
+#custom-claude.warning {
+    background-color: #c15f3c;
+}
+
+#custom-claude.critical {
+    background-color: #a33a1d;
 }
 
 #temperature {

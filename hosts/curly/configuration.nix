@@ -1,5 +1,22 @@
 { pkgs, ... }:
 {
+  services.cachefilesd = {
+    enable = true;
+  };
+
+  networking.hosts = {
+    "100.100.57.46" = [
+      "turb.io"
+      "nixcache.turb.io"
+      "int.turb.io"
+      "bt.int.turb.io"
+      "jelly.int.turb.io"
+      "ollama.int.turb.io"
+      "sync.int.turb.io"
+      "home.int.turb.io"
+    ];
+  };
+
   virtualisation.virtualbox.host.enable = true;
 
   systemd.network.wait-online.enable = false;
@@ -31,6 +48,10 @@
         enable = true;
         path = "~/Pictures/webcamlog";
       };
+      "photos" = {
+        enable = true;
+        path = "~/Pictures/photos";
+      };
     };
   };
 
@@ -38,17 +59,36 @@
 
   isDesktop = true;
 
-  fileSystems."/sync" = {
-    device = "ballos:/mnt/sync";
-    fsType = "nfs";
-    neededForBoot = false;
-    options = [
-      "rw"
-      "noatime"
-      "x-systemd.automount"
-      "x-systemd.mount-timeout=5s"
-    ];
-  };
+  fileSystems =
+    let
+      nfsopts = {
+        fsType = "nfs";
+        neededForBoot = false;
+        options = [
+          "rw"
+          "noatime"
+          "nofail"
+          "fsc"
+          "proto=tcp"
+          "noac"
+          "async"
+          "x-systemd.automount"
+          "x-systemd.mount-timeout=5s"
+          "x-systemd.idle-timeout=10m"
+        ];
+      };
+    in
+    {
+      "tank/sync" = nfsopts // {
+        device = "ballos:/mnt/sync";
+      };
+      "tank/photos" = nfsopts // {
+        device = "ballos:/tank/enc/photos";
+      };
+      "tank/backups" = nfsopts // {
+        device = "ballos:/tank/enc/backups";
+      };
+    };
 
   /*
     TODO

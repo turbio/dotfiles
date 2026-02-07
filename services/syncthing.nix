@@ -1,4 +1,4 @@
-{ lib, hostname, ... }:
+{ lib, ... }:
 {
   services.syncthing = {
     enable = lib.mkDefault false;
@@ -19,6 +19,7 @@
           devices = [
             "ballos"
             "gero"
+            "curly"
           ];
         };
         "code" = {

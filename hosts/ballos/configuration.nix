@@ -251,6 +251,16 @@ in
     gid = 994;
   };
 
+  users.users.molters = {
+    isSystemUser = true;
+    group = "molters";
+    uid = 1100;
+    home = "/tank/enc/molters";
+  };
+  users.groups.molters = {
+    gid = 1100;
+  };
+
   # container traffic -> internet
   # tbh we should quarantine this off to it's own interface
   networking.nat = {
@@ -471,6 +481,13 @@ in
     };
     "enc/ollama" = {
       properties.sync = "disabled";
+    };
+    "enc/molters" = {
+      properties.sync = "standard";
+      properties.sharenfs = "rw=@192.168.0.0/16,async,no_root_squash";
+      perms.owner = "molters";
+      perms.group = "molters";
+      perms.mode = "750";
     };
   };
 

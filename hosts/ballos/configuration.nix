@@ -63,6 +63,27 @@ in
       properties.sync = "standard";
       properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
+    "enc/git" = {
+      perms.owner = "git";
+      perms.group = "git";
+      perms.mode = "770";
+    };
+  };
+
+  users.users.git = {
+    isSystemUser = true;
+    group = "git";
+  };
+  users.groups.git = { };
+
+  services.cgit.default = {
+    group = "git";
+    enable = true;
+    scanPath = config.zfs.pools.tank.datasets."enc/git".mountpoint;
+    nginx.virtualHost = "git.turb.io";
+
+    gitHttpBackend.enable = true;
+    gitHttpBackend.checkExportOkFiles = false;
   };
 
   services.nginx.virtualHosts."jelly.turb.io" = {

@@ -37,6 +37,19 @@ body {
 	filter: brightness(1.5);
 }
 
+#skip {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	font-size: 3em;
+	cursor: pointer;
+	z-index: 10;
+}
+
+#skip:hover {
+	filter: brightness(1.5);
+}
+
 #pbtn {
 	font-size: 50vw;
 	display: none;
@@ -53,9 +66,10 @@ body {
 </head>
 <body>
 	<div id="c" class="crt">
-		<video class="screen" id="vid" autoplay></video>
+		<video class="screen" id="vid" autoplay playsinline></video>
 		<div class="overlay" id="name">AV-1</div>
 		<div id="pbtn">&blacktriangleright;</div>
+		<div id="skip">&raquo;</div>
 	</div>
 	<div id="cats">
 		<div class="cat" cat="bop">👍</div>
@@ -113,6 +127,8 @@ async function setcat(cat) {
 			}
 		});
 	});
+
+document.getElementById('skip').addEventListener('click', () => loadnext());
 
 async function loadnext() {
 	const r = await fetch("/c/next?cat="+cat);

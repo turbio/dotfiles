@@ -25,21 +25,21 @@ in
       domain = "vibes.turb.io";
       useACMEHost = "turb.io";
     })
-    (import ../../services/vibes {
-      mediaRoot = "/tank/enc/vibes";
-      domain = "nice.meme";
-      pageTitle = "nice meme";
-      useACMEHost = "nice.meme";
-      extraHead = ''
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-6E4JY4KNSC');
-        </script>
-      '';
-    })
+    # (import ../../services/vibes {
+    #   mediaRoot = "/tank/enc/vibes";
+    #   domain = "nice.meme";
+    #   pageTitle = "nice meme";
+    #   useACMEHost = "nice.meme";
+    #   extraHead = ''
+    #     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
+    #     <script>
+    #       window.dataLayer = window.dataLayer || [];
+    #       function gtag(){dataLayer.push(arguments);}
+    #       gtag('js', new Date());
+    #       gtag('config', 'G-6E4JY4KNSC');
+    #     </script>
+    #   '';
+    # })
   ];
 
   environment.enableAllTerminfo = true;
@@ -155,25 +155,26 @@ in
     };
   };
 
-  # services.nginx.virtualHosts."nice.meme" = {
-  #   http2 = true;
-  #   forceSSL = true;
-  #   useACMEHost = "nice.meme";
-  #   root = ./nice.meme;
-  #   extraConfig = ''
-  #     error_page 404 =200 /index.html;
-  #     charset utf-8;
-  #   '';
-  #   locations."/".extraConfig = ''
-  #     if ($is_txt) {
-  #       rewrite ^ /llm.html break;
-  #     }
-  #   '';
-  #   locations."= /llm.html".extraConfig = ''
-  #     internal;
-  #   '';
-  # };
+  services.nginx.virtualHosts."nice.meme" = {
+    http2 = true;
+    forceSSL = true;
+    useACMEHost = "nice.meme";
+    root = ./nice.meme;
+    extraConfig = ''
+      error_page 404 =200 /index.html;
+      charset utf-8;
+    '';
+
+    locations."/tessa" = {
+      root = "/nix/store/9pi7db2qa4a4zk7zrjq6907gi3lp5dlf-source";
+      extraConfig = ''
+        rewrite  ^/tessa/(.*) /$1 break;
+        autoindex on;
+      '';
+    };
+  };
   services.nginx.virtualHosts."*.nice.meme" = {
+    http2 = true;
     forceSSL = true;
     useACMEHost = "nice.meme";
     root = ./nice.meme;
@@ -506,7 +507,10 @@ in
     };
   };
 
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+    "armv7l-linux"
+  ];
 
   security.acme.acceptTerms = true;
 

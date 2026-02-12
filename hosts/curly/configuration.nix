@@ -1,5 +1,8 @@
 { pkgs, ... }:
 {
+  nix.settings.extra-platforms = [ "armv7l-linux" ];
+  boot.binfmt.emulatedSystems = [ "armv7l-linux" ];
+
   services.cachefilesd = {
     enable = true;
   };

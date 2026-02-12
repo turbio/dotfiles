@@ -80,6 +80,7 @@ in
     home = "/home/turbio";
     isNormalUser = true;
     extraGroups = [
+      "git"
       "wheel"
       "networkmanager"
       "audio"

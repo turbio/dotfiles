@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [
+    22
     80
     443
   ];
@@ -11,7 +12,7 @@
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iifname "enp0s6" tcp dport { 80, 443 } dnat to 100.100.57.46
+          iifname "enp0s6" tcp dport { 22, 80, 443 } dnat to 100.100.57.46
         }
 
         chain postrouting {

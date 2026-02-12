@@ -2,6 +2,7 @@
 {
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [
+    22
     80
     443
     23
@@ -13,7 +14,7 @@
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iiftype ether tcp dport { 80, 443, 23 } dnat to 100.100.57.46
+          iiftype ether tcp dport { 22, 80, 443, 23 } dnat to 100.100.57.46
         }
 
         chain postrouting {
@@ -25,7 +26,7 @@
       table ip6 vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iiftype ether tcp dport { 80, 443, 23 } dnat to fd7a:115c:a1e0::2233:392e
+          iiftype ether tcp dport { 22, 80, 443, 23 } dnat to fd7a:115c:a1e0::2233:392e
         }
 
         chain postrouting {

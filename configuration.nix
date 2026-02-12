@@ -22,6 +22,7 @@ in
   networking.hosts = {
     # TODO: ewww VPN FIXE THIS
     "100.100.57.46" = [
+      "nixcache.turb.io"
       "int.turb.io"
       "bt.int.turb.io"
       "jelly.int.turb.io"
@@ -47,9 +48,8 @@ in
       substituters = [
         "https://nix-community.cachix.org"
         "https://cache.nixos.org/"
-      ]
-
-      ++ lib.optional (hostname != "ballos" && hostname != "zote") "https://nixcache.turb.io";
+        "https://nixcache.turb.io"
+      ];
 
       trusted-public-keys = [
         "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" # TODO(turbio): key management

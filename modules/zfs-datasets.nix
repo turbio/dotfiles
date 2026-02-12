@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }:
 
@@ -97,9 +96,10 @@ let
 
   datasetModule =
     { poolName }:
-    { config, name, ... }:
+    { name, ... }@datasetArgs:
     let
       defaultMountpoint = "/${poolName}/${name}";
+      datasetModuleConfig = datasetArgs.config;
     in
     {
       options = {
@@ -115,6 +115,7 @@ let
         size = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           description = "Size for ZVOLs (only valid when type = \"volume\")";
+          default = null;
         };
 
         properties = lib.mkOption {
@@ -125,15 +126,8 @@ let
 
         mountpoint = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = if config.type == "filesystem" then defaultMountpoint else null;
+          default = if datasetModuleConfig.type == "filesystem" then defaultMountpoint else null;
           description = ''Mountpoint default to ("${defaultMountpoint}").'';
-        };
-
-        assertions = lib.mkOption {
-          type = lib.types.listOf lib.types.unspecified;
-          default = [ ];
-          visible = false;
-          internal = true;
         };
 
         perms.owner = lib.mkOption {
@@ -155,24 +149,6 @@ let
 
       # Enforce invariants
       config = {
-        assertions = [
-          {
-            assertion = !(config.properties ? mountpoint);
-            message = "mountpoint should be configured with zfs.<pool>.${name}.mountpoint instead.";
-          }
-          {
-            assertion = (config.type == "volume") || (config.size == null);
-            message = "zfs.<pool>.${name}.size is only allowed when type = \"volume\".";
-          }
-          {
-            assertion = (config.type != "volume") || (config.size != null);
-            message = "zfs.<pool>.${name}.size must be specified when type = \"volume\".";
-          }
-          {
-            assertion = (config.type == "filesystem") || (config.mountpoint == null);
-            message = "mountpoint is only meaningful for filesystem datasets.";
-          }
-        ];
       };
     };
 
@@ -233,6 +209,53 @@ in
   };
 
   config = {
+    assertions =
+      let
+        datasetAsserts = poolname: name: dataset: [
+          {
+            assertion = dataset.type == "volume" -> dataset.size != null;
+            message = "size must be set for volume datasets.";
+          }
+          {
+            assertion = dataset.type == "filesystem" -> dataset.size == null;
+            message = "size cannot be set for filesystem datasets.";
+          }
+          {
+            assertion = !dataset.properties ? mountpoint;
+            message = "mountpoint should be configured with zfs.${poolname}.${name}.mountpoint instead.";
+          }
+          {
+            assertion = dataset.type == "filesystem" -> dataset.mountpoint != null;
+            message = "mountpoint is only meaningful for filesystem datasets.";
+          }
+          {
+            assertion =
+              (dataset.perms ? owner && dataset.perms.owner != null)
+              -> (lib.hasAttr dataset.perms.owner config.users.users);
+            message = ''
+              user "${dataset.perms.owner}" in zfs.${poolname}.${name}.perms.owner must be an existing system user.
+              expected to find the user in users.users.<user>.
+            '';
+          }
+          {
+            assertion =
+              (dataset.perms ? group && dataset.perms.group != null)
+              -> (lib.hasAttr dataset.perms.group config.users.groups);
+            message = ''
+              group "${dataset.perms.group}" in zfs.${poolname}.${name}.perms.group must be an existing system group.
+              expected to find the group in users.groups.<group>.
+            '';
+          }
+        ];
+      in
+      cfg.pools
+      |> lib.mapAttrsToList (
+        pool: poolConfig:
+        (lib.mapAttrsToList (dataset: datasetConfig: datasetAsserts pool dataset datasetConfig))
+          poolConfig.datasets
+      )
+      |> lib.flatten;
+
     systemd.services = lib.mkMerge mkServices;
   };
 }

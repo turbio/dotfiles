@@ -89,6 +89,17 @@ in
 
     gitHttpBackend.enable = true;
     gitHttpBackend.checkExportOkFiles = false;
+
+    settings = {
+      logo = "";
+      root-title = "turbio git";
+      root-desc = "git repos";
+    };
+  };
+  services.nginx.virtualHosts."git.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+    http2 = true;
   };
 
   services.nginx.virtualHosts."jelly.turb.io" = {

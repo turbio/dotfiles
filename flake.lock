@@ -121,6 +121,24 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_4"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "flippyflops": {
       "flake": false,
       "locked": {
@@ -471,6 +489,27 @@
         "type": "github"
       }
     },
+    "redex": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771143689,
+        "narHash": "sha256-NO7VPUzADGVkk2hdy2pLGZwDrxBnv1TJ00JiPYkhaE0=",
+        "ref": "refs/heads/master",
+        "rev": "ab8d5cada88806dfad849257b848fadc9d17252b",
+        "revCount": 11,
+        "type": "git",
+        "url": "https://git.turb.io/redex"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.turb.io/redex"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -488,6 +527,7 @@
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "raspberry-pi-nix": "raspberry-pi-nix",
+        "redex": "redex",
         "schemeclub": "schemeclub",
         "wrappers": "wrappers",
         "zsh-history-substring-search": "zsh-history-substring-search",
@@ -677,6 +717,21 @@
       }
     },
     "systems_3": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_4": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

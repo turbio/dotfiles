@@ -70,6 +70,9 @@
 
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
+
+    redex.url = "git+https://git.turb.io/redex";
+    redex.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -82,6 +85,7 @@
       wrappers,
       agenix,
       nix-index-database,
+      redex,
       ...
     }@inputs:
     let
@@ -116,7 +120,8 @@
         nixpkgs.lib.nixosSystem {
           system = arch hostname;
           modules =
-            lib.optional (hostname == "ballos") {
+            lib.optional (hostname == "ballos") redex.nixosModules.default
+            ++ lib.optional (hostname == "ballos") {
               age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
               age.secrets."rfc2136-acme".owner = "acme";
             }

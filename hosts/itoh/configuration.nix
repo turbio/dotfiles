@@ -1,6 +1,7 @@
 { ... }:
 {
   isDesktop = true;
+  services.flatpak.enable = true;
 
   virtualisation.virtualbox.host.enable = true;
 

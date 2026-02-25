@@ -81,6 +81,11 @@ in
   };
   users.groups.git = { };
 
+  environment.etc.gitconfig.text = ''
+    [safe]
+      directory = *
+  '';
+
   services.cgit.default = {
     group = "git";
     enable = true;
@@ -192,6 +197,16 @@ in
     };
   };
 
+  services.redex = {
+    enable = false;
+    database = "/mnt/sync/datadumps/reddit/rel.db";
+  };
+  systemd.services.redex.serviceConfig = {
+    ProtectSystem = lib.mkForce false;
+    BindReadOnlyPaths = lib.mkForce [ ];
+    ReadOnlyPaths = lib.mkForce [ ];
+  };
+
   services.nginx.virtualHosts."nice.meme" = {
     http2 = true;
     forceSSL = true;
@@ -208,6 +223,13 @@ in
         rewrite  ^/tessa/(.*) /$1 break;
         autoindex on;
       '';
+    };
+
+    locations."/reddit/" = {
+      proxyPass = "http://127.0.0.1:8080/";
+    };
+    locations."= /reddit" = {
+      return = "302 /reddit/";
     };
   };
   services.nginx.virtualHosts."*.nice.meme" = {
@@ -516,6 +538,7 @@ in
     "enc/primary" = {
       properties.sync = "disabled";
       mountpoint = "/mnt/sync/";
+      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
     "enc/ollama" = {
       properties.sync = "disabled";

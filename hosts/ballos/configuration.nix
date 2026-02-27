@@ -6,6 +6,7 @@
 }:
 let
   internalIp = (import ../../assignments.nix).vpn.internal;
+  gitDir = config.zfs.pools.tank.datasets."enc/git".mountpoint;
 in
 {
   imports = [
@@ -66,20 +67,22 @@ in
     "enc/git" = {
       perms.owner = "git";
       perms.group = "git";
-      perms.mode = "770";
+      perms.mode = "750";
     };
   };
 
-  users.users.git = {
-    isSystemUser = true;
+  services.gitolite = {
+    enable = true;
+    user = "git";
     group = "git";
-    home = config.zfs.pools.tank.datasets."enc/git".mountpoint;
-    shell = "${pkgs.git}/bin/git-shell";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio" # TODO(turbio): key management
-    ];
+    dataDir = gitDir;
+    adminPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio"; # TODO(turbio): manage those keys
+    extraGitoliteRc = ''
+      $RC{UMASK} = 0027;
+      $RC{GIT_CONFIG_KEYS} = 'gitweb\..* cgit\..*';
+      push( @{$RC{ENABLE}}, 'cgit');
+    '';
   };
-  users.groups.git = { };
 
   environment.etc.gitconfig.text = ''
     [safe]
@@ -89,13 +92,17 @@ in
   services.cgit.default = {
     group = "git";
     enable = true;
-    scanPath = config.zfs.pools.tank.datasets."enc/git".mountpoint;
+    scanPath = "${gitDir}/repositories";
     nginx.virtualHost = "git.turb.io";
 
     gitHttpBackend.enable = true;
     gitHttpBackend.checkExportOkFiles = false;
 
     settings = {
+      project-list = "${gitDir}/projects.list";
+      enable-git-config = 1;
+      remove-suffix = 1;
+      enable-index-owner = 0;
       logo = "";
       root-title = "turbio git";
       root-desc = "git repos";

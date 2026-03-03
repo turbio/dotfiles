@@ -10,6 +10,8 @@
     ../../modules/netbootable_nfs.nix
   ];
 
+  netboot.macAddresses = [ "30:9c:23:9d:83:ec" "98:b7:85:23:b6:4d" ];
+
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];

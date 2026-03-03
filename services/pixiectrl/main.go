@@ -38,7 +38,7 @@ func bootReq(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	store := " store_url={{ URL \"file://"+*hosts+"/"+MAC+"/nix-store.squashfs\" }}"
+	store := " store_url={{ URL \"file://"+*hosts+"/"+MAC+"/nix-store.img\" }}"
 
 	resp := struct {
 		Kernel string   `json:"kernel"`

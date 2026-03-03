@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, netbootImages, ... }:
 let
   pixiectrl = pkgs.buildGoModule {
     pname = "pixiectrl";
@@ -70,7 +70,7 @@ in
       WorkingDirectory = "/var/lib/pixiectrl";
       RuntimeDirectory = "pixiectrl";
       RuntimeDirectoryMode = "0750";
-      ExecStart = "${pixiectrl}/bin/pixiectrl -port 4242 -addr 127.0.0.1 -hosts /mnt/sync/netboot/";
+      ExecStart = "${pixiectrl}/bin/pixiectrl -port 4242 -addr 127.0.0.1 -hosts ${netbootImages}";
     };
   };
 

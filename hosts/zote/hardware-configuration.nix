@@ -1,8 +1,12 @@
-{ modulesPath, ... }: {
+{ modulesPath, ... }:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ../../modules/netbootable_nfs.nix
   ];
+
+  netboot.macAddresses = [ "70:10:6f:aa:cd:d0" ];
+  netboot.storeImageFormat = "erofs";
 
   boot.initrd.availableKernelModules = [
     "ehci_pci"

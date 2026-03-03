@@ -2,7 +2,27 @@
 {
   networking.firewall.enable = false;
 
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  networking.hosts = {
+    # TODO: ewww VPN FIXE THIS
+    "192.168.86.114" = [
+      "nixcache.turb.io"
+      "int.turb.io"
+      "bt.int.turb.io"
+      "jelly.int.turb.io"
+      "ollama.int.turb.io"
+      "sync.int.turb.io"
+      "home.int.turb.io"
+    ];
+  };
+
+  nix.settings.system-features = [
+    "gccarch-armv7-a"
+  ];
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+    "armv7l-linux"
+    "i686-linux"
+  ];
 
   services.prometheus.exporters.node = {
     enable = true;
@@ -48,16 +68,21 @@
   # Lower unprivileged port start so nginx can bind port 80
   boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 80;
 
-  # signal-cli daemon
   systemd.services.signal-cli = {
     description = "signal-cli JSON-RPC daemon";
-    after = [ "network-online.target" "home-molters.mount" ];
-    wants = [ "network-online.target" "home-molters.mount" ];
+    after = [
+      "network-online.target"
+      "home-molters.mount"
+    ];
+    wants = [
+      "network-online.target"
+      "home-molters.mount"
+    ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       User = "molters";
       Group = "molters";
-      ExecStart = "${pkgs.signal-cli}/bin/signal-cli --config /home/molters/.local/share/signal-cli daemon --http --receive-mode=manual localhost:8080";
+      ExecStart = "${pkgs.signal-cli}/bin/signal-cli --config /home/molters/.local/share/signal-cli daemon --http --receive-mode=manual";
       Restart = "always";
       RestartSec = 5;
     };
@@ -73,7 +98,12 @@
       }
     '';
     virtualHosts."_" = {
-      listen = [{ addr = "0.0.0.0"; port = 80; }];
+      listen = [
+        {
+          addr = "0.0.0.0";
+          port = 80;
+        }
+      ];
       locations."/voice/" = {
         proxyPass = "http://127.0.0.1:3334";
         proxyWebsockets = true;
@@ -104,14 +134,35 @@
   # openclaw gateway (installed via npm in molters home)
   systemd.services.openclaw = {
     description = "OpenClaw Gateway";
-    after = [ "network-online.target" "home-molters.mount" "signal-cli.service" "xvfb.service" ];
-    wants = [ "network-online.target" "home-molters.mount" ];
-    requires = [ "signal-cli.service" "xvfb.service" ];
+    after = [
+      "network-online.target"
+      "home-molters.mount"
+      "signal-cli.service"
+      "xvfb.service"
+    ];
+    wants = [
+      "network-online.target"
+      "home-molters.mount"
+    ];
+    requires = [
+      "signal-cli.service"
+      "xvfb.service"
+    ];
     wantedBy = [ "multi-user.target" ];
     environment = {
       HOME = "/home/molters";
       DISPLAY = ":99";
-      PATH = lib.mkForce "/home/molters/.npm-global/bin:/home/molters/.nix-profile/bin:${lib.makeBinPath (with pkgs; [ claude-code chromium nodejs coreutils ])}:/run/current-system/sw/bin";
+      PATH = lib.mkForce "/home/molters/.npm-global/bin:/home/molters/.nix-profile/bin:${
+        lib.makeBinPath (
+          with pkgs;
+          [
+            claude-code
+            chromium
+            nodejs
+            coreutils
+          ]
+        )
+      }:/run/current-system/sw/bin";
     };
     serviceConfig = {
       User = "molters";

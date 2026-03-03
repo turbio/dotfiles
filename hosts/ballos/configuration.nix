@@ -574,9 +574,13 @@ in
     };
   };
 
+  nix.settings.system-features = [
+    "gccarch-armv7-a"
+  ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"
     "armv7l-linux"
+    "i686-linux"
   ];
 
   security.acme.acceptTerms = true;
@@ -693,6 +697,7 @@ in
     defaultListenAddresses = [
       "100.100.57.46"
       "[fd7a:115c:a1e0::2233:392e]"
+      "192.168.86.114"
     ];
 
     enable = true;

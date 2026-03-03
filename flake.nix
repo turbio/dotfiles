@@ -210,37 +210,16 @@
     rec {
       overlays.default = wrappersOverlay;
 
-      nixosConfigurations = mapEachHost <| mksystem [ ];
+      nixosConfigurations = (mapEachHost <| mksystem [ ]) // {
+        ballos = mksystem [ { _module.args.netbootImages = netbootImages; } ] "ballos";
+      };
 
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
 
       netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_nfs.nix ];
 
-      # Spits out the kernel and initrd for pxe booting a host.
       netbootableSystems = mapEachHost (
-        h:
-        let
-          output = netbootableConfigurations.${h}.config.system.build;
-        in
-        nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-${h}" {
-          bzImage = "${output.netbootKernel}/bzImage";
-          initrd = "${output.netbootRamdisk}/initrd";
-          cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
-          "nix-store.squashfs" = output.squashfsStore;
-        }
-      );
-
-      # Just the initrd (no squashfs) for quick iteration on boot scripts
-      netbootableInitrds = mapEachHost (
-        h:
-        let
-          output = netbootableConfigurations.${h}.config.system.build;
-        in
-        nixpkgs.legacyPackages.x86_64-linux.linkFarm "netbootable-initrd-${h}" {
-          bzImage = "${output.netbootKernel}/bzImage";
-          initrd = "${output.netbootRamdisk}/initrd";
-          cmdline = (nixpkgs.legacyPackages.x86_64-linux.writeText "cmdline" output.netbootCmdline);
-        }
+        h: netbootableConfigurations.${h}.config.system.build.netbootSystem
       );
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
@@ -297,6 +276,25 @@
       #     cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
       #       /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
       #   '';
+
+      netbootImages =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          allHosts = builtins.attrNames (builtins.readDir ./hosts);
+          pairs = builtins.concatMap (
+            hostname:
+            let
+              cfg = netbootableConfigurations.${hostname};
+              macs = cfg.config.netboot.macAddresses;
+              system = netbootableSystems.${hostname};
+            in
+            map (mac: {
+              name = mac;
+              path = system;
+            }) macs
+          ) allHosts;
+        in
+        pkgs.linkFarm "netboot-images" pairs;
 
       pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 

@@ -3,8 +3,16 @@
 def main [] {
   let creds_path = $"($env.HOME)/.claude/.credentials.json"
   let projects_dir = $"($env.HOME)/.claude/projects"
+  let pidfile = "/tmp/claude-waybar.pid"
   let poll_interval = 30sec
   let idle_timeout = 5min
+
+  # Kill previous instance to prevent accumulation on waybar reload
+  if ($pidfile | path exists) {
+    let old_pid = try { open $pidfile | str trim | into int } catch { 0 }
+    if $old_pid > 0 { try { kill $old_pid } }
+  }
+  $"($nu.pid)" | save -f $pidfile
 
   mut last_activity = date now
 

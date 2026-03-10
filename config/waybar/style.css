@@ -185,11 +185,11 @@ label:focus {
 }
 
 #custom-claude.warning {
-    background-color: #c15f3c;
+    /*background-color: #c15f3c;*/
 }
 
 #custom-claude.critical {
-    background-color: #a33a1d;
+    /*background-color: #a33a1d;*/
 }
 
 #temperature {

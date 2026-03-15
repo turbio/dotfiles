@@ -212,5 +212,16 @@ nnoremap <C-l> <C-w>l
 
 " lightline filename function (referenced in nixvim config)
 function! LightlineFilename()
-  return expand('%:t') !=# '' ? expand('%') : '[No Name]'
+  if expand('%:t') ==# ''
+    return '[No Name]'
+  endif
+  let l:root = finddir('.git', '.;')
+  if l:root !=# ''
+    let l:root = fnamemodify(l:root, ':h:p')
+    let l:full = expand('%:p')
+    if l:full[:len(l:root)-1] ==# l:root
+      return l:full[len(l:root):]
+    endif
+  endif
+  return expand('%')
 endfunction

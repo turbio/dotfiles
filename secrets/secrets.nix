@@ -6,6 +6,7 @@ let
   ballos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJWYDyDSh9zG0qFoJHMOM0W4QnXPsPZ7Z2D/QkdOQYIq";
   mote = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEIKavDGGzGemCCwZ0n06JlwW/hAPxLMbLTdrrm2hAKS";
   curly = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLLasBaQX/IdGPbnrD5TyPKHOBwaSnZNC9irMv16Bi1";
+  itoh = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMRyt+V0ZWL+ISnC7J/d07Sj8k8/yZn2pkFCDC16XTvA";
   all = [
     me
     aackle
@@ -14,6 +15,7 @@ let
     ballos
     mote
     curly
+    itoh
   ];
 in
 {

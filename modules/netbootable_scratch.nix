@@ -13,22 +13,26 @@ let
   rwStorePath = "${scratchPath}/rw-store";
 in
 {
-  options.netboot.macAddresses = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [ ];
-    description = "MAC addresses this host netboots from";
-  };
+  options.netboot = {
+    macAddresses = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "MAC addresses this host netboots from";
+    };
 
-  options.netboot.storeImageFormat = lib.mkOption {
-    type = lib.types.enum [ "squashfs" "erofs" ];
-    default = "squashfs";
-    description = "Filesystem format for the nix store image";
+    storeImageFormat = lib.mkOption {
+      type = lib.types.enum [
+        "squashfs"
+        "erofs"
+      ];
+      default = "squashfs";
+      description = "Filesystem format for the nix store image";
+    };
   };
 
   imports = [ (modulesPath + "/profiles/all-hardware.nix") ];
 
   config = {
-
     # Show journal on tty1 instead of login prompt for debugging
     services.journald.console = "/dev/tty1";
 
@@ -58,9 +62,7 @@ in
 
     hardware.enableRedistributableFirmware = true;
 
-    boot.initrd.kernelModules = [
-      "autofs4"
-    ];
+    boot.initrd.kernelModules = [ "autofs4" ];
 
     boot.initrd.systemd.enable = true;
 
@@ -107,7 +109,10 @@ in
       "/nix/.ro-store" = {
         device = storeImageInitrdPath;
         fsType = config.netboot.storeImageFormat;
-        options = [ "loop" "ro" ];
+        options = [
+          "loop"
+          "ro"
+        ];
         neededForBoot = true;
       };
 
@@ -248,6 +253,7 @@ in
     system.build.netbootCmdline = toString (
       [ "init=${config.system.build.toplevel}/init" ] ++ config.boot.kernelParams
     );
+
     system.build.squashfsStore = pkgs.callPackage "${modulesPath}/../lib/make-squashfs.nix" {
       storeContents = [ config.system.build.toplevel ];
       comp = "zstd";
@@ -257,18 +263,20 @@ in
       let
         closureInfo = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ]; };
       in
-      pkgs.runCommand "nix-store.erofs" {
-        __structuredAttrs = true;
-        nativeBuildInputs = [ pkgs.erofs-utils ];
-        unsafeDiscardReferences.out = true;
-      } ''
-        mkdir root
-        cp ${closureInfo}/registration root/nix-path-registration
-        while IFS= read -r path; do
-          cp -a "$path" root/
-        done < ${closureInfo}/store-paths
-        mkfs.erofs -z lz4hc -T 0 --all-root --workers=$NIX_BUILD_CORES $out root
-      '';
+      pkgs.runCommand "nix-store.erofs"
+        {
+          __structuredAttrs = true;
+          nativeBuildInputs = [ pkgs.erofs-utils ];
+          unsafeDiscardReferences.out = true;
+        }
+        ''
+          mkdir root
+          cp ${closureInfo}/registration root/nix-path-registration
+          while IFS= read -r path; do
+            cp -a "$path" root/
+          done < ${closureInfo}/store-paths
+          mkfs.erofs -z lz4hc -T 0 --all-root --workers=$NIX_BUILD_CORES $out root
+        '';
 
     system.build.netbootSystem =
       let

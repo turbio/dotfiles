@@ -1,14 +1,10 @@
-molters.xyz. 300 IN A 35.209.100.97
 molters.xyz. 300 IN A 146.235.204.90
 molters.xyz. 300 IN A 163.192.60.165
-molters.xyz. 300 IN AAAA 2600:1900:4000:e9d7::
 molters.xyz. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
 molters.xyz. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 
-*.molters.xyz. 300 IN A 35.209.100.97
 *.molters.xyz. 300 IN A 146.235.204.90
 *.molters.xyz. 300 IN A 163.192.60.165
-*.molters.xyz. 300 IN AAAA 2600:1900:4000:e9d7::
 *.molters.xyz. 300 IN AAAA 2603:c024:c018:6b00:0:8870:dbc4:5495
 *.molters.xyz. 300 IN AAAA 2603:c024:c018:6b00:0:54b7:d0b:9783
 

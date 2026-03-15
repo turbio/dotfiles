@@ -216,7 +216,7 @@
 
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
 
-      netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_nfs.nix ];
+      netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_scratch.nix ];
 
       netbootableSystems = mapEachHost (
         h: netbootableConfigurations.${h}.config.system.build.netbootSystem

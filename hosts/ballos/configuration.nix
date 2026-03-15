@@ -43,6 +43,12 @@ in
     # })
   ];
 
+  users.users.turbio = {
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPaSIYZYHcTVrctash3bTrayw2D4psofDHsbGZH3BxLP iphone" # TODO(turbio): key management
+    ];
+  };
+
   environment.enableAllTerminfo = true;
 
   zfs.pools.tank.datasets = {
@@ -106,6 +112,7 @@ in
       logo = "";
       root-title = "turbio git";
       root-desc = "git repos";
+      clone-url = "https://git.turb.io/$CGIT_REPO_URL git@git.turb.io:$CGIT_REPO_URL";
     };
   };
   services.nginx.virtualHosts."git.turb.io" = {

@@ -2,7 +2,7 @@
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
-    ../../modules/netbootable_nfs.nix
+    ../../modules/netbootable_scratch.nix
   ];
 
   netboot.macAddresses = [ "70:10:6f:aa:cd:d0" ];

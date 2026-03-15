@@ -46,9 +46,6 @@ in
       settings.highlight.enable = true;
     };
 
-    render-markdown.enable = true;
-    render-markdown.autoLoad = true;
-
     nui.enable = true;
 
     fzf-lua = {

@@ -11,6 +11,8 @@
 
   isDesktop = true;
 
+  users.users.root.password = "root";
+
   # clobber it right over your disk:
   # $ sudo nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
   disko.devices.disk.main = {

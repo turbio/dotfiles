@@ -97,7 +97,7 @@ in
     ];
     uid = 1000;
 
-    hashedPasswordFile = config.age.secrets.userpassword.path;
+    hashedPasswordFile = lib.mkIf (hostname != "zote") config.age.secrets.userpassword.path;
 
     shell = pkgs.zsh;
     #shell = pkgs.fish;

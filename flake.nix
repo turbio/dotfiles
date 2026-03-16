@@ -132,12 +132,13 @@
               age.secrets."rfc2136-xfer".file = ./secrets/rfc2136-xfer.age;
               age.secrets."rfc2136-xfer".owner = "named";
             }
+
+            ++ lib.optional (hostname != "zote") {
+              age.secrets.userpassword.file = ./secrets/userpassword.age;
+            }
             ++ [
               nix-index-database.nixosModules.default
               agenix.nixosModules.default
-              {
-                age.secrets.userpassword.file = ./secrets/userpassword.age;
-              }
               #./modules/wg-vpn.nix
               ./configuration.nix
               ./desktop.nix

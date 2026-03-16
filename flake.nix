@@ -199,13 +199,6 @@
           value = fn c;
         })
         |> builtins.listToAttrs;
-
-      suffix =
-        fix: attrs:
-        nixpkgs.lib.attrsets.mapAttrs' (n: v: {
-          name = "${n}-${fix}";
-          value = v;
-        }) attrs;
     in
     rec {
       overlays.default = wrappersOverlay;
@@ -224,20 +217,7 @@
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
       packages.x86_64-linux =
-        (
-          mapEachHost (mksystem [
-            (
-              { ... }:
-              {
-                disko.devices.disk.main.imageSize = "60G"; # should be enough right
-              }
-            )
-          ])
-          |> nixpkgs.lib.filterAttrs (n: sys: n == "curly")
-          |> nixpkgs.lib.filterAttrs (n: sys: sys.config.disko.devices.disk != { })
-          |> nixpkgs.lib.mapAttrs (n: sys: sys.config.system.build.diskoImagesScript)
-          |> suffix "disko-image-script"
-        )
+        { }
         // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
         // {
           devvm = import ./devvm.nix {
@@ -263,19 +243,6 @@
               };
             };
         };
-
-      # activate-uki.ballos =
-      #   let
-      #     system = (mksystem repartImageModule "ballos");
-      #     pkgs = system.pkgs;
-      #     config = system.config;
-      #   in
-      #   nixpkgs.legacyPackages.x86_64-linux.writeScript "activate-uki" ''
-      #     cp ${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${pkgs.stdenv.hostPlatform.efiArch}.efi \
-      #       /boot/EFI/BOOT/BOOT${system.lib.toUpper pkgs.stdenv.hostPlatform.efiArch}.EFI
-      #     cp ${config.system.build.uki}/${config.system.boot.loader.ukiFile} \
-      #       /boot/EFI/Linux/${config.system.boot.loader.ukiFile}
-      #   '';
 
       netbootImages =
         let

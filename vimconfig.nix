@@ -58,9 +58,8 @@ in
 
     openscad.enable = isDesktop;
 
-    lightline = {
+    lualine = {
       enable = true;
-      settings.component_function.filename = "LightlineFilename";
     };
 
     fugitive.enable = true;

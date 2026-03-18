@@ -34,7 +34,13 @@
 
   virtualisation.virtualbox.host.enable = true;
 
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  nix.settings.system-features = [
+    "gccarch-armv7-a"
+  ];
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+    "armv7l-linux"
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

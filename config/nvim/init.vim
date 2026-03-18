@@ -210,4 +210,90 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-lua require('lualine').setup { sections = { lualine_c = { { 'filename', path = 1 } } } }
+lua << LUALINE
+-- lightline default (powerline) palette, exact hex values from source
+local c = {
+  darkestgreen  = '#005f00',
+  brightgreen   = '#afdf00',
+  darkestcyan   = '#005f5f',
+  mediumcyan    = '#87dfff',
+  darkestblue   = '#005f87',
+  darkblue      = '#0087af',
+  darkred       = '#870000',
+  brightred     = '#df0000',
+  brightorange  = '#ff8700',
+  white         = '#ffffff',
+  gray0         = '#121212',
+  gray1         = '#262626',
+  gray2         = '#303030',
+  gray3         = '#4e4e4e',
+  gray4         = '#585858',
+  gray5         = '#606060',
+  gray7         = '#8a8a8a',
+  gray8         = '#9e9e9e',
+  gray9         = '#bcbcbc',
+  gray10        = '#d0d0d0',
+}
+
+local function make_theme(modified)
+  -- when modified, shift grey backgrounds lighter
+  local bg_b = modified and c.gray7  or c.gray4   -- b section bg
+  local bg_c = modified and c.gray4  or c.gray2   -- c section (middle) bg
+  local fg_b = modified and c.gray1  or c.white
+  local fg_c = modified and c.gray1  or c.gray7
+
+  return {
+    normal = {
+      a = { fg = c.darkestgreen, bg = c.brightgreen, gui = 'bold' },
+      b = { fg = fg_b, bg = bg_b },
+      c = { fg = fg_c, bg = bg_c },
+    },
+    insert = {
+      a = { fg = c.darkestcyan, bg = c.white, gui = 'bold' },
+      b = { fg = modified and c.gray1 or c.white, bg = modified and c.gray7 or c.darkblue },
+      c = { fg = modified and c.gray1 or c.mediumcyan, bg = modified and c.gray4 or c.darkestblue },
+    },
+    visual = {
+      a = { fg = c.darkred, bg = c.brightorange, gui = 'bold' },
+      b = { fg = fg_b, bg = bg_b },
+      c = { fg = fg_c, bg = bg_c },
+    },
+    replace = {
+      a = { fg = c.white, bg = c.brightred, gui = 'bold' },
+      b = { fg = fg_b, bg = bg_b },
+      c = { fg = fg_c, bg = bg_c },
+    },
+    command = {
+      a = { fg = c.darkestgreen, bg = c.brightgreen, gui = 'bold' },
+      b = { fg = fg_b, bg = bg_b },
+      c = { fg = fg_c, bg = bg_c },
+    },
+    inactive = {
+      a = { fg = c.gray4, bg = c.gray1 },
+      b = { fg = c.gray4, bg = c.gray1 },
+      c = { fg = c.gray4, bg = c.gray0 },
+    },
+  }
+end
+
+local lualine_opts = {
+  options = {
+    theme = make_theme(false),
+    section_separators = { left = '', right = '' },
+    component_separators = { left = '|', right = '|' },
+  },
+  sections = {
+    lualine_c = { { 'filename', path = 1 } },
+  },
+}
+
+require('lualine').setup(lualine_opts)
+
+vim.api.nvim_create_autocmd({ 'BufModifiedSet', 'BufWritePost', 'TextChanged', 'TextChangedI' }, {
+  callback = function()
+    local mod = vim.bo.modified
+    lualine_opts.options.theme = make_theme(mod)
+    require('lualine').setup(lualine_opts)
+  end,
+})
+LUALINE

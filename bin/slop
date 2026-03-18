@@ -1,0 +1,31 @@
+#!/usr/bin/env nu
+
+def main [question: string] {
+  let key = ($env | get -o ANTHROPIC_API_KEY | default "")
+  if $key == "" {
+    print -e "Error: ANTHROPIC_API_KEY not set"
+    exit 1
+  }
+
+  let payload = {
+    model: "claude-haiku-4-5",
+    max_tokens: 256,
+    system: "Reply with only the command. Nothing else. No markdown, no code fences, no explanation.",
+    messages: [{role: "user", content: $question}]
+  }
+
+  let response = (
+    http post
+      --content-type application/json
+      --headers {x-api-key: $key, anthropic-version: "2023-06-01"}
+      https://api.anthropic.com/v1/messages
+      $payload
+  )
+
+  if ($response | get -o error.message | default "" | str trim) != "" {
+    print -e $"Error: ($response.error.message)"
+    exit 1
+  }
+
+  $response.content.0.text
+}

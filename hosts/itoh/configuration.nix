@@ -1,5 +1,17 @@
 { ... }:
 {
+  # nixpkgs.buildPlatform = {
+  #   gcc.arch = "arrowlake-s";
+  #   gcc.tune = "arrowlake-s";
+  #   system = "x86_64-linux";
+  # };
+
+  nixpkgs.hostPlatform = {
+    gcc.arch = "arrowlake-s";
+    gcc.tune = "arrowlake-s";
+    system = "x86_64-linux";
+  };
+
   hardware.keyboard.zsa.enable = true;
   services.udev.extraRules = ''
     # Rules for Oryx web flashing and live training
@@ -36,6 +48,7 @@
 
   nix.settings.system-features = [
     "gccarch-armv7-a"
+    "gccarch-arrowlake-s"
   ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"

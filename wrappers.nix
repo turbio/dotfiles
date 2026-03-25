@@ -1,4 +1,4 @@
- { pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 {
   ghostty = {
     settings = {
@@ -92,7 +92,7 @@
       background = "0x272822";
       foreground = "0xffffff";
     };
-    font.size = 7;
+    font.size = 18;
     font.bold = {
       family = "Terminus";
       style = "Bold";

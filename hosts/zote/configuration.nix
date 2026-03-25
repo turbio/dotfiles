@@ -17,6 +17,7 @@
 
   nix.settings.system-features = [
     "gccarch-armv7-a"
+    "gccarch-arrowlake-s"
   ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"
@@ -45,7 +46,7 @@
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio@iphone"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN68b5ceMxx7powPlkG2KmlCsEjHSnkBi2y3zey4vbi4 turbio@tivni"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDzhnFHxsljrsOEKIJCMwJv6SIUwjhxcf6YUJuyVp5kB turbio@tivni"
     ];
   };
   users.groups.molters = {

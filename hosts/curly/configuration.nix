@@ -111,9 +111,6 @@
       };
     in
     {
-      "tank/sync" = nfsopts // {
-        device = "ballos:/mnt/sync";
-      };
       "tank/photos" = nfsopts // {
         device = "ballos:/tank/enc/photos";
       };

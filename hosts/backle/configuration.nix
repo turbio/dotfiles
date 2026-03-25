@@ -5,6 +5,9 @@
     ../../modules/edge-router.nix
   ];
 
+  nix.settings.system-features = [ "gccarch-armv7-a" ];
+  nix.settings.extra-platforms = [ "armv7l-linux" ];
+
   services.prometheus.exporters.node = {
     enable = true;
     enabledCollectors = [ "systemd" ];

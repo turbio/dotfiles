@@ -133,7 +133,7 @@
               age.secrets."rfc2136-xfer".owner = "named";
             }
 
-            ++ lib.optional (hostname != "zote") {
+            ++ lib.optional (hostname != "zote" && hostname != "j1" && hostname != "j2") {
               age.secrets.userpassword.file = ./secrets/userpassword.age;
             }
             ++ [

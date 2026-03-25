@@ -57,15 +57,6 @@
   users.users.turbio.extraGroups = [ "plugdev" ];
   environment.systemPackages = with pkgs; [ rtl-sdr ];
 
-  fileSystems."/sync" = {
-    device = "ballos:/mnt/sync";
-    fsType = "nfs";
-    options = [
-      "rw"
-      "noatime"
-    ];
-  };
-
   boot.kernelParams = [
     #"quiet" "udev.log_level=0"
   ];

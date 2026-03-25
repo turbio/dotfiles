@@ -211,16 +211,6 @@ in
     };
   };
 
-  services.redex = {
-    enable = false;
-    database = "/mnt/sync/datadumps/reddit/rel.db";
-  };
-  systemd.services.redex.serviceConfig = {
-    ProtectSystem = lib.mkForce false;
-    BindReadOnlyPaths = lib.mkForce [ ];
-    ReadOnlyPaths = lib.mkForce [ ];
-  };
-
   services.nginx.virtualHosts."nice.meme" = {
     http2 = true;
     forceSSL = true;
@@ -549,9 +539,8 @@ in
   };
 
   zfs.pools.tank.datasets = {
-    "enc/primary" = {
+    "enc/misc" = {
       properties.sync = "disabled";
-      mountpoint = "/mnt/sync/";
       properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
     "enc/ollama" = {
@@ -583,6 +572,7 @@ in
 
   nix.settings.system-features = [
     "gccarch-armv7-a"
+    "gccarch-arrowlake-s"
   ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"
@@ -664,7 +654,15 @@ in
   services.sanoid = {
     enable = true;
     datasets = {
-      "tank/enc/primary" = {
+      "tank/enc/misc" = {
+        hourly = 24;
+        daily = 30;
+        monthly = 12;
+
+        autosnap = true;
+        autoprune = true;
+      };
+      "tank/enc/code" = {
         hourly = 24;
         daily = 30;
         monthly = 12;
@@ -694,10 +692,6 @@ in
   ];
   services.nfs.server = {
     enable = true;
-    exports = ''
-      /mnt/sync 192.168.0.0/16(rw)
-      /mnt/sync 100.100.0.0/16(rw)
-    '';
   };
 
   services.nginx = {
@@ -787,6 +781,7 @@ in
   services.nginx.virtualHosts."sync.int.turb.io" = {
     extraConfig = ''
       allow ${internalIp};
+      allow 192.168.0.0/16;
       deny all;
     '';
     locations."/" = {
@@ -815,8 +810,8 @@ in
   services.syncthing = {
     enable = true;
 
-    configDir = "/mnt/sync/config";
-    dataDir = "/mnt/sync";
+    configDir = "/tank/enc/misc/config";
+    dataDir = "/tank/enc/misc";
     settings.folders = {
       "photos" = {
         enable = true;
@@ -824,19 +819,19 @@ in
       };
       "code" = {
         enable = true;
-        path = "/mnt/sync/code";
+        path = "/tank/enc/code";
       };
       "notes" = {
         enable = true;
-        path = "/mnt/sync/notes";
+        path = "/tank/enc/misc/notes";
       };
       "ios_photos" = {
         enable = true;
-        path = "/mnt/sync/ios_photos";
+        path = "/tank/enc/misc/ios_photos";
       };
       "clips" = {
         enable = true;
-        path = "/mnt/sync/clips";
+        path = "/tank/enc/misc/clips";
       };
       "webcamlog" = {
         enable = true;

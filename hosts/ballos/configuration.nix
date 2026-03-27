@@ -572,7 +572,6 @@ in
 
   nix.settings.system-features = [
     "gccarch-armv7-a"
-    "gccarch-arrowlake-s"
   ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"
@@ -1187,6 +1186,18 @@ in
             targets = [ "zote.lan:9100" ];
             labels = {
               host = "zote";
+            };
+          }
+          {
+            targets = [ "j1.lan:9100" ];
+            labels = {
+              host = "j1";
+            };
+          }
+          {
+            targets = [ "j2.lan:9100" ];
+            labels = {
+              host = "j2";
             };
           }
         ];

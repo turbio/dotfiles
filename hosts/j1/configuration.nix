@@ -17,7 +17,6 @@
 
   nix.settings.system-features = [
     "gccarch-armv7-a"
-    "gccarch-arrowlake-s"
   ];
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"

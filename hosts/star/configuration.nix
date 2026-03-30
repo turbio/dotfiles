@@ -1,10 +1,9 @@
-{ ... }:
+{ lib, ... }:
 {
   isDesktop = true;
 
-  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  networking.useDHCP = lib.mkForce true;
 
-  networking.interfaces.enp0s25.useDHCP = true;
-  networking.interfaces.wlp3s0.useDHCP = true;
+  netboot.formatFirstAvailableDisk = true;
 }

@@ -28,6 +28,12 @@ in
       default = "squashfs";
       description = "Filesystem format for the nix store image";
     };
+
+    formatFirstAvailableDisk = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "automatically partition and format the first available local disk for scratch";
+    };
   };
 
   imports = [ (modulesPath + "/profiles/all-hardware.nix") ];
@@ -142,6 +148,132 @@ in
       };
     };
 
+    boot.initrd.systemd.services.format-scratch-disk =
+      lib.mkIf config.netboot.formatFirstAvailableDisk
+        {
+          description = "Format first available disk for scratch";
+          wantedBy = [ "setup-scratch.service" ];
+          before = [ "setup-scratch.service" ];
+          after = [
+            "sysroot.mount"
+            "network-online.target"
+          ];
+          wants = [ "network-online.target" ];
+
+          unitConfig.DefaultDependencies = false;
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          path = [
+            config.boot.initrd.systemd.package.util-linux
+            config.boot.initrd.systemd.package
+            pkgs.e2fsprogs
+            pkgs.curl
+            pkgs.coreutils
+          ];
+
+          script = ''
+            set -euo pipefail
+
+            # Total RAM in bytes
+            mem_bytes=0
+            while read -r key value rest; do
+              case "$key" in
+                MemTotal:) mem_bytes=$((value * 1024)); break ;;
+              esac
+            done < /proc/meminfo
+
+            # Store image size via HEAD request
+            store_bytes=0
+            store_url=""
+            for param in $(cat /proc/cmdline); do
+              case "$param" in
+                store_url=*) store_url="''${param#store_url=}" ;;
+              esac
+            done
+            if [ -n "''${store_url:-}" ]; then
+              while IFS=': ' read -r header value; do
+                case "$header" in
+                  [Cc]ontent-[Ll]ength) store_bytes=$(echo "$value" | tr -d '\r') ;;
+                esac
+              done < <(curl -sfI "$store_url")
+            fi
+
+            # Minimum disk size: swap (=RAM) + store image + 1GB headroom
+            extra=$((1024 * 1024 * 1024))
+            min_bytes=$((mem_bytes + store_bytes + extra))
+            echo "Need ''${min_bytes} bytes (swap=''${mem_bytes} store=''${store_bytes} extra=''${extra})"
+
+            # Find first suitable disk
+            target=""
+            while read -r dname dtype; do
+              [ "$dtype" = "disk" ] || continue
+
+              # Skip disks with an iPXE-labeled partition
+              skip=false
+              while IFS= read -r label; do
+                if [ "$label" = "iPXE" ]; then
+                  skip=true
+                  break
+                fi
+              done < <(lsblk -nro LABEL "$dname" 2>/dev/null)
+              if $skip; then
+                echo "Skipping $dname (iPXE)"
+                continue
+              fi
+
+              # Skip disks with any mounted partition
+              while IFS= read -r mp; do
+                if [ -n "$mp" ]; then
+                  skip=true
+                  break
+                fi
+              done < <(lsblk -nro MOUNTPOINT "$dname" 2>/dev/null)
+              if $skip; then
+                echo "Skipping $dname (mounted)"
+                continue
+              fi
+
+              # Check size
+              disk_bytes=$(lsblk -dnbo SIZE "$dname")
+              if [ "$disk_bytes" -lt "$min_bytes" ]; then
+                echo "Skipping $dname (too small: ''${disk_bytes} < ''${min_bytes})"
+                continue
+              fi
+
+              target="$dname"
+              echo "Selected $dname (''${disk_bytes} bytes)"
+              break
+            done < <(lsblk -dpno NAME,TYPE)
+
+            if [ -z "$target" ]; then
+              echo "ERROR: no suitable disk found"
+              exit 1
+            fi
+
+            # Partition: swap (RAM-sized) + scratch (rest of disk)
+            swap_sectors=$((mem_bytes / 512))
+            sfdisk --wipe always --force "$target" <<SFDISK
+            label: gpt
+            size=$swap_sectors, type=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F
+            type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
+            SFDISK
+
+            udevadm settle
+
+            # First partition = swap, second = scratch
+            readarray -t parts < <(lsblk -lnpo NAME "$target" | tail -n +2)
+            swap_dev="''${parts[0]}"
+            scratch_dev="''${parts[1]}"
+
+            mkswap -L swap "$swap_dev"
+            mkfs.ext4 -F -L scratch "$scratch_dev"
+
+            echo "Done: swap=$swap_dev scratch=$scratch_dev"
+          '';
+        };
+
     # Set up /scratch - either from partition labeled "scratch" or tmpfs fallback.
     boot.initrd.systemd.services.setup-scratch = {
       description = "Set up scratch space";
@@ -210,6 +342,7 @@ in
       path = [
         pkgs.curl
         pkgs.coreutils
+        pkgs.util-linux
       ];
 
       script = ''
@@ -237,6 +370,7 @@ in
           echo "Downloading $download_mb MB ($available_mb MB available)"
           if [ "$download_size" -gt "$available" ]; then
             echo "WARNING: Download ($download_mb MB) exceeds available space ($available_mb MB)"
+            wall "WARNING: Download ($download_mb MB) exceeds available space ($available_mb MB)"
           fi
         fi
 

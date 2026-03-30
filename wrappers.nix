@@ -92,7 +92,7 @@
       background = "0x272822";
       foreground = "0xffffff";
     };
-    font.size = 18;
+    font.size = 7;
     font.bold = {
       family = "Terminus";
       style = "Bold";

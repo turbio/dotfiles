@@ -1,5 +1,59 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
+  services.kanata = {
+    enable = true;
+    keyboards.internal = {
+      extraDefCfg = "process-unmapped-keys yes";
+      config = ''
+        (defsrc
+          grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+          tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+          caps a    s    d    f    g    h    j    k    l    ;    '    ret
+          lsft z    x    c    v    b    n    m    ,    .    /    rsft
+          lctl lmet lalt           spc            ralt rmet rctl
+        )
+
+        (defalias
+          ;; Home row mods (GACS) - left hand
+          gui_a (tap-hold-press 200 250 a lmet)
+          alt_s (tap-hold-press 200 250 s lalt)
+          ctl_d (tap-hold-press 200 250 d lctl)
+          sft_f (tap-hold-press 200 250 f lsft)
+
+          ;; Home row mods (GACS) - right hand
+          sft_j (tap-hold-press 200 250 j rsft)
+          ctl_k (tap-hold-press 200 250 k rctl)
+          alt_l (tap-hold-press 200 250 l ralt)
+          gui_sc (tap-hold-press 200 250 ; rmet)
+
+          ;; Z with gui (matches voyager)
+          gui_z (tap-hold-press 200 250 z lmet)
+
+          ;; Layer taps
+          l1_sl (tap-hold-press 200 250 / (layer-while-held symbols))
+          l1_ent (tap-hold-press 200 250 ret (layer-while-held symbols))
+        )
+
+        (deflayer base
+          grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+          tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+          (layer-while-held symbols) @gui_a @alt_s @ctl_d @sft_f g h @sft_j @ctl_k @alt_l @gui_sc ' @l1_ent
+          lsft @gui_z x    c    v    b    n    m    ,    .    @l1_sl rsft
+          lctl lmet lalt           spc            ralt rmet rctl
+        )
+
+        ;; Matches voyager layer 1: brackets, arrows, +/=
+        (deflayer symbols
+          _    _    _    _    _    S-[  S-]  _    _    _    S-=  =    _    esc
+          _    _    _    _    _    [    ]    _    up   _    _    _    _    _
+          _    _    _    S-=  =    S-9  S-0  left down rght _    _    _
+          _    _    _    _    _    _    _    _    _    _    _    _
+          _    _    _              _              _    _    _
+        )
+      '';
+    };
+  };
+
   hardware.keyboard.zsa.enable = true;
   services.udev.extraRules = ''
     # Rules for Oryx web flashing and live training

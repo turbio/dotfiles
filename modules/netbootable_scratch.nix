@@ -68,7 +68,12 @@ in
 
     hardware.enableRedistributableFirmware = true;
 
-    boot.initrd.kernelModules = [ "autofs4" ];
+    boot.initrd.kernelModules = [
+      "autofs4"
+
+      # must be loaded in early initrd for scratch proping on some hardware
+      "smartpqi"
+    ];
 
     boot.initrd.systemd.enable = true;
 
@@ -260,6 +265,7 @@ in
             type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
             SFDISK
 
+            partx -u "$target"
             udevadm settle
 
             # First partition = swap, second = scratch
@@ -285,7 +291,10 @@ in
         "sysroot-nix-.rw\\x2dstore.mount"
         "sysroot-tmp.mount"
       ];
-      after = [ "sysroot.mount" ];
+      after = [
+        "sysroot.mount"
+        "systemd-modules-load.service"
+      ];
       wants = [ "sysroot.mount" ];
 
       unitConfig.DefaultDependencies = false;

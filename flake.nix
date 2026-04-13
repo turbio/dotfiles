@@ -59,6 +59,7 @@
       url = "github:turbio/flippyflops";
     };
     wrappers.url = "github:turbio/wrappers";
+    wrappers.inputs.nixpkgs.follows = "nixpkgs";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";
     raspberry-pi-nix.inputs.nixpkgs.follows = "nixpkgs";

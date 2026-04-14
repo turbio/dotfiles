@@ -288,6 +288,16 @@
           '';
         };
 
+      checks =
+        let
+          hostsBy = system: lib.filterAttrs (name: _: arch name == system) nixosConfigurations;
+          toplevels = lib.mapAttrs (_: cfg: cfg.config.system.build.toplevel);
+        in
+        {
+          x86_64-linux = toplevels (hostsBy "x86_64-linux");
+          aarch64-linux = toplevels (hostsBy "aarch64-linux");
+        };
+
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     };
 }

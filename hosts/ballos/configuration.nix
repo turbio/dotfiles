@@ -1426,11 +1426,21 @@ in
   services.buildbot-nix.master = {
     enable = true;
     domain = "buildbot.turb.io";
-    workersFile = pkgs.writeText "buildbot-workers.json" (builtins.toJSON [
-      { name = "ballos"; pass = "password"; cores = 8; }
-    ]);
+    workersFile = pkgs.writeText "buildbot-workers.json" (
+      builtins.toJSON [
+        {
+          name = "ballos";
+          pass = "password";
+          cores = 8;
+        }
+      ]
+    );
     useHTTPS = true;
     authBackend = "none";
+    buildSystems = [
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
     pullBased.repositories = {
       dotfiles = {
         url = "https://git.turb.io/dotfiles";

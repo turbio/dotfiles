@@ -1421,6 +1421,35 @@ in
     };
   };
 
+  services.postgresql.package = pkgs.postgresql_16;
+
+  services.buildbot-nix.master = {
+    enable = true;
+    domain = "buildbot.turb.io";
+    workersFile = pkgs.writeText "buildbot-workers.json" (builtins.toJSON [
+      { name = "ballos"; pass = "password"; cores = 8; }
+    ]);
+    useHTTPS = true;
+    authBackend = "none";
+    pullBased.repositories = {
+      dotfiles = {
+        url = "https://git.turb.io/dotfiles";
+        defaultBranch = "master";
+        pollInterval = 10;
+      };
+    };
+  };
+
+  services.buildbot-nix.worker = {
+    enable = true;
+    workerPasswordFile = pkgs.writeText "buildbot-worker-password" "password";
+  };
+
+  services.nginx.virtualHosts."buildbot.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+  };
+
   services.promtail = {
     enable = true;
     configuration = {

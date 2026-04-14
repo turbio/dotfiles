@@ -8,6 +8,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixvim.url = "github:nix-community/nixvim/nixos-25.11";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
@@ -74,6 +75,9 @@
 
     redex.url = "git+https://git.turb.io/redex";
     redex.inputs.nixpkgs.follows = "nixpkgs";
+
+    buildbot-nix.url = "github:nix-community/buildbot-nix";
+    buildbot-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs =
@@ -122,6 +126,8 @@
           system = arch hostname;
           modules =
             lib.optional (hostname == "ballos") redex.nixosModules.default
+            ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-master
+            ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-worker
             ++ lib.optional (hostname == "ballos") {
               age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
               age.secrets."rfc2136-acme".owner = "acme";

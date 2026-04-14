@@ -49,7 +49,7 @@ in
     ];
   };
 
-  environment.enableAllTerminfo = true;
+  environment.enableAllTerminfo = true; # test
 
   zfs.pools.tank.datasets = {
     "enc/media" = {
@@ -1441,13 +1441,29 @@ in
       "x86_64-linux"
       "aarch64-linux"
     ];
-    pullBased.repositories = {
-      dotfiles = {
-        url = "https://git.turb.io/dotfiles";
-        defaultBranch = "master";
-        pollInterval = 10;
-      };
-    };
+    pullBased.repositories =
+      lib.genAttrs
+        [
+          "bfcc"
+          "buylowsellhigh"
+          "chromeambient"
+          "dotfiles"
+          "nix-flamegraph"
+          "nixcov"
+          "niximage-for-tessa"
+          "noscript"
+          "obj2svg"
+          "proxmobil3"
+          "redex"
+          "vantronix"
+          "vmshell"
+          "wrappers"
+        ]
+        (name: {
+          url = "https://git.turb.io/${name}";
+          defaultBranch = "master";
+          pollInterval = 10;
+        });
   };
 
   services.buildbot-nix.worker = {

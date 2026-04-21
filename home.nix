@@ -177,7 +177,6 @@ in
         _JAVA_AWT_WM_NONREPARENTING = "1";
       };
 
-
       programs.git = {
         lfs = {
           enable = true;
@@ -234,12 +233,10 @@ in
         };
       };
 
-
-
       gtk = lib.mkIf config.isDesktop {
         enable = true;
         font.package = pkgs.terminus_font;
-        font.name = "Terminus";
+        font.name = "Terminus (TTF)";
         font.size = 9;
 
         theme.package = pkgs.arc-theme;

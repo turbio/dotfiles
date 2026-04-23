@@ -79,18 +79,13 @@ in
     };
   };
 
-  services.gitolite = {
-    enable = true;
-    user = "git";
+  users.users.git = {
+    isSystemUser = true;
     group = "git";
-    dataDir = gitDir;
-    adminPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio"; # TODO(turbio): manage those keys
-    extraGitoliteRc = ''
-      $RC{UMASK} = 0027;
-      $RC{GIT_CONFIG_KEYS} = 'gitweb\..* cgit\..*';
-      push( @{$RC{ENABLE}}, 'cgit');
-    '';
+    home = gitDir;
+    createHome = false;
   };
+  users.groups.git = { };
 
   environment.etc.gitconfig.text = ''
     [safe]
@@ -107,14 +102,12 @@ in
     gitHttpBackend.checkExportOkFiles = false;
 
     settings = {
-      project-list = "${gitDir}/projects.list";
       enable-git-config = 1;
       remove-suffix = 1;
       enable-index-owner = 0;
       logo = "";
       root-title = "turbio git";
-      root-desc = "git repos";
-      clone-url = "https://git.turb.io/$CGIT_REPO_URL git@git.turb.io:$CGIT_REPO_URL";
+      clone-url = "https://git.turb.io/$CGIT_REPO_URL";
     };
   };
   services.nginx.virtualHosts."git.turb.io" = {
@@ -143,7 +136,6 @@ in
         proxy_set_header X-Forwarded-Protocol $scheme;
         proxy_set_header X-Forwarded-Host $http_host;
 
-        # Disable buffering when the nginx proxy gets very resource heavy upon streaming
         proxy_buffering off;
       '';
     };
@@ -1447,11 +1439,8 @@ in
     gitea = {
       enable = true;
       instanceUrl = "https://forge.turb.io";
-      # forgejo-bootstrap.service seeds the oauth2_application row with this
-      # exact client_id (see services/forgejo.nix).
       oauthId = "buildbot";
       oauthSecretFile = config.age.secrets."forgejo-oauth-secret".path;
-      # Generated on first activation by forgejo-bootstrap.service.
       tokenFile = "/var/lib/forgejo-bootstrap/api-token";
       webhookSecretFile = config.age.secrets."forgejo-webhook-secret".path;
     };
@@ -1460,33 +1449,6 @@ in
       "aarch64-linux"
     ];
     branches.all.matchGlob = "*";
-    # Transitional: keep polling the cgit-hosted repos at git.turb.io until
-    # they're migrated into forgejo (where webhook-driven builds take over
-    # for any repo tagged with the `build-with-buildbot` topic).
-    pullBased.repositories =
-      lib.genAttrs
-        [
-          "bfcc"
-          "buylowsellhigh"
-          "chromeambient"
-          "dotfiles"
-          "nix-flamegraph"
-          "nixcov"
-          "niximage-for-tessa"
-          "noscript"
-          "obj2svg"
-          "proxmobil3"
-          "redex"
-          "vantronix"
-          "vmshell"
-          "wrappers"
-          "nix"
-        ]
-        (name: {
-          url = "https://git.turb.io/${name}";
-          defaultBranch = "master";
-          pollInterval = 10;
-        });
   };
 
   services.buildbot-nix.worker = {
@@ -1494,8 +1456,6 @@ in
     workerPasswordFile = pkgs.writeText "buildbot-worker-password" "password";
   };
 
-  # Wait for forgejo-bootstrap to have created the API token file that
-  # buildbot-master's LoadCredential references.
   systemd.services.buildbot-master = {
     after = [ "forgejo-bootstrap.service" ];
     requires = [ "forgejo-bootstrap.service" ];

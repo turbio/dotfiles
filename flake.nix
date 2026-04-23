@@ -131,6 +131,7 @@
 
           age.secrets."forgejo-oauth-secret".file = ./secrets/forgejo-oauth-secret.age;
           age.secrets."forgejo-webhook-secret".file = ./secrets/forgejo-webhook-secret.age;
+          age.secrets."forgejo-admin-password".file = ./secrets/forgejo-admin-password.age;
         }
         ++ lib.optional (hostname == "aackle" || hostname == "backle") {
           age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;

@@ -119,6 +119,7 @@ in
       ${pkgs.coreutils}/bin/chmod 0751 /run/agenix
       ${stage "forgejo-oauth-secret" "test-oauth-secret"}
       ${stage "forgejo-webhook-secret" "test-webhook-secret"}
+      ${stage "forgejo-admin-password" "test-admin-pw"}
       ${stage "userpassword" "testpassword"}
       ${stage "rfc2136-acme" ''
         key "stub" { algorithm hmac-sha256; secret "c3R1Yg=="; };

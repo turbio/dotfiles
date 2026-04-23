@@ -115,6 +115,7 @@ in
       StateDirectoryMode = "0700";
       LoadCredential = [
         "oauth-client-secret:${config.age.secrets."forgejo-oauth-secret".path}"
+        "admin-password:${config.age.secrets."forgejo-admin-password".path}"
       ];
     };
 
@@ -129,16 +130,30 @@ in
       db=${dbPath}
       state=$STATE_DIRECTORY
 
-      # 1. Ensure admin user exists. We use -w (word match) on the full
-      # listing rather than parsing columns — forgejo's CLI output format
-      # is not stable enough to rely on fixed column positions.
+      # 1. Ensure admin user exists with the password from the age secret.
+      # We hash the plaintext and compare against a stored hash so rotating
+      # the age file pushes the new password into forgejo on the next run.
+      pw_file="$CREDENTIALS_DIRECTORY/admin-password"
+      pw_hash=$(sha256sum "$pw_file" | awk '{print $1}')
+      stored_hash=""
+      if [ -f "$state/admin-password.hash" ]; then
+        stored_hash=$(cat "$state/admin-password.hash")
+      fi
+
       if ! forgejo -c "$app_ini" admin user list | grep -qw "$admin_user"; then
         forgejo -c "$app_ini" admin user create \
           --username "$admin_user" \
           --email "$admin_email" \
           --admin \
-          --random-password \
+          --password "$(cat "$pw_file")" \
           --must-change-password=false
+        echo -n "$pw_hash" > "$state/admin-password.hash"
+      elif [ "$stored_hash" != "$pw_hash" ]; then
+        forgejo -c "$app_ini" admin user change-password \
+          --username "$admin_user" \
+          --password "$(cat "$pw_file")" \
+          --must-change-password=false
+        echo -n "$pw_hash" > "$state/admin-password.hash"
       fi
 
       # 2. Ensure API token exists (idempotent by file presence).

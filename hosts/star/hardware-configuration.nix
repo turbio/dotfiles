@@ -8,6 +8,7 @@
 
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
+    ../../modules/netbootable_scratch.nix
   ];
 
   boot.initrd.availableKernelModules = [

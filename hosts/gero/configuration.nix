@@ -61,10 +61,8 @@
     #"quiet" "udev.log_level=0"
   ];
 
-  services.logind = {
-    lidSwitch = "hibernate";
-    extraConfig = ''
-      HandlePowerKey=hibernate
-    '';
+  services.logind.settings.Login = {
+    HandleLidSwitch = "hibernate";
+    HandlePowerKey = "hibernate";
   };
 }

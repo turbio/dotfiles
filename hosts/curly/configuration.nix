@@ -1,7 +1,22 @@
 { pkgs, lib, ... }:
 {
   services.kanata = {
-    enable = true;
+    enable = false;
+    package = pkgs.kanata.overrideAttrs (old: rec {
+      version = "1.12.0-prerelease-2";
+      src = pkgs.fetchFromGitHub {
+        owner = "jtroo";
+        repo = "kanata";
+        rev = "v${version}";
+        hash = "sha256-bNUlQBsyGxCu3GHP+qgrYLikLagXxzLjjuZFZFi7Vzk=";
+      };
+      doCheck = false;
+      cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
+        inherit src;
+        name = "${old.pname}-${version}-vendor";
+        hash = "sha256-da7kmSvm+z6C+RPqEBEY9PNWxrAEQ8h/ZGDvS9WJ1J8=";
+      };
+    });
     keyboards.internal = {
       extraDefCfg = "process-unmapped-keys yes";
       config = ''
@@ -13,21 +28,27 @@
           lctl lmet lalt           spc            ralt rmet rctl
         )
 
+        ;; Chordal hold: matches voyager chordal_hold_layout (L/R/*).
+        (defhands
+          (left  grv 1 2 3 4 5 tab q w e r t caps a s d f g lsft z x c v b lctl lmet lalt)
+          (right 6 7 8 9 0 - = bspc y u i o p [ ] \ h j k l ; ' ret n m , . / rsft ralt rmet rctl)
+        )
+
         (defalias
           ;; Home row mods (GACS) - left hand
-          gui_a (tap-hold-press 200 250 a lmet)
-          alt_s (tap-hold-press 200 250 s lalt)
-          ctl_d (tap-hold-press 200 250 d lctl)
-          sft_f (tap-hold-press 200 250 f lsft)
+          gui_a (tap-hold-opposite-hand 250 a lmet)
+          alt_s (tap-hold-opposite-hand 250 s lalt)
+          ctl_d (tap-hold-opposite-hand 250 d lctl)
+          sft_f (tap-hold-opposite-hand 250 f lsft)
 
           ;; Home row mods (GACS) - right hand
-          sft_j (tap-hold-press 200 250 j rsft)
-          ctl_k (tap-hold-press 200 250 k rctl)
-          alt_l (tap-hold-press 200 250 l ralt)
-          gui_sc (tap-hold-press 200 250 ; rmet)
+          sft_j (tap-hold-opposite-hand 250 j rsft)
+          ctl_k (tap-hold-opposite-hand 250 k rctl)
+          alt_l (tap-hold-opposite-hand 250 l ralt)
+          gui_sc (tap-hold-opposite-hand 250 ; rmet)
 
-          ;; Z with gui (matches voyager)
-          gui_z (tap-hold-press 200 250 z lmet)
+          ;; Z with gui
+          gui_z (tap-hold-opposite-hand 250 z lmet)
 
           ;; Layer taps
           l1_sl (tap-hold-press 200 250 / (layer-while-held symbols))
@@ -53,6 +74,12 @@
       '';
     };
   };
+
+  # logind's uaccess tagging (via 60-steam-input.rules) sets ACLs on /dev/uinput
+  # that strip group permissions, breaking kanata's DynamicUser group-based access.
+  # Fix the ACL right before kanata starts.
+  systemd.services.kanata-internal.serviceConfig.ExecStartPre =
+    "+${pkgs.acl}/bin/setfacl -m g:uinput:rw /dev/uinput";
 
   hardware.keyboard.zsa.enable = true;
   services.udev.extraRules = ''

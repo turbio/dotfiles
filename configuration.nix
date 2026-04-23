@@ -261,16 +261,16 @@ in
   services.tailscale.enable = lib.mkIf (hostname != "zote") true;
   services.tailscale.useRoutingFeatures = "both";
   networking.firewall.allowedUDPPorts = [ 48000 ]; # TODO: ts relay
-  networking.nameservers = [
-    "100.100.100.100"
-    "8.8.8.8"
-    "1.1.1.1"
-  ];
+  # networking.nameservers = [
+  #   "100.100.100.100"
+  #   "8.8.8.8"
+  #   "1.1.1.1"
+  # ];
   networking.nftables = {
     enable = true;
   };
 
-  networking.useNetworkd = true;
+  #networking.useNetworkd = true;
   services.resolved.enable = true;
 
   boot.supportedFilesystems = [ "nfs" ];

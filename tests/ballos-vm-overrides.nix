@@ -226,4 +226,8 @@ in
 
   # sqlite CLI for the test script's assertions.
   environment.systemPackages = [ pkgs.sqlite ];
+
+  # The cgit import step would try to clone from git.turb.io which this VM
+  # maps back to itself — skip in tests.
+  services.forgejoBootstrap.cgitImports = lib.mkForce [ ];
 }

@@ -120,61 +120,68 @@
           |> (a: a.wrapper)
         ));
 
+      hostModulesList =
+        extraModules: hostname:
+        lib.optional (hostname == "ballos") redex.nixosModules.default
+        ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-master
+        ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-worker
+        ++ lib.optional (hostname == "ballos") {
+          age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
+          age.secrets."rfc2136-acme".owner = "acme";
+
+          age.secrets."forgejo-oauth-secret".file = ./secrets/forgejo-oauth-secret.age;
+          age.secrets."forgejo-webhook-secret".file = ./secrets/forgejo-webhook-secret.age;
+        }
+        ++ lib.optional (hostname == "aackle" || hostname == "backle") {
+          age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
+          age.secrets."rfc2136-acme".owner = "named";
+
+          age.secrets."rfc2136-xfer".file = ./secrets/rfc2136-xfer.age;
+          age.secrets."rfc2136-xfer".owner = "named";
+        }
+
+        ++ lib.optional (hostname != "zote" && hostname != "j1" && hostname != "j2") {
+          age.secrets.userpassword.file = ./secrets/userpassword.age;
+        }
+        ++ [
+          nix-index-database.nixosModules.default
+          agenix.nixosModules.default
+          #./modules/wg-vpn.nix
+          ./configuration.nix
+          ./desktop.nix
+          ./home.nix
+          ./services/syncthing.nix
+          (./hosts + "/${hostname}" + /configuration.nix)
+          (./hosts + "/${hostname}" + /hardware-configuration.nix)
+          #./vpn.nix
+          disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          nixvim.nixosModules.nixvim
+          {
+            nixpkgs.overlays = [
+              wrappersOverlay
+            ];
+          }
+        ]
+        ++ (lib.optional (hostname != "balrog" && hostname != "backle" && hostname != "aackle") ./vim.nix)
+        ++ extraModules
+        ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd)
+        ++ (lib.optional (hostname == "mote") {
+          #nixpkgs.config.contentAddressedByDefault = true;
+        });
+
+      hostSpecialArgs = hostname: {
+        inherit hostname;
+        assignments = import ./assignments.nix;
+        repos = inputs;
+      };
+
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
           system = arch hostname;
-          modules =
-            lib.optional (hostname == "ballos") redex.nixosModules.default
-            ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-master
-            ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-worker
-            ++ lib.optional (hostname == "ballos") {
-              age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
-              age.secrets."rfc2136-acme".owner = "acme";
-            }
-            ++ lib.optional (hostname == "aackle" || hostname == "backle") {
-              age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
-              age.secrets."rfc2136-acme".owner = "named";
-
-              age.secrets."rfc2136-xfer".file = ./secrets/rfc2136-xfer.age;
-              age.secrets."rfc2136-xfer".owner = "named";
-            }
-
-            ++ lib.optional (hostname != "zote" && hostname != "j1" && hostname != "j2") {
-              age.secrets.userpassword.file = ./secrets/userpassword.age;
-            }
-            ++ [
-              nix-index-database.nixosModules.default
-              agenix.nixosModules.default
-              #./modules/wg-vpn.nix
-              ./configuration.nix
-              ./desktop.nix
-              ./home.nix
-              ./services/syncthing.nix
-              (./hosts + "/${hostname}" + /configuration.nix)
-              (./hosts + "/${hostname}" + /hardware-configuration.nix)
-              #./vpn.nix
-              disko.nixosModules.disko
-              home-manager.nixosModules.home-manager
-              nixvim.nixosModules.nixvim
-              {
-                nixpkgs.overlays = [
-                  wrappersOverlay
-                ];
-              }
-            ]
-            ++ (lib.optional (hostname != "balrog" && hostname != "backle" && hostname != "aackle") ./vim.nix)
-            ++ extraModules
-            ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd)
-            ++ (lib.optional (hostname == "mote") {
-              #nixpkgs.config.contentAddressedByDefault = true;
-            });
-
-          specialArgs = {
-            inherit hostname;
-            assignments = import ./assignments.nix;
-            repos = inputs;
-          };
+          modules = hostModulesList extraModules hostname;
+          specialArgs = hostSpecialArgs hostname;
         };
 
       pxeExecScript =
@@ -202,6 +209,10 @@
         fn:
         builtins.readDir ./hosts
         |> builtins.attrNames
+        # hosts/vm is a placeholder filled in by devvm.nix (it pulls in the
+        # microvm module + actual config); the bare nixosConfiguration would
+        # fail eval for lack of a root fs, so skip it here.
+        |> builtins.filter (c: c != "vm")
         |> map (c: {
           name = c;
           value = fn c;
@@ -255,7 +266,7 @@
       netbootImages =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          allHosts = builtins.attrNames (builtins.readDir ./hosts);
+          allHosts = builtins.attrNames netbootableConfigurations;
           pairs = builtins.concatMap (
             hostname:
             let
@@ -294,7 +305,18 @@
           toplevels = lib.mapAttrs (_: cfg: cfg.config.system.build.toplevel);
         in
         {
-          x86_64-linux = toplevels (hostsBy "x86_64-linux");
+          x86_64-linux = toplevels (hostsBy "x86_64-linux") // {
+            ballos-vm = import ./tests/ballos-vm.nix {
+              pkgs = nixpkgs.legacyPackages.x86_64-linux;
+              hostModulesList =
+                extraModules: hostname:
+                hostModulesList extraModules hostname
+                ++ lib.optional (hostname == "ballos") {
+                  _module.args.netbootImages = netbootImages;
+                };
+              inherit hostSpecialArgs;
+            };
+          };
           aarch64-linux = toplevels (hostsBy "aarch64-linux");
         };
 

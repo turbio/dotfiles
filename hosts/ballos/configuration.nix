@@ -14,6 +14,8 @@ in
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
     ../../services/evaldb.nix
+    ../../services/forgejo.nix
+    #../../services/gerrit.nix
     ../../services/netboot_host.nix
     ./ipmi.nix
     (import ./acme-wildcard.nix { domain = "turb.io"; })
@@ -1436,11 +1438,27 @@ in
       ]
     );
     useHTTPS = true;
-    authBackend = "none";
+    authBackend = "gitea";
+    admins = [ "turbio" ];
+    gitea = {
+      enable = true;
+      instanceUrl = "https://forge.turb.io";
+      # forgejo-bootstrap.service seeds the oauth2_application row with this
+      # exact client_id (see services/forgejo.nix).
+      oauthId = "buildbot";
+      oauthSecretFile = config.age.secrets."forgejo-oauth-secret".path;
+      # Generated on first activation by forgejo-bootstrap.service.
+      tokenFile = "/var/lib/forgejo-bootstrap/api-token";
+      webhookSecretFile = config.age.secrets."forgejo-webhook-secret".path;
+    };
     buildSystems = [
       "x86_64-linux"
       "aarch64-linux"
     ];
+    branches.all.matchGlob = "*";
+    # Transitional: keep polling the cgit-hosted repos at git.turb.io until
+    # they're migrated into forgejo (where webhook-driven builds take over
+    # for any repo tagged with the `build-with-buildbot` topic).
     pullBased.repositories =
       lib.genAttrs
         [
@@ -1458,6 +1476,7 @@ in
           "vantronix"
           "vmshell"
           "wrappers"
+          "nix"
         ]
         (name: {
           url = "https://git.turb.io/${name}";
@@ -1469,6 +1488,13 @@ in
   services.buildbot-nix.worker = {
     enable = true;
     workerPasswordFile = pkgs.writeText "buildbot-worker-password" "password";
+  };
+
+  # Wait for forgejo-bootstrap to have created the API token file that
+  # buildbot-master's LoadCredential references.
+  systemd.services.buildbot-master = {
+    after = [ "forgejo-bootstrap.service" ];
+    requires = [ "forgejo-bootstrap.service" ];
   };
 
   services.nginx.virtualHosts."buildbot.turb.io" = {

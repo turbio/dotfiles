@@ -24,4 +24,7 @@ in
   # generate with `tsig-keygen rfc2136key`
   "rfc2136-acme.age".publicKeys = all;
   "rfc2136-xfer.age".publicKeys = all;
+
+  "forgejo-oauth-secret.age".publicKeys = all;
+  "forgejo-webhook-secret.age".publicKeys = all;
 }

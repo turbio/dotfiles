@@ -1459,6 +1459,25 @@ in
   systemd.services.buildbot-master = {
     after = [ "forgejo-bootstrap.service" ];
     requires = [ "forgejo-bootstrap.service" ];
+    # Any change to forgejo's settings restarts buildbot-master. The
+    # preStart then blanks the gitea-project-cache so the reload scheduler
+    # refetches `ssh_url` etc. from the live API — otherwise a stale cached
+    # URL makes the SingleBranchScheduler's repository filter miss incoming
+    # webhooks (see buildbot_nix/project_config.py and gitea_projects.py).
+    restartTriggers = [
+      (builtins.toJSON config.services.forgejo.settings)
+    ];
+    serviceConfig.ExecStartPre = [
+      "${pkgs.coreutils}/bin/rm -f /var/lib/buildbot/gitea-project-cache.json"
+    ];
+  };
+
+  # Worker should track master — if master restarts, worker reconnects.
+  # On deploy, `systemctl restart buildbot-master` alone used to leave the
+  # worker stopped; bind them so the worker comes back automatically.
+  systemd.services.buildbot-worker = {
+    after = [ "buildbot-master.service" ];
+    bindsTo = [ "buildbot-master.service" ];
   };
 
   services.nginx.virtualHosts."buildbot.turb.io" = {

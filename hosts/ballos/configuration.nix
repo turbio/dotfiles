@@ -327,11 +327,15 @@ in
     gid = 1100;
   };
 
-  # container traffic -> internet
-  # tbh we should quarantine this off to it's own interface
+  # container + tailscale-exit-node traffic -> internet. tailscale0 needs
+  # masquerade so peers using ballos as an exit node have their 100.64/10
+  # source IPs SNATted out of enp4s0; otherwise replies never come back.
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-*" ];
+    internalInterfaces = [
+      "ve-*"
+      "tailscale0"
+    ];
     externalInterface = "enp4s0";
     enableIPv6 = true;
   };

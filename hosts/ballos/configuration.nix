@@ -15,6 +15,7 @@ in
     ../../services/flippyflops.nix
     ../../services/evaldb.nix
     ../../services/forgejo.nix
+    ../../services/nix-builders.nix
     #../../services/gerrit.nix
     ../../services/netboot_host.nix
     ./ipmi.nix
@@ -319,222 +320,20 @@ in
     gid = 1100;
   };
 
-  # container + tailscale-exit-node traffic -> internet. tailscale0 needs
-  # masquerade so peers using ballos as an exit node have their 100.64/10
-  # source IPs SNATted out of enp4s0; otherwise replies never come back.
   networking.nat = {
     enable = true;
     internalInterfaces = [
       "ve-*"
+
+      # tailscale0 needs masquerade for peers using ballos as an exit node
       "tailscale0"
     ];
     externalInterface = "enp4s0";
     enableIPv6 = true;
   };
 
-  /*
-    containers.jellyfin = {
-      ephemeral = true;
-      autoStart = true;
-      privateNetwork = true;
-      hostAddress = "192.168.100.10";
-      localAddress = "192.168.100.11";
-      privateUsers = "pick";
-      bindMounts = {
-        "/media" = {
-          mountPoint = "/media:idmap"; # nasty hax (https://github.com/NixOS/nixpkgs/issues/329530)
-          hostPath = "/tank/enc/media";
-          isReadOnly = false;
-        };
-        "/persist" = {
-          mountPoint = "/persist:idmap";
-          hostPath = "/tank/enc/jellyfin";
-          isReadOnly = false;
-        };
-      };
-      config =
-        { ... }:
-        {
-          imports = [
-            (import ../../services/jelly.nix {
-              userId = config.users.users.jellyfin.uid;
-              groupId = config.users.groups.media.gid;
-              persistDataDir = "/persist";
-            })
-          ];
-
-          networking.firewall = {
-            enable = true;
-            allowedTCPPorts = [
-              8096 # jellyfin
-              9472 # qbittorrent
-              9696 # prowlarr
-              5055 # seerr
-              7878 # radarr
-              8989 # sonarr
-            ];
-          };
-          networking.useHostResolvConf = false;
-          services.resolved.enable = true;
-          system.stateVersion = "25.05";
-        };
-    };
-  */
-
   networking.wireguard.enable = true;
-  networking.wireguard.interfaces = {
-    # "wg0" is the network interface name. You can name the interface arbitrarily.
-    wg0 = {
-      ips = [ "10.100.1.2/24" ];
-      listenPort = 51820; # to match firewall allowedUDPPorts (without this wg uses random port numbers)
-      allowedIPsAsRoutes = false;
-
-      # postSetup = ''
-      #   ${ip} rule add from 10.100.1.0/24 lookup 100
-      #   ${ip} route add default dev wg0 table 100
-      # '';
-
-      # postShutdown = ''
-      #   ${ip} rule del from 10.100.1.0/24 lookup 100
-      #   ${ip} route del default dev wg0 table 100
-      # '';
-
-      privateKeyFile = "/root/wireguard-keys/private";
-
-      peers = [
-        {
-          publicKey = "SnuLTHTNwJuW/7VHMcLLTPUOFhyZaTbpLtSTnrd3zwE=";
-          allowedIPs = [ "0.0.0.0/0" ];
-          endpoint = "185.216.68.61:51820";
-          persistentKeepalive = 25;
-        }
-      ];
-    };
-
-    wg1 = {
-      ips = [ "10.100.2.2/24" ];
-      allowedIPsAsRoutes = false;
-
-      privateKeyFile = "/root/wireguard-keys2/private";
-
-      peers = [
-        {
-          publicKey = "NFxVkrIsKcW7Wp9ToLmwC4l1di1sXf+uZ3ipG9rq3X4=";
-          allowedIPs = [ "0.0.0.0/0" ];
-          endpoint = "185.216.68.66:51820";
-          persistentKeepalive = 25;
-        }
-      ];
-    };
-
-    wg3 = {
-      ips = [ "10.100.3.2/24" ];
-      allowedIPsAsRoutes = false;
-
-      privateKeyFile = "/root/wireguard-keys-wg3/private";
-
-      peers = [
-        {
-          publicKey = "Ig1QRX9Brp1rTPRCYMbVFx2x6v1EyVmszVTm71XOITw=";
-          allowedIPs = [ "0.0.0.0/0" ];
-          endpoint = "144.202.10.83:51820";
-          persistentKeepalive = 25;
-        }
-      ];
-    };
-
-    wg4 = {
-      ips = [ "10.100.4.2/24" ];
-      allowedIPsAsRoutes = false;
-
-      privateKeyFile = "/root/wireguard-keys-wg4/private";
-
-      peers = [
-        {
-          publicKey = "hjuO1aj0chglToYOGFSpQTcJs1BNeRr5hvrvAVyomxo=";
-          allowedIPs = [ "0.0.0.0/0" ];
-          endpoint = "167.172.206.235:51820";
-          persistentKeepalive = 25;
-        }
-      ];
-    };
-  };
-
-  systemd.network.networks."10-wg4" = {
-    matchConfig.Name = "wg4";
-    networkConfig = {
-      Address = "10.100.4.2/24";
-    };
-    routes = [
-      {
-        Table = "204";
-        Destination = "0.0.0.0/0";
-      }
-    ];
-    routingPolicyRules = [
-      {
-        From = "10.100.4.0/24";
-        Table = "204";
-      }
-    ];
-  };
-
-  systemd.network.networks."10-wg" = {
-    matchConfig.Name = "wg0";
-    networkConfig = {
-      Address = "10.100.1.2/24";
-    };
-    routes = [
-      {
-        Table = "123";
-        Destination = "0.0.0.0/0";
-      }
-    ];
-    routingPolicyRules = [
-      {
-        From = "10.100.1.0/24";
-        Table = "123";
-      }
-    ];
-  };
-
-  systemd.network.networks."10-wg1" = {
-    matchConfig.Name = "wg1";
-    networkConfig = {
-      Address = "10.100.2.2/24";
-    };
-    routes = [
-      {
-        Table = "124";
-        Destination = "0.0.0.0/0";
-      }
-    ];
-    routingPolicyRules = [
-      {
-        From = "10.100.2.0/24";
-        Table = "124";
-      }
-    ];
-  };
-
-  systemd.network.networks."10-wg3" = {
-    matchConfig.Name = "wg3";
-    networkConfig = {
-      Address = "10.100.3.2/24";
-    };
-    routes = [
-      {
-        Table = "125";
-        Destination = "0.0.0.0/0";
-      }
-    ];
-    routingPolicyRules = [
-      {
-        From = "10.100.3.0/24";
-        Table = "125";
-      }
-    ];
-  };
+  networking.wireguard.interfaces = { };
 
   zfs.pools.tank.datasets = {
     "enc/misc" = {
@@ -557,6 +356,7 @@ in
     perms.group = "ollama";
     perms.mode = "775";
   };
+
   services.ollama = {
     enable = true;
     models = config.zfs.pools.tank.datasets."enc/ollama".mountpoint;
@@ -572,34 +372,12 @@ in
     "gccarch-armv7-a"
   ];
   boot.binfmt.emulatedSystems = [
-    "aarch64-linux"
+    # "aarch64-linux"
     "armv7l-linux"
     "i686-linux"
   ];
 
   security.acme.acceptTerms = true;
-
-  /*
-    services.nix-serve = {
-      package = pkgs.nix-serve-ng;
-      enable = true;
-      secretKeyFile = "/var/cache-priv-key.pem"; # TODO: state
-    };
-
-    services.nginx.virtualHosts."nixcache.turb.io" = {
-      forceSSL = true;
-      useACMEHost = "turb.io";
-
-      locations."/" = {
-        proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
-      };
-      locations."/.well-known/acme-challenge" = {
-        extraConfig = ''
-          allow all;
-        '';
-      };
-    };
-  */
 
   services.nginx.virtualHosts."nixcache.turb.io" = {
     addSSL = true;
@@ -1429,7 +1207,7 @@ in
         {
           name = "ballos";
           pass = "password";
-          cores = 8;
+          cores = 32;
         }
       ]
     );

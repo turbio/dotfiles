@@ -67,8 +67,17 @@ let
           config.boot.zfs.package
         ];
         description = "Ensure ZFS dataset ${fullName}";
-        after = [ "zfs-import-${pool}.service" ];
-        wantedBy = [ "multi-user.target" ];
+        unitConfig.DefaultDependencies = false;
+        after = [
+          "zfs-import-${pool}.service"
+          "zfs-mount.service"
+        ];
+        before = [
+          "local-fs.target"
+          "shutdown.target"
+        ];
+        conflicts = [ "shutdown.target" ];
+        wantedBy = [ "local-fs.target" ];
         serviceConfig.Type = "oneshot";
         script = ''
           set -euo pipefail

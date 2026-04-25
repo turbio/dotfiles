@@ -1,5 +1,9 @@
 { pkgs, lib, ... }:
 {
+  imports = [
+    ../../modules/nix-remote-builder.nix
+  ];
+
   networking.firewall.enable = false;
 
   networking.hosts = {

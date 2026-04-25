@@ -15,6 +15,16 @@
 #   - tailscale (not load-bearing for the forgejo/buildbot test)
 #   - IPMI kernel modules (hardware-only; service fails harmlessly)
 #   - netboot host service (external, doesn't block the critical path)
+#
+# The microvm.nix-managed aarch-builder VM (services/nix-builders.nix) is
+# disabled here for two reasons:
+#   1. The test VM has no nested KVM/qemu support and even if it did, an
+#      8 GB / 4 vCPU TCG-emulated aarch64 guest inside a 4 GB test VM is
+#      not going to fit.
+#   2. Starting the microvm requires materialising the aarch-builder
+#      closure (cross-built or substituted aarch64 NixOS), which the
+#      ballos-vm test build doesn't need to validate. Skipping it keeps
+#      the test build cheap.
 {
   config,
   lib,
@@ -226,4 +236,14 @@ in
 
   # sqlite CLI for the test script's assertions.
   environment.systemPackages = [ pkgs.sqlite ];
+
+  # Skip the aarch-builder microvm in tests (see file header). The zfs
+  # dataset for microvm state is still declared in services/nix-builders.nix;
+  # when microvm.host is off, the `microvm` user doesn't exist, so retarget
+  # the dataset's perms.owner to an unconditionally-present user.
+  microvm.host.enable = lib.mkForce false;
+  microvm.autostart = lib.mkForce [ ];
+  microvm.vms = lib.mkForce { };
+  zfs.pools.tank.datasets."enc/microvms".perms.owner = lib.mkForce "root";
+  zfs.pools.tank.datasets."enc/microvms".perms.group = lib.mkForce "root";
 }

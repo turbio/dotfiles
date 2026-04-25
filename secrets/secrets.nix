@@ -28,4 +28,5 @@ in
   "forgejo-oauth-secret.age".publicKeys = all;
   "forgejo-webhook-secret.age".publicKeys = all;
   "forgejo-admin-password.age".publicKeys = all;
+  "nix-builders-ssh-key.age".publicKeys = all;
 }

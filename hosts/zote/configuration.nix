@@ -2,19 +2,6 @@
 {
   networking.firewall.enable = false;
 
-  networking.hosts = {
-    # TODO: ewww VPN FIXE THIS
-    "192.168.86.114" = [
-      "nixcache.turb.io"
-      "int.turb.io"
-      "bt.int.turb.io"
-      "jelly.int.turb.io"
-      "ollama.int.turb.io"
-      "sync.int.turb.io"
-      "home.int.turb.io"
-    ];
-  };
-
   nix.settings.system-features = [
     "gccarch-armv7-a"
   ];

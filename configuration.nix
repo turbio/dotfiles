@@ -8,15 +8,6 @@
 }:
 let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
-  inVPN =
-    hostname == "ballos" || hostname == "backle" || hostname == "cackle" || hostname == "aackle";
-  inLAN =
-    hostname == "ballos"
-    || hostname == "zote"
-    || hostname == "itoh"
-    || hostname == "tivni"
-    || hostname == "j1"
-    || hostname == "j2";
 in
 {
   documentation.man.generateCaches = false; # building the cache takes forver and I don't use it
@@ -27,29 +18,6 @@ in
     (final: prev: {
     })
   ];
-
-  networking.hosts = {
-    # TODO: ewww VPN FIXE THIS
-    "100.100.57.46" = lib.mkIf inVPN [
-      "nixcache.turb.io"
-      "int.turb.io"
-      "bt.int.turb.io"
-      "jelly.int.turb.io"
-      "ollama.int.turb.io"
-      "sync.int.turb.io"
-      "home.int.turb.io"
-    ];
-
-    "192.168.86.114" = lib.mkIf inLAN [
-      "nixcache.turb.io"
-      "int.turb.io"
-      "bt.int.turb.io"
-      "jelly.int.turb.io"
-      "ollama.int.turb.io"
-      "sync.int.turb.io"
-      "home.int.turb.io"
-    ];
-  };
 
   nix = {
     #autoOptimiseStore = true;

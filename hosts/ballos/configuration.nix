@@ -473,7 +473,6 @@ in
     defaultListenAddresses = [
       "100.100.57.46"
       "[fd7a:115c:a1e0::2233:392e]"
-      "192.168.86.114"
     ];
 
     enable = true;
@@ -1224,7 +1223,7 @@ in
     };
     buildSystems = [
       "x86_64-linux"
-      "aarch64-linux"
+      #"aarch64-linux"
     ];
     branches.all.matchGlob = "*";
   };

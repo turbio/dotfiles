@@ -473,6 +473,7 @@ in
     defaultListenAddresses = [
       "100.100.57.46"
       "[fd7a:115c:a1e0::2233:392e]"
+      "0.0.0.0"
     ];
 
     enable = true;
@@ -1226,6 +1227,7 @@ in
       #"aarch64-linux"
     ];
     branches.all.matchGlob = "*";
+    evalWorkerCount = 4;
   };
 
   services.buildbot-nix.worker = {

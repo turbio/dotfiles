@@ -19,9 +19,6 @@ let
 
   bootstrapEnv = pkgs.python3.withPackages (ps: [ ps.bcrypt ]);
 
-  # SSH public keys attached to the forgejo admin user, authorizing
-  # `git push git@forge.turb.io:turbio/...`. Idempotent in the bootstrap
-  # service; add more entries as needed.
   adminSshKeys = {
     turbio-main = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n";
   };
@@ -82,6 +79,23 @@ in
       service.DISABLE_REGISTRATION = true;
       session.COOKIE_SECURE = true;
       actions.ENABLED = false;
+
+      # Apply repack.writeBitmaps to every `git` invocation forgejo makes
+      # (including the cron gc below), so reachability bitmaps are kept up
+      # to date. Without bitmaps, fresh clones of large repos (e.g.
+      # turbio/nixpkgs) walk the full object graph server-side and blow
+      # past nginx's 60s proxy_read_timeout, producing HTTP 504.
+      "git.config" = {
+        "repack.writeBitmaps" = true;
+      };
+
+      # Periodic git gc / repack across all repos so bitmaps and
+      # commit-graphs stay current as refs move.
+      "cron.git_gc_repos" = {
+        ENABLED = true;
+        RUN_AT_START = false;
+        SCHEDULE = "@every 24h";
+      };
     };
   };
 

@@ -169,7 +169,8 @@
                       url = "https://github.com/yandex/gixy/compare/6f68624a7540ee51316651bda656894dc14c9a3e...b1c6899b3733b619c244368f0121a01be028e8c2.patch";
                       hash = "sha256-jAF5WxMwTKTiCvEQF2xQnTBp6S2Yzpgq6mPugVKQksM=";
                     })
-                  ] ++ builtins.tail old.patches;
+                  ]
+                  ++ builtins.tail old.patches;
                 });
               })
             ];
@@ -251,13 +252,6 @@
         { }
         // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
         // {
-          devvm = import ./devvm.nix {
-            inherit mksystem;
-            inherit lib;
-            inherit (inputs) microvm;
-            pkgs = import nixpkgs { system = "x86_64-linux"; };
-          };
-
           vim =
             let
               pkgs = import nixpkgs {

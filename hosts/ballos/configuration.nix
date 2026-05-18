@@ -328,7 +328,7 @@ in
       # tailscale0 needs masquerade for peers using ballos as an exit node
       "tailscale0"
     ];
-    externalInterface = "enp4s0";
+    externalInterface = "bond0";
     enableIPv6 = true;
   };
 

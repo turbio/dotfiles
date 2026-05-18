@@ -77,13 +77,15 @@ in
     repos.microvm.nixosModules.host
   ];
 
-  zfs.pools.tank.datasets."enc/microvms" = {
-    perms.owner = "microvm";
-    perms.group = "kvm";
-    perms.mode = "750";
-  };
+  /*
+    zfs.pools.tank.datasets."enc/microvms" = {
+      perms.owner = "microvm";
+      perms.group = "kvm";
+      perms.mode = "750";
+    };
+  */
 
-  microvm.host.enable = true;
+  microvm.host.enable = false;
   microvm.stateDir = config.zfs.pools.tank.datasets."enc/microvms".mountpoint;
   microvm.autostart = [ "aarch-builder" ];
 

@@ -8,9 +8,6 @@
     isNormalUser = true;
     description = "Remote-build account for ballos's nix-daemon";
     openssh.authorizedKeys.keys = [
-      # The trailing comment is the literal -C value from ssh-keygen and
-      # reflects when the key was first generated (originally for the
-      # aarch-builder VM, now reused for j1/j2 too).
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZmfZntnzKWbcWMPghM4kPaDbfbYATLwwnNUJp4EbVT ballos-aarch-builder"
     ];
   };

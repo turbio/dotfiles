@@ -54,6 +54,14 @@
     dhcpV4Config.RouteMetric = 2000;
   };
 
+  # avoid arp flux
+  boot.kernel.sysctl = {
+    "net.ipv4.conf.all.arp_ignore" = 1;
+    "net.ipv4.conf.all.arp_announce" = 2;
+    "net.ipv4.conf.default.arp_ignore" = 1;
+    "net.ipv4.conf.default.arp_announce" = 2;
+  };
+
   services.resolved.enable = true;
   services.resolved.llmnr = "false";
   services.resolved.extraConfig = ''

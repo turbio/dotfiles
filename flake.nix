@@ -18,11 +18,6 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
-    microvm = {
-      url = "github:microvm-nix/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     github-copilot-vim = {
       flake = false;
       url = "github:github/copilot.vim";
@@ -223,9 +218,8 @@
         fn:
         builtins.readDir ./hosts
         |> builtins.attrNames
-        # hosts/vm is a placeholder filled in by devvm.nix (it pulls in the
-        # microvm module + actual config); the bare nixosConfiguration would
-        # fail eval for lack of a root fs, so skip it here.
+        # hosts/vm is an empty placeholder; the bare nixosConfiguration
+        # would fail eval for lack of a root fs, so skip it here.
         |> builtins.filter (c: c != "vm")
         |> map (c: {
           name = c;

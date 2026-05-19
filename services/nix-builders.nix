@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  repos,
   ...
 }:
 let
@@ -10,17 +9,8 @@ let
 
   builders = [
     {
-      alias = "aarch-builder";
-      hostName = "127.0.0.1";
-      port = 22022;
-      systems = [ "aarch64-linux" ];
-      maxJobs = 4;
-      speedFactor = 1;
-      verifyHostKey = false;
-    }
-    {
       alias = "j1";
-      hostName = "j1";
+      hostName = "j1.lan";
       port = 22;
       systems = [ "x86_64-linux" ];
       maxJobs = 8;
@@ -29,7 +19,7 @@ let
     }
     {
       alias = "j2";
-      hostName = "j2";
+      hostName = "j2.lan";
       port = 22;
       systems = [ "x86_64-linux" ];
       maxJobs = 8;
@@ -73,75 +63,6 @@ let
   };
 in
 {
-  imports = [
-    repos.microvm.nixosModules.host
-  ];
-
-  /*
-    zfs.pools.tank.datasets."enc/microvms" = {
-      perms.owner = "microvm";
-      perms.group = "kvm";
-      perms.mode = "750";
-    };
-  */
-
-  microvm.host.enable = false;
-  microvm.stateDir = config.zfs.pools.tank.datasets."enc/microvms".mountpoint;
-  microvm.autostart = [ "aarch-builder" ];
-
-  microvm.vms.aarch-builder = {
-    autostart = true;
-    pkgs = null;
-    extraModules = [
-      ../modules/nix-remote-builder.nix
-    ];
-    config = {
-      nixpkgs.crossSystem.config = "aarch64-unknown-linux-gnu";
-
-      networking.hostName = "aarch-builder";
-
-      microvm = {
-        hypervisor = "qemu";
-        cpu = "neoverse-n1";
-        vcpu = 4;
-        mem = 16384;
-        balloon = true;
-        writableStoreOverlay = "/nix/.rw-store";
-        volumes = [
-          {
-            image = "nix-store-overlay.img";
-            mountPoint = "/nix/.rw-store";
-            size = 16384;
-          }
-        ];
-
-        # qemu user-mode SLiRP networking with a host-port forward to
-        # the guest's sshd. No TAP, no bridge, no host networkd — the
-        # SLiRP stack is qemu's userspace NAT.
-        interfaces = [
-          {
-            type = "user";
-            id = "eth0";
-            mac = "02:00:00:AA:AA:01";
-          }
-        ];
-        forwardPorts = [
-          {
-            from = "host";
-            host.address = "127.0.0.1";
-            host.port = 22022;
-            guest.port = 22;
-          }
-        ];
-      };
-
-      services.openssh.enable = true;
-
-      services.getty.autologinUser = "root";
-      system.stateVersion = "25.11";
-    };
-  };
-
   age.secrets."nix-builders-ssh-key".owner = "root";
   age.secrets."nix-builders-ssh-key".mode = "0400";
 

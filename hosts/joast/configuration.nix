@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/nix-remote-builder.nix
+    ../../modules/ipmi-exporter.nix
   ];
 
   networking.firewall.enable = false;

@@ -85,7 +85,7 @@ in
     uid = 1000;
 
     hashedPasswordFile = lib.mkIf (
-      hostname != "zote" && hostname != "j1" && hostname != "j2"
+      hostname != "zote" && hostname != "joast" && hostname != "j2"
     ) config.age.secrets.userpassword.path;
 
     shell = pkgs.zsh;

@@ -9,8 +9,8 @@ let
 
   builders = [
     {
-      alias = "j1";
-      hostName = "j1.lan";
+      alias = "joast";
+      hostName = "joast.lan";
       port = 22;
       systems = [ "x86_64-linux" ];
       maxJobs = 8;

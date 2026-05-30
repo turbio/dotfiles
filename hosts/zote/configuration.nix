@@ -1,5 +1,9 @@
 { pkgs, lib, ... }:
 {
+  imports = [
+    ../../modules/ipmi-exporter.nix
+  ];
+
   networking.firewall.enable = false;
 
   nix.settings.system-features = [

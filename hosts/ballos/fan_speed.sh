@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
 			VERBOSE_LOG=1
 			shift
 			;;
-		-*|--*)
+		-*)
 			echo "Unknown option $1"
 			exit 1
 			;;
@@ -50,8 +50,8 @@ fi
 echo "started fanspeed, disengage_temp=$disengage_temp target_temp=$target_temp"
 
 function get_temp {
-	local TEMP=$(ipmitool sdr type temperature | grep -o -e '[0-9][0-9] degrees' | grep -o -e '[0-9][0-9]' | sort -r | head -1)
-	echo $TEMP
+	TEMP=$(ipmitool sdr type temperature | grep -o -e '[0-9][0-9] degrees' | grep -o -e '[0-9][0-9]' | sort -r | head -1)
+	echo "$TEMP"
 }
 
 function set_dynamic {
@@ -65,11 +65,12 @@ function set_speed {
 }
 
 
-kd=0.0 # todo: the derivative
-ki=0.01
+kd=1.0
+ki=0.1
 kp=1.0
 
 integral=0.0
+running_err=0.0
 
 pid_enabled=1
 
@@ -90,24 +91,30 @@ while true; do
 	fi
 
 	if [[ "$pid_enabled" == "0" ]]; then
-		sleep $interval
+		sleep "$interval"
 		continue
 	fi
 
-	err=$(echo "$temp - $target_temp" | bc)
-	integral=$(echo "$integral + $err * $ki" | bc)
-	p=$(echo "$err * $kp" | bc)
-	pct=$(printf %.0f  $(echo "$p + $integral" | bc))
+	err=$(echo "$temp - $target_temp" | bc -l)
+	integral=$(echo "$integral + $err * $ki" | bc -l)
+	derivative=$(echo "($err - $running_err) * $kd" | bc -l)
+	running_err=$(echo "($err + $running_err) / 2.0" | bc -l)
+	proportion=$(echo "$err * $kp" | bc -l)
+	pct=$(printf %.0f  "$(echo "$proportion + $integral + $derivative" | bc -l)")
 
 	if (( $(echo "$integral < 0" | bc -l) )); then
 		integral="0.0"
+	fi
+
+	if (( $(echo "$integral > 110" | bc -l) )); then
+		integral="100.0"
 	fi
 
 	if [[ "$VERBOSE_LOG" == "1" ]]; then
 		echo "temp=${temp}\
 	disengage_temp=${disengage_temp}\
 	target_temp=${target_temp}\
-	pid controller: (error: $err) $p + $integral = $pct%";
+	pid controller: (error: $err) (running error: $running_err) P $proportion + I $integral + D $derivative = $pct%";
 	fi
 
 	if [[ "$pct" -ge "100" ]]; then
@@ -115,8 +122,8 @@ while true; do
 	elif [[ "$pct" -le "5" ]]; then
 		set_speed 5
 	else
-		set_speed $pct
+		set_speed "$pct"
 	fi
 
-	sleep $interval
+	sleep "$interval"
 done

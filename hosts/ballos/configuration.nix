@@ -206,6 +206,13 @@ in
     };
   };
 
+  services.nginx.virtualHosts."colotop.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+    http2 = true;
+    locations."/".proxyPass = "http://127.0.0.1:8080";
+  };
+
   services.nginx.virtualHosts."nice.meme" = {
     http2 = true;
     forceSSL = true;
@@ -898,24 +905,10 @@ in
         fallback_scrape_protocol = "OpenMetricsText1.0.0";
       }
       {
-        job_name = "big-ups";
-        scrape_interval = "1s";
-        static_configs = [
-          { targets = [ "big-ups.lan:8080" ]; }
-        ];
-      }
-      {
         job_name = "prometheus";
         scrape_interval = "5s";
         static_configs = [
           { targets = [ "127.0.0.1:9090" ]; }
-        ];
-      }
-      {
-        job_name = "reth";
-        scrape_interval = "5s";
-        static_configs = [
-          { targets = [ "127.0.0.1:9551" ]; }
         ];
       }
       {
@@ -954,6 +947,30 @@ in
         scrape_interval = "10s";
         static_configs = [
           { targets = [ "127.0.0.1:9010" ]; }
+        ];
+      }
+      {
+        job_name = "raritan-pdu";
+        scrape_interval = "30s";
+        scrape_timeout = "10s";
+        scheme = "https";
+        metrics_path = "/cgi-bin/dump_prometheus.cgi";
+        basic_auth = {
+          username = "admin";
+          password = "ZCG8ihvcznuHPdzvVYig";
+        };
+        tls_config = {
+          insecure_skip_verify = true;
+        };
+        static_configs = [
+          {
+            targets = [ "192.168.88.246:443" ];
+            labels.host = "raritan-pdu-112";
+          }
+          {
+            targets = [ "192.168.88.247:443" ];
+            labels.host = "raritan-pdu-113";
+          }
         ];
       }
       {
@@ -1059,9 +1076,91 @@ in
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.process.port}" ]; }
         ];
       }
+      {
+        job_name = "snmp_exporter";
+        scrape_interval = "1m";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}" ]; }
+        ];
+      }
+      # Low-res tier: full if_mib walk (everything) once a minute. The CRS326
+      # (.245) takes ~8.5s for this, so timeout is generous and well under 60s.
+      {
+        job_name = "snmp";
+        scrape_interval = "300s";
+        scrape_timeout = "20s";
+        metrics_path = "/snmp";
+        # module defaults to if_mib when no __param_module is set
+        static_configs = [
+          {
+            targets = [
+              "192.168.88.1"
+              "192.168.88.245"
+              "192.168.88.252"
+              "192.168.50.1"
+            ];
+          }
+        ];
+        relabel_configs = [
+          {
+            source_labels = [ "__address__" ];
+            target_label = "__param_target";
+          }
+          {
+            source_labels = [ "__param_target" ];
+            target_label = "instance";
+          }
+          {
+            target_label = "__address__";
+            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}";
+          }
+        ];
+      }
+      {
+        job_name = "snmp_bw";
+        scrape_interval = "10s";
+        scrape_timeout = "9s";
+        metrics_path = "/snmp";
+        params.module = [ "if_bw_fast" ];
+        static_configs = [
+          {
+            targets = [
+              "192.168.88.1"
+              "192.168.88.245"
+              "192.168.88.252"
+              "192.168.50.1"
+            ];
+          }
+        ];
+        relabel_configs = [
+          {
+            source_labels = [ "__address__" ];
+            target_label = "__param_target";
+          }
+          {
+            source_labels = [ "__param_target" ];
+            target_label = "instance";
+          }
+          {
+            target_label = "__address__";
+            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}";
+          }
+        ];
+      }
     ];
 
     exporters = {
+      snmp = {
+        enable = true;
+        configurationPath =
+          /*
+                                   pkgs.fetchurl {
+              url = "https://raw.githubusercontent.com/prometheus/snmp_exporter/1178915b46b49eb80a976eaadd6d7b3f921283d5/snmp.yml";
+              hash = "sha256-yztr+9T0wLXr/ZM9pXShbIfiGdNmgD8IbunvfAxicSQ=";
+            }
+          */
+          ./snmp.yml;
+      };
       process = {
         enable = true;
         settings.process_names = [
@@ -1087,9 +1186,11 @@ in
           targets = [
             "8.8.8.8"
             "1.1.1.1"
-            "10.100.0.1"
-            "turb.io"
-            "udm-se.lan"
+            "google.com"
+            "facebook.com"
+            "www.microsoft.com"
+            "www.apple.com"
+            "www.amazon.com"
           ];
         };
       };
@@ -1105,10 +1206,35 @@ in
                 files = [ "/var/log/nginx/access.log" ];
               };
               relabel_configs = [
-                {
-                  target_label = "host";
-                  from = "host";
-                }
+                (
+                  let
+                    vhostNames = builtins.attrNames config.services.nginx.virtualHosts;
+                    escapeRegex = lib.replaceStrings [ "." ] [ "\\." ];
+                    exactVhosts = builtins.filter (n: !(lib.hasPrefix "*" n) && n != "_") vhostNames;
+                    wildcardVhosts = builtins.filter (lib.hasPrefix "*.") vhostNames;
+                    # nginx prefers the longest wildcard match; sort by length desc
+                    wildcardsByLength = lib.sort (a: b: lib.stringLength a > lib.stringLength b) wildcardVhosts;
+                  in
+                  {
+                    target_label = "host";
+                    from = "host";
+                    matches =
+                      (map (n: {
+                        regexp = "^${escapeRegex n}$";
+                        replacement = n;
+                      }) exactVhosts)
+                      ++ (map (w: {
+                        regexp = "^.+${escapeRegex (lib.removePrefix "*" w)}$";
+                        replacement = w;
+                      }) wildcardsByLength)
+                      ++ [
+                        {
+                          regexp = ".*";
+                          replacement = "_";
+                        }
+                      ];
+                  }
+                )
               ];
               histogram_buckets = [
                 0.005

@@ -212,9 +212,21 @@ in
     useACMEHost = "nice.meme";
     root = ./nice.meme;
     extraConfig = ''
-      error_page 404 =200 /index.html;
+      error_page 404 = @fsfallback;
       charset utf-8;
     '';
+
+    locations."@fsfallback" = {
+      root = "/tank/enc/http/$host";
+      extraConfig = ''
+        try_files $uri @spafallback;
+      '';
+    };
+    locations."@spafallback" = {
+      extraConfig = ''
+        try_files /index.html =404;
+      '';
+    };
 
     locations."/tessa" = {
       root = "/nix/store/9pi7db2qa4a4zk7zrjq6907gi3lp5dlf-source";
@@ -250,6 +262,15 @@ in
 
       what a deal
     '';
+    extraConfig = ''
+      error_page 404 = @fsfallback;
+    '';
+    locations."@fsfallback" = {
+      root = "/tank/enc/http/$host";
+      extraConfig = ''
+        try_files $uri =404;
+      '';
+    };
   };
 
   services.nginx.virtualHosts."masonclayton.com" = {
@@ -258,6 +279,15 @@ in
     root = pkgs.writeTextDir "index.html" ''
       heyo
     '';
+    extraConfig = ''
+      error_page 404 = @fsfallback;
+    '';
+    locations."@fsfallback" = {
+      root = "/tank/enc/http/$host";
+      extraConfig = ''
+        try_files $uri =404;
+      '';
+    };
   };
 
   services.nginx.virtualHosts."molters.xyz" = {

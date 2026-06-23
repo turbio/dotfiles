@@ -54,6 +54,13 @@ in
       index = "index.txt";
     };
 
+    locations."@fsfallback" = {
+      root = "/tank/enc/http/$host";
+      extraConfig = ''
+        try_files $uri /404.txt;
+      '';
+    };
+
     locations."=/404.txt" = {
       return = "404";
       root = "${turbio404}";
@@ -64,7 +71,7 @@ in
     };
 
     extraConfig = ''
-      error_page 404 /404.txt;
+      error_page 404 = @fsfallback;
       charset utf-8;
     '';
   };

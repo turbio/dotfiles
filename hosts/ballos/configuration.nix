@@ -1014,9 +1014,9 @@ in
             };
           }
           {
-            targets = [ "j1.lan:9100" ];
+            targets = [ "joast.lan:9100" ];
             labels = {
-              host = "j1";
+              host = "joast";
             };
           }
           {

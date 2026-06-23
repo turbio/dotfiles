@@ -8,6 +8,7 @@
   netboot.macAddresses = [
     "b8:83:03:7f:01:54"
     "b8:83:03:7f:01:54"
+    "94:40:c9:f2:36:74"
   ];
   netboot.storeImageFormat = "erofs";
 

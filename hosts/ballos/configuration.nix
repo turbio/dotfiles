@@ -860,10 +860,12 @@ in
       pkgs.ipmitool
       pkgs.bc
       pkgs.bash
+      pkgs.lm_sensors
+      pkgs.gawk
     ];
     serviceConfig = {
       User = "root";
-      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --disengage-temp 74 --target-temp 55";
+      ExecStart = "${pkgs.bash}/bin/bash ${./fan_speed.sh} --disengage-temp 80 --target-temp 60 --verbose-log";
     };
   };
 

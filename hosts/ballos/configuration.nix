@@ -884,6 +884,30 @@ in
     };
   };
 
+  power.ups = {
+    enable = true;
+    mode = "standalone";
+    upsmon.enable = false;
+    ups.ups0 = {
+      driver = "usbhid-ups";
+      port = "auto";
+      description = "CyberPower CP2000PFCRM2U";
+      directives = [
+        "vendorid = 0764"
+        "serial = CYWQY7003869"
+      ];
+    };
+    ups.ups1 = {
+      driver = "usbhid-ups";
+      port = "auto";
+      description = "CyberPower CP2000PFCRM2U";
+      directives = [
+        "vendorid = 0764"
+        "serial = CYWQY7003858"
+      ];
+    };
+  };
+
   services.prometheus = {
     enable = true;
     port = 9090;
@@ -1035,6 +1059,33 @@ in
         ];
       }
       {
+        job_name = "nut";
+        scrape_interval = "15s";
+        metrics_path = "/ups_metrics";
+        static_configs = [
+          {
+            targets = [
+              "ups0"
+              "ups1"
+            ];
+          }
+        ];
+        relabel_configs = [
+          {
+            source_labels = [ "__address__" ];
+            target_label = "__param_ups";
+          }
+          {
+            source_labels = [ "__param_ups" ];
+            target_label = "ups";
+          }
+          {
+            target_label = "__address__";
+            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.nut.port}";
+          }
+        ];
+      }
+      {
         job_name = "nginx";
         scrape_interval = "1s";
         static_configs = [
@@ -1150,11 +1201,28 @@ in
     ];
 
     exporters = {
+      nut = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+        nutVariables = [
+          "battery.charge"
+          "battery.runtime"
+          "battery.voltage"
+          "battery.voltage.nominal"
+          "input.voltage"
+          "input.voltage.nominal"
+          "output.voltage"
+          "ups.load"
+          "ups.realpower"
+          "ups.power"
+          "ups.status"
+        ];
+      };
       snmp = {
         enable = true;
         configurationPath =
           /*
-                                   pkgs.fetchurl {
+            pkgs.fetchurl {
               url = "https://raw.githubusercontent.com/prometheus/snmp_exporter/1178915b46b49eb80a976eaadd6d7b3f921283d5/snmp.yml";
               hash = "sha256-yztr+9T0wLXr/ZM9pXShbIfiGdNmgD8IbunvfAxicSQ=";
             }

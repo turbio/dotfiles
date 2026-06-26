@@ -1427,7 +1427,7 @@ in
 
   services.buildbot-nix.master = {
     enable = true;
-    domain = "buildbot.turb.io";
+    domain = "ci.turb.io";
     workersFile = pkgs.writeText "buildbot-workers.json" (
       builtins.toJSON [
         {
@@ -1485,7 +1485,7 @@ in
     bindsTo = [ "buildbot-master.service" ];
   };
 
-  services.nginx.virtualHosts."buildbot.turb.io" = {
+  services.nginx.virtualHosts."ci.turb.io" = {
     forceSSL = true;
     useACMEHost = "turb.io";
   };

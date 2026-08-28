@@ -1,4 +1,8 @@
 { pkgs, ... }:
+let
+  # blurred-screenshot locker; runtime deps are baked into the script
+  lock = pkgs.callPackage ../../packages/lock.nix { };
+in
 {
   # logind's uaccess tagging (via 60-steam-input.rules) sets ACLs on /dev/uinput
   # that strip group permissions, breaking kanata's DynamicUser group-based access.
@@ -157,8 +161,9 @@
 
   security.pam.services.swaylock = { };
 
-  environment.systemPackages = with pkgs; [
-    swaylock
+  environment.systemPackages = [
+    pkgs.swaylock
+    lock
   ];
 
   systemd.user.services.swayidle = {
@@ -166,18 +171,19 @@
     after = [ "graphical-session.target" ];
     wantedBy = [ "graphical-session.target" ];
 
-    path = with pkgs; [
-      swaylock
-      niri
-    ];
-
     serviceConfig = {
+      # -w holds the sleep inhibitor until lock returns, so we never suspend
+      # ahead of the lock actually being up. 'lock' picks up
+      # loginctl lock-session too.
       ExecStart = ''
         ${pkgs.swayidle}/bin/swayidle -w \
-          timeout 600 'swaylock -f' \
-          before-sleep 'swaylock -f'
+          timeout 600 '${lock}/bin/lock' \
+          before-sleep '${lock}/bin/lock' \
+          lock '${lock}/bin/lock'
       '';
-      Restart = "on-failure";
+      # the watcher dying is itself a way to end up never locking
+      Restart = "always";
+      RestartSec = 1;
     };
   };
 }

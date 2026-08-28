@@ -144,7 +144,6 @@ nix \
 	build \
 	.#nixosConfigurations."$WHOMST".config.system.build.toplevel \
 	--out-link "$scratch_dir/toplevel" \
-	--builders "$BUILDERS" \
 	-v \
 	--builders-use-substitutes #--log-format internal-json #|& nom --json
 

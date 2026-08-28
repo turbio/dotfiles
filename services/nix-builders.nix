@@ -10,18 +10,16 @@ let
   builders = [
     {
       alias = "joast";
-      hostName = "joast.lan";
+      hostName = "aux.joast.int.turb.io";
       port = 22;
-      systems = [ "x86_64-linux" ];
-      maxJobs = 8;
-      speedFactor = 2;
-      verifyHostKey = true;
-    }
-    {
-      alias = "j2";
-      hostName = "j2.lan";
-      port = 22;
-      systems = [ "x86_64-linux" ];
+      # aarch64/armv7l/i686 are binfmt-emulated on joast (hosts/joast) —
+      # slow per-core but it has 80 of them
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "armv7l-linux"
+        "i686-linux"
+      ];
       maxJobs = 8;
       speedFactor = 2;
       verifyHostKey = true;
@@ -58,6 +56,7 @@ let
       "benchmark"
       "nixos-test"
       "kvm"
+      "gccarch-armv7-a"
     ];
     protocol = "ssh-ng";
   };

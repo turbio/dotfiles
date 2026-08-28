@@ -7,12 +7,14 @@ let
   mote = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEIKavDGGzGemCCwZ0n06JlwW/hAPxLMbLTdrrm2hAKS";
   curly = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLLasBaQX/IdGPbnrD5TyPKHOBwaSnZNC9irMv16Bi1";
   itoh = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMRyt+V0ZWL+ISnC7J/d07Sj8k8/yZn2pkFCDC16XTvA";
+  joast = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBOJ/J+mKaSFqz6HwYJv0jNhfNRGKdWydZaCDfW5iAdK";
   all = [
     me
     aackle
     backle
     cackle
     ballos
+    joast
     mote
     curly
     itoh
@@ -28,5 +30,12 @@ in
   "forgejo-oauth-secret.age".publicKeys = all;
   "forgejo-webhook-secret.age".publicKeys = all;
   "forgejo-admin-password.age".publicKeys = all;
+  # buildbot's forgejo api token (was minted imperatively by the old
+  # forgejo-bootstrap unit at /var/lib/forgejo-bootstrap/api-token; the
+  # buildbot vm receives it host-delivered)
+  "forgejo-api-token.age".publicKeys = all;
+  # ipinfo.io geoip download token (akvorado vm, host-delivered; was an
+  # out-of-band file at /var/lib/akvorado-geoip/token)
+  "ipinfo-token.age".publicKeys = all;
   "nix-builders-ssh-key.age".publicKeys = all;
 }

@@ -20,6 +20,8 @@
     isSystemUser = true;
     group = "ipmi-exporter";
   };
+
+  # TODO: this rule won't apply to existing devices by nixos switch, gotta `udevadm trigger`
   services.udev.extraRules = ''
     KERNEL=="ipmi*", MODE="660", GROUP="ipmi-exporter"
   '';

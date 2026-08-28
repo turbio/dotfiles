@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-6E4JY4KNSC');
+    </script>
+
+    <title>Nice meme</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+      }
+      h1 {
+        font-size: 5em;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Nice meme</h1>
+    <audio id="audio" src="nice.mp3" type="audio/mpeg" preload="auto" autoplay></audio>
+    <script type="text/javascript">
+      document.addEventListener('touchend', function handleTouch () {
+        document.getElementById('audio').play();
+      });
+      document.addEventListener('click', function handleClick () {
+        document.getElementById('audio').play();
+      });
+    </script>
+</body>
+</html>

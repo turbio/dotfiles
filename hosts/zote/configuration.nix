@@ -43,7 +43,7 @@
 
   # NFS mount for molters home
   fileSystems."/home/molters" = {
-    device = "ballos.lan:/tank/enc/molters";
+    device = "ballos.int.turb.io:/tank/enc/molters";
     fsType = "nfs";
     options = [
       "rw"
@@ -185,15 +185,4 @@
   */
 
   networking.firewall.enable = true;
-  services.ollama = {
-    openFirewall = true;
-    enable = true;
-    user = "ollama";
-    group = "ollama";
-    host = "0.0.0.0";
-    environmentVariables = {
-      OLLAMA_MAX_LOADED_MODELS = "2";
-      OLLAMA_NUM_PARALLEL = "5";
-    };
-  };
 }

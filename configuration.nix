@@ -2,6 +2,7 @@
   config,
   hostname,
   localpkgs,
+  inventory,
   pkgs,
   lib,
   ...
@@ -33,9 +34,18 @@ in
 
       # todo(turbio): lol
       substituters = [
+        # own cache first; lan machines take the internal name (the public
+        # one detours via the cloud edges — bench 2026-07-31: ~22MB/s vs
+        # ~130MB/s direct), lan-less machines (edges, roamers) keep the
+        # public name
+        # (
+        #   if inventory.machines.${hostname} or { } ? lan then
+        #     "https://nixcache.int.turb.io"
+        #   else
+        #     "https://nixcache.turb.io"
+        # )
         "https://nix-community.cachix.org"
         "https://cache.nixos.org/"
-        "https://nixcache.turb.io"
       ];
 
       trusted-public-keys = [

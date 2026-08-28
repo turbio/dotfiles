@@ -14,6 +14,11 @@ let
 
   domains = [
     "turb.io"
+    # not a public zone of its own, but the *.int.turb.io SAN on the turb.io
+    # cert (PLAN.md §4/M3) needs a writable _acme-challenge.int.turb.io —
+    # lego's zone discovery finds this exact-match zone instead of walking up
+    # to the static turb.io zone and getting REFUSED
+    "int.turb.io"
     "turbi.ooo"
     "masonclayton.com"
     "nice.meme"

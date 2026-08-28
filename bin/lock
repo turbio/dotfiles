@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+mkdir -p /tmp/lb
+
+readarray -t outs < <(niri msg --json outputs | jq 'values[].name' --raw-output)
+
+for o in "${outs[@]}"; do
+
+	{
+		n="scr-$o.png"
+		f="/tmp/lb/$n"
+		fb="/tmp/lb/blur.$n"
+
+		#grim -c -s 0.5 -o "$o" "$f"
+		grim -c -s 1 -o "$o" "$f"
+
+		#magick "$f" -scale 10% -blur 0x0.1 -resize 1000% "$fb"
+		#blur_image -d /dev/dri/renderD129 -p 1 -r 1 "$f" -o "$fb"
+		#blur_image -p 1 -r 1 "$f" -o "$fb"
+		stackblur -in "$f" -out "$fb" -radius 20
+	} &
+done
+
+wait
+
+swaylock --no-unlock-indicator $(
+	for o in "${outs[@]}"; do
+		n="scr-$o.png"
+		fb="/tmp/lb/blur.$n"
+		echo "--image $o:$fb"
+	done
+)

@@ -19,7 +19,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "gero"
             "curly"
           ];
@@ -28,7 +28,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "gero"
             "itoh"
             "curly"
@@ -38,7 +38,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "gero"
             "iphone"
             "curly"
@@ -49,7 +49,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "iphone"
           ];
         };
@@ -57,7 +57,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "curly"
             "itoh"
             "gero"
@@ -67,7 +67,7 @@
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";
           devices = [
-            "ballos"
+            "syncthing"
             "curly"
             "itoh"
             "gero"
@@ -78,10 +78,16 @@
         iphone = {
           id = "U6DSDQT-RHHKWPS-T5AI3LN-VVZSIAP-WOLWDDJ-GEC4JE6-LSL45CH-GGCXZQU";
         };
-        ballos = {
+        # the home instance, in vms/syncthing on joast since 2026-08-28 —
+        # hence the vm's address, reachable from the lan directly and from
+        # the tailnet over the 10.42.0.0/16 route joast advertises. the id
+        # predates the move and was named after ballos: the cert travelled
+        # with the tank pool when joast took over, so the machine changed
+        # underneath it twice while the device stayed the same
+        syncthing = {
           addresses = [
-            "tcp://${inventory.machines.ballos.tailscale.ip6}:22000"
-            "tcp://${inventory.machines.ballos.tailscale.ip4}:22000"
+            "tcp://[${inventory.vms.syncthing.addr.ip6}]:22000"
+            "tcp://${inventory.vms.syncthing.addr.ip4}:22000"
           ];
           id = "6SH2YN7-U5D7HOJ-NE4QYNS-E3MIXKO-XIWYIUA-TZBEAHU-4LH3XFK-VHLBGAQ";
         };

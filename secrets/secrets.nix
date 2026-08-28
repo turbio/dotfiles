@@ -4,7 +4,6 @@ let
   backle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFPCXE7qQxOFsDTxN0/LLExtNr2oRYxnMvJyW7UddWhO";
   cackle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM5hSwGfL0Ff+jvnpfPdEQA6uuFCNF0NpBbsCW4i8Qgp";
   ballos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJWYDyDSh9zG0qFoJHMOM0W4QnXPsPZ7Z2D/QkdOQYIq";
-  mote = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEIKavDGGzGemCCwZ0n06JlwW/hAPxLMbLTdrrm2hAKS";
   curly = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLLasBaQX/IdGPbnrD5TyPKHOBwaSnZNC9irMv16Bi1";
   itoh = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMRyt+V0ZWL+ISnC7J/d07Sj8k8/yZn2pkFCDC16XTvA";
   joast = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBOJ/J+mKaSFqz6HwYJv0jNhfNRGKdWydZaCDfW5iAdK";
@@ -15,7 +14,6 @@ let
     cackle
     ballos
     joast
-    mote
     curly
     itoh
   ];
@@ -38,4 +36,13 @@ in
   # out-of-band file at /var/lib/akvorado-geoip/token)
   "ipinfo-token.age".publicKeys = all;
   "nix-builders-ssh-key.age".publicKeys = all;
+
+  # syncthing (vms/syncthing, host-delivered). cert/key ARE the device
+  # identity — the id peers dial is derived from the cert, so these are the
+  # copies of the pair that used to sit unencrypted in
+  # /tank/enc/misc/config. the gui password is plaintext; syncthing-init
+  # bcrypts it into config.xml
+  "syncthing-cert.age".publicKeys = all;
+  "syncthing-key.age".publicKeys = all;
+  "syncthing-gui-password.age".publicKeys = all;
 }

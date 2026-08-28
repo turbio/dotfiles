@@ -3,7 +3,7 @@
 # Known-unmodelable leftovers are listed in appliances/README.md.
 { lib, ... }:
 let
-  inventory = import ../inventory.nix;
+  inventory = import ../lib/inventory.nix;
 
   lanMachines = lib.filterAttrs (_: m: m ? lan && m.lan ? ip4 && m.lan ? mac) inventory.machines;
 
@@ -284,7 +284,7 @@ in
 
   # static leases + .lan names, generated from inventory for every machine
   # that declares lan.{ip4,macs}. STOPGAP: .lan registration died with the
-  # previous router and configs still depend on it (mote.lan, zote.lan, ...);
+  # previous router and configs still depend on it (zote.lan, j2.lan, ...);
   # this resurrects those names declaratively. eventually .lan gets abandoned
   # entirely for the unified int.turb.io hierarchy (PLAN.md §4, M3/M5).
   resource.routeros_ip_dhcp_server_lease = lib.concatMapAttrs (

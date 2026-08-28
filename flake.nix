@@ -27,14 +27,6 @@
       flake = false;
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
     };
-    #zsh-syntax-highlighting = {
-    #  flake = false;
-    #  url = "github:zsh-users/zsh-syntax-highlighting";
-    #};
-    #zsh-history-substring-search = {
-    #  flake = false;
-    #  url = "github:zsh-users/zsh-history-substring-search";
-    #};
     livewallpaper = {
       flake = false;
       url = "github:turbio/live_wallpaper/nixfix";
@@ -89,6 +81,10 @@
     let
       lib = nixpkgs.lib;
 
+      # inventory.nix is data only; lib/inventory.nix derives the addresses,
+      # checks and helpers from it
+      inventory = import ./lib/inventory.nix;
+
       wrappersOverlay =
         final: prev:
         import ./wrappers.nix {
@@ -108,9 +104,6 @@
 
       secretsModuleFor =
         hostname:
-        let
-          inventory = import ./inventory.nix;
-        in
         (inventory.machines.${hostname}.secrets or [ ])
         |> lib.map (s: {
           age.secrets.${s}.file = ./secrets/${s}.age;
@@ -147,7 +140,7 @@
       hostSpecialArgs = hostname: {
         inherit hostname;
         assignments = import ./assignments.nix;
-        inventory = import ./inventory.nix;
+        inherit inventory;
         microvm = inputs.microvm;
         repos = inputs;
       };
@@ -155,7 +148,7 @@
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
-          system = (import ./inventory.nix).machines.${hostname}.arch;
+          system = inventory.machines.${hostname}.arch;
           modules = hostModulesList extraModules hostname;
           specialArgs = hostSpecialArgs hostname;
         };

@@ -23973,8 +23973,8 @@
       },
       {
         "current": {
-          "text": "mote",
-          "value": "mote"
+          "text": "joast",
+          "value": "joast"
         },
         "datasource": {
           "type": "prometheus",

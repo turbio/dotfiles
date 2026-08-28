@@ -556,49 +556,14 @@ in
     };
 
   };
-  services.nginx.virtualHosts."sync.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      allow 192.168.0.0/16;
-      deny all;
-    '';
-    locations."/" = {
-      proxyPass = "http://${config.services.syncthing.guiAddress}";
-    };
-  };
-
-  services.syncthing = {
-    enable = true;
-
-    configDir = "/tank/enc/misc/config";
-    dataDir = "/tank/enc/misc";
-    settings.folders = {
-      "photos" = {
-        enable = true;
-        path = "/tank/enc/photos";
-      };
-      "code" = {
-        enable = true;
-        path = "/tank/enc/code";
-      };
-      "notes" = {
-        enable = true;
-        path = "/tank/enc/misc/notes";
-      };
-      "ios_photos" = {
-        enable = true;
-        path = "/tank/enc/misc/ios_photos";
-      };
-      "clips" = {
-        enable = true;
-        path = "/tank/enc/misc/clips";
-      };
-      "webcamlog" = {
-        enable = true;
-        path = config.zfs.pools.tank.datasets."enc/webcamlog".mountpoint;
-      };
-    };
-  };
+  # syncthing lives in vms/syncthing (cut over 2026-08-28), reading the
+  # same datasets through virtiofs mounts at their host paths. its gui is
+  # the vm's own name — http://syncthing.int.turb.io — with a real password
+  # instead of the ip-allowlisted sync.int.turb.io vhost that used to sit
+  # here (a vhost-only int name, so NXDOMAIN since M3 anyway). leftovers on
+  # disk, remove later (turbio): /tank/enc/misc/config, the old config dir
+  # — the cert/key are secrets/syncthing-{cert,key}.age now and the sqlite
+  # index moved to the vm's blk volume
 
   services.nginx.virtualHosts = {
     "graf.turb.io" = {

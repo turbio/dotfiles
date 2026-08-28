@@ -111,8 +111,8 @@
       "x86_64-linux"
     ];
     branches.all.matchGlob = "*";
-    # mote's cudaSupport makes opencv a from-source build whose cuda link
-    # steps go >20min without output; the 1200s default killed it at 97%
+    # cudaSupport makes opencv a from-source build whose cuda link steps go
+    # >20min without output; the 1200s default killed one at 97%
     buildMaxSilentTime = 7200;
     # each eval worker can hit ~15G on this repo (ballos embeds all the vm
     # systems); two keeps peak inside the vm's 32G with room for builds

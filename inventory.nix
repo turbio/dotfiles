@@ -2,87 +2,33 @@
 # name. Addresses, DNS, routes, firewall policy, and appliance config all
 # derive from here (see PLAN.md).
 #
+# This file is data only — no functions, no function application, nothing to
+# evaluate. Everything derived from it (vm address hashing, the
+# uniqueness/reserved-range checks, storage path helpers, selector
+# normalization) lives in lib/inventory.nix, and consumers import that.
+#
 # Identity is the name alone. VM addresses are hashed from the name: the first
 # 16 bits of sha256 become the host part in every family, so a vm's v4 and v6
 # visibly correlate. Collisions and reserved-range hits fail eval; the escape
 # hatch is per-vm `addressSalt` (or an explicit `ip4`/`ip6` override).
 # Physical machines carry explicit addresses since they encode existing
 # reality and the lease window is too small to hash into.
-let
-  hexVal = {
-    "0" = 0;
-    "1" = 1;
-    "2" = 2;
-    "3" = 3;
-    "4" = 4;
-    "5" = 5;
-    "6" = 6;
-    "7" = 7;
-    "8" = 8;
-    "9" = 9;
-    "a" = 10;
-    "b" = 11;
-    "c" = 12;
-    "d" = 13;
-    "e" = 14;
-    "f" = 15;
-  };
-
-  chars = s: builtins.genList (i: builtins.substring i 1 s) (builtins.stringLength s);
-  hexToInt = s: builtins.foldl' (a: c: a * 16 + hexVal.${c}) 0 (chars s);
-
-  hashHex = name: builtins.substring 0 4 (builtins.hashString "sha256" name);
-  hash16 = name: hexToInt (hashHex name);
-
-  # what actually gets hashed: the name, or name~salt when a collision forced
-  # a salt
-  hashKey =
-    name: cfg: if (cfg.addressSalt or 0) == 0 then name else "${name}~${toString cfg.addressSalt}";
-
-  vmAddrs =
-    key:
-    let
-      h = hash16 key;
-      hex = hashHex key;
-      full = builtins.hashString "sha256" key;
-      b = i: builtins.substring i 2 full;
-    in
-    {
-      hash = h;
-      ip4 = "10.42.${toString (h / 256)}.${toString (h - (h / 256) * 256)}";
-      ip6 = "${net.vm.ulaPrefix}${hex}";
-      mac = "02:42:${b 0}:${b 2}:${b 4}:${b 6}";
-    };
-
-  # policy selector dsl: expose.to / allow entries are structured objects
-  # built by these constructors, never parsed strings. the _class tag lets
-  # the policy engine (modules/vm-host.nix) reject anything else with a
-  # clear error.
-  #   network "lan"              a whole trust tier (lan / mgmt / tailscale)
-  #   vm "loki"                  another vm, by name
-  #   machine "ballos" [ 9090 ]  a physical machine's ports ([ ] = all).
-  #                              resolved relative to where the vm lives:
-  #                              input rules when hosted on that machine,
-  #                              forward rules when not — so moving a vm
-  #                              never breaks its grants
-  #   cidr "192.168.50.0/24"     a raw range
-  selector =
-    kind: attrs:
-    {
-      _class = "policy-selector";
-      inherit kind;
-    }
-    // attrs;
-  network = name: selector "network" { inherit name; };
-  vm = name: selector "vm" { inherit name; };
-  machine = name: ports: selector "machine" { inherit name ports; };
-  cidr = range: selector "cidr" { inherit range; };
-
-  storage = rec {
+#
+# policy selector dsl: expose.to / allow entries are single-key attrsets,
+# never parsed strings. lib/inventory.nix normalizes them and rejects
+# anything else with a clear error.
+#   { network = "lan"; }              a whole trust tier (lan / mgmt / tailscale)
+#   { vm = "loki"; }                  another vm, by name
+#   { machine = "ballos";             a physical machine's ports (omitted or
+#     ports = [ 9090 ]; }             [ ] = all). resolved relative to where
+#                                     the vm lives: input rules when hosted on
+#                                     that machine, forward rules when not —
+#                                     so moving a vm never breaks its grants
+#   { cidr = "192.168.50.0/24"; }     a raw range
+{
+  storage = {
     pool = "tank";
-    datasetPath = ds: "/${pool}/${ds}";
     vmsDataset = "enc/vms";
-    vmsPath = datasetPath vmsDataset;
   };
 
   net = {
@@ -245,9 +191,9 @@ let
         {
           port = 3001;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "prometheus")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "prometheus"; }
           ];
         }
       ];
@@ -268,9 +214,9 @@ let
         {
           port = 9091;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "prometheus")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "prometheus"; }
           ];
         }
       ];
@@ -281,16 +227,16 @@ let
         {
           port = 9427;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "prometheus")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "prometheus"; }
           ];
         }
       ];
       egress = true;
       # the wan-probe aliases (192.168.100-102.x, dst-natted at the ccr) are
       # rfc1918 so plain egress doesn't cover them
-      allow = [ (cidr "192.168.100.0/22") ];
+      allow = [ { cidr = "192.168.100.0/22"; } ];
     };
     loki = {
       host = "joast";
@@ -299,9 +245,9 @@ let
         {
           port = 3100;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "grafana")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "grafana"; }
           ];
         }
       ];
@@ -315,18 +261,18 @@ let
         {
           port = 9116;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "prometheus")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "prometheus"; }
           ];
         }
       ];
       # snmp targets: ccr/switches on the lan, the pepwave-side gear on
       # 192.168.50.x
       allow = [
-        (network "lan")
-        (cidr "192.168.50.0/24")
-        (cidr "192.168.1.0/24")
+        { network = "lan"; }
+        { cidr = "192.168.50.0/24"; }
+        { cidr = "192.168.1.0/24"; }
       ];
     };
     prometheus = {
@@ -336,9 +282,9 @@ let
         {
           port = 9090;
           to = [
-            (network "lan")
-            (network "tailscale")
-            (vm "grafana")
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { vm = "grafana"; }
           ];
         }
       ];
@@ -347,24 +293,27 @@ let
       # access (ports are the exporters' nixpkgs defaults, node is pinned
       # to 9092 in hosts/ballos)
       allow = [
-        (network "lan")
-        (network "tailscale")
-        (vm "flippyflops")
-        (vm "pushgateway")
-        (vm "pingexp")
-        (vm "snmpexp")
-        (machine "joast" [
-          9100 # node
-          9113 # nginx
-          9117 # nginxlog
-          9134 # zfs
-          9199 # nut
-          9256 # process
-          9427 # ping
-          9586 # wireguard
-          9633 # smartctl
-          9290 # ipmi
-        ])
+        { network = "lan"; }
+        { network = "tailscale"; }
+        { vm = "flippyflops"; }
+        { vm = "pushgateway"; }
+        { vm = "pingexp"; }
+        { vm = "snmpexp"; }
+        {
+          machine = "joast";
+          ports = [
+            9100 # node
+            9113 # nginx
+            9117 # nginxlog
+            9134 # zfs
+            9199 # nut
+            9256 # process
+            9427 # ping
+            9586 # wireguard
+            9633 # smartctl
+            9290 # ipmi
+          ];
+        }
       ];
       mem = 3072;
     };
@@ -393,7 +342,12 @@ let
       egress = true;
       # nixcache.int.turb.io — the local binary cache at ballos's lan
       # address (input path)
-      allow = [ (machine "joast" [ 443 ]) ];
+      allow = [
+        {
+          machine = "joast";
+          ports = [ 443 ];
+        }
+      ];
       secrets = [
         "forgejo-oauth-secret"
         "forgejo-webhook-secret"
@@ -431,7 +385,7 @@ let
         { port = 8080; }
       ];
       # snmp metadata queries to the ccr/switches
-      allow = [ (network "lan") ];
+      allow = [ { network = "lan"; } ];
       # container image pulls (quay/docker.io) + ipinfo geoip downloads
       egress = true;
       secrets = [ "ipinfo-token" ];
@@ -468,60 +422,56 @@ let
       # the host service on ballos, with the prometheus vm as a
       # side-by-side test datasource until its cutover
       allow = [
-        (vm "loki")
-        (vm "prometheus")
-        (machine "joast" [ 9090 ])
+        { vm = "loki"; }
+        { vm = "prometheus"; }
+        {
+          machine = "joast";
+          ports = [ 9090 ];
+        }
       ];
       mem = 1024;
     };
-  };
-
-  withAddrs = builtins.mapAttrs (name: cfg: cfg // { addr = vmAddrs (hashKey name cfg); }) vms;
-
-  checks =
-    let
-      entries = builtins.attrValues (
-        builtins.mapAttrs (name: cfg: {
-          inherit name;
-          h = (withAddrs.${name}).addr.hash;
-        }) vms
-      );
-      reserved = map (
-        e:
-        if e.h < 256 || e.h == 65535 then
-          throw "inventory: vm '${e.name}' hashes into a reserved range (${toString e.h}), set addressSalt"
-        else
-          null
-      ) entries;
-      grouped = builtins.groupBy (e: toString e.h) entries;
-      dups = builtins.attrValues grouped |> builtins.filter (g: builtins.length g > 1);
-      collisions = map (
-        g:
-        throw "inventory: vm address hash collision between: ${
-          builtins.concatStringsSep ", " (map (e: e.name) g)
-        }; set addressSalt on one"
-      ) dups;
-    in
-    reserved ++ collisions;
-in
-{
-  inherit
-    net
-    machines
-    appliances
-    storage
-    ;
-
-  vms = builtins.deepSeq checks withAddrs;
-
-  lib = {
-    inherit
-      hash16
-      vmAddrs
-      network
-      vm
-      machine
-      cidr
-      ;
+    syncthing = {
+      host = "joast";
+      persistVar = true;
+      expose = [
+        # peer protocol; syncthing's default listener is tcp+quic on the
+        # same port. lan + tailscale (the default `to`) covers every device
+        # that syncs with this instance
+        { port = 22000; }
+        {
+          port = 22000;
+          proto = "udp";
+        }
+        # gui/rest api on the plain name: http://syncthing.int.turb.io
+        # (vms/syncthing makes :80 unprivileged, same trick as immich)
+        { port = 80; }
+      ];
+      # discovery is off fleet-wide, so every device dials explicit
+      # addresses: peers dial in (trusted tiers cover that), and this end
+      # dials out to curly's tailscale address
+      allow = [ { network = "tailscale"; } ];
+      # the folders keep their host paths inside the guest, so the config
+      # coming across needs no path rewrites — and the webcam archive
+      # timer, which stays a host unit, keeps working on the same dataset
+      mounts = {
+        "/tank/enc/misc".dataset = "enc/misc";
+        "/tank/enc/photos".dataset = "enc/photos";
+        "/tank/enc/code".dataset = "enc/code";
+        "/tank/enc/webcamlog".dataset = "enc/webcamlog";
+      };
+      # the device identity (cert/key — losing it means re-pairing every
+      # peer) and the gui password, host-delivered at /run/host-secrets
+      secrets = [
+        "syncthing-cert"
+        "syncthing-key"
+        "syncthing-gui-password"
+      ];
+      # hashing during a rescan uses every core it is given; the host
+      # instance sat around 1G rss (2048 exactly trips microvm.nix's
+      # "qemu hangs at exactly 2GB" warning)
+      vcpu = 4;
+      mem = 3072;
+    };
   };
 }

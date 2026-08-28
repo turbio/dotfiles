@@ -41,15 +41,15 @@ let
   );
   tapOf = name: "vm-${name}";
 
-  # policy entries are structured selector objects from inventory's dsl
-  # (inventory.lib.{network,vm,machine,cidr}); anything else — including
-  # the old string forms — is rejected at eval
+  # policy entries are structured selector objects, normalized out of the
+  # inventory data by lib/inventory.nix; anything else — including the old
+  # string forms — is rejected at eval
   checkSel =
     s:
     if (s._class or null) == "policy-selector" then
       s
     else
-      throw "vmhost: policy entry must be a selector built with inventory.lib.{network,vm,machine,cidr}, got a ${builtins.typeOf s}";
+      throw "vmhost: policy entry must be a normalized inventory selector, got a ${builtins.typeOf s}";
 
   allowsOf = vm: map checkSel (vm.allow or [ ]);
   # machine selectors resolve relative to where the vm lives: grants

@@ -123,10 +123,6 @@ in
             labels.host = "ballos";
           }
           {
-            targets = [ "mote.int.turb.io:9100" ];
-            labels.host = "mote";
-          }
-          {
             targets = [ "aackle.int.turb.io:9100" ];
             labels.host = "aackle";
           }

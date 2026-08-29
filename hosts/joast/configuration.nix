@@ -9,25 +9,6 @@ let
   internalIp = (import ../../assignments.nix).vpn.internal;
   gitDir = config.zfs.pools.tank.datasets."enc/git".mountpoint;
 
-  mediaRoot = "/tank/enc/vibes";
-  webroot = pkgs.linkFarm "vibes-webroot" [
-    {
-      name = "index.html";
-      path = pkgs.replaceVars ../../services/vibes/webroot/index.html {
-        pageTitle = "nice memes";
-        extraHead = ''
-          <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
-          <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-6E4JY4KNSC');
-          </script>
-        '';
-      };
-    }
-  ];
 in
 {
   imports = [
@@ -52,26 +33,6 @@ in
     # dns is afraid rn
     #(import ./acme-wildcard.nix { domain = "nice.meme"; })
     (import ./acme-wildcard.nix { domain = "molters.xyz"; })
-    (import ../../services/vibes {
-      mediaRoot = "/tank/enc/vibes";
-      domain = "vibes.turb.io";
-      useACMEHost = "turb.io";
-    })
-    # (import ../../services/vibes {
-    #   mediaRoot = "/tank/enc/vibes";
-    #   domain = "nice.meme";
-    #   pageTitle = "nice meme";
-    #   useACMEHost = "nice.meme";
-    #   extraHead = ''
-    #     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
-    #     <script>
-    #       window.dataLayer = window.dataLayer || [];
-    #       function gtag(){dataLayer.push(arguments);}
-    #       gtag('js', new Date());
-    #       gtag('config', 'G-6E4JY4KNSC');
-    #     </script>
-    #   '';
-    # })
   ];
 
   users.users.turbio = {
@@ -209,16 +170,15 @@ in
     };
 
     locations."/vids/" = {
-      alias = "${webroot}/";
-      index = "index.html";
+      proxyPass = "http://${inventory.vms.vibes.addr.ip4}:80";
     };
 
     locations."/c/" = {
-      proxyPass = "http://${inventory.vms.vibes.addr.ip4}:3010/c/";
+      proxyPass = "http://${inventory.vms.vibes.addr.ip4}:80";
     };
 
     locations."/media/" = {
-      alias = "${mediaRoot}/media/";
+      proxyPass = "http://${inventory.vms.vibes.addr.ip4}:80";
     };
   };
   #services.nginx.virtualHosts."wow.nice.meme" = {

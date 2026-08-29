@@ -32,26 +32,6 @@ in
     # dns is afraid rn
     #(import ./acme-wildcard.nix { domain = "nice.meme"; })
     (import ./acme-wildcard.nix { domain = "molters.xyz"; })
-    (import ../../services/vibes {
-      mediaRoot = "/tank/enc/vibes";
-      domain = "vibes.turb.io";
-      useACMEHost = "turb.io";
-    })
-    # (import ../../services/vibes {
-    #   mediaRoot = "/tank/enc/vibes";
-    #   domain = "nice.meme";
-    #   pageTitle = "nice meme";
-    #   useACMEHost = "nice.meme";
-    #   extraHead = ''
-    #     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6E4JY4KNSC"></script>
-    #     <script>
-    #       window.dataLayer = window.dataLayer || [];
-    #       function gtag(){dataLayer.push(arguments);}
-    #       gtag('js', new Date());
-    #       gtag('config', 'G-6E4JY4KNSC');
-    #     </script>
-    #   '';
-    # })
   ];
 
   users.users.turbio = {

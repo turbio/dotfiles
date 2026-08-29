@@ -205,7 +205,7 @@
     };
     vibes = {
       host = "joast";
-      expose = [ { port = 3010; } ];
+      expose = [ { port = 80; } ];
       mounts."/media".dataset = "enc/vibes";
     };
     pushgateway = {

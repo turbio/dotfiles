@@ -1,12 +1,3 @@
-# grafana — behind the graf.turb.io vhost on ballos. reaches loki at its vm
-# address and the (still host-side) prometheus at the anycast gateway; when
-# prometheus becomes a vm only the provisioned datasource url changes.
-#
-# pending data migration (turbio's ledger): host /var/lib/grafana ->
-# /tank/enc/vms/grafana/var/lib/grafana (+ in-guest chown -R
-# grafana:grafana); carries manually-created dashboards — the old manual
-# prometheus datasource in it points at 127.0.0.1 and can be deleted in
-# favor of the provisioned one
 {
   pkgs,
   inventory,

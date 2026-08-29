@@ -1,8 +1,3 @@
-# vibes — media curation service. the media dataset (enc/vibes) mounts at
-# /media via the inventory mounts mechanism. the guest owns its whole http
-# surface: nginx serves the webroot and media statics off the mount and
-# proxies /c/ to the app; the hypervisor's nginx is just an ssl-terminating
-# proxy to :80 here (the vibes.turb.io vhost in hosts/joast).
 { pkgs, ... }:
 let
   vibesbin = pkgs.buildGoModule {
@@ -28,8 +23,6 @@ let
     }
   ];
 
-  # the nice.meme /vids/ face of the same app (proxied from that vhost on
-  # joast)
   vidsroot = pkgs.linkFarm "vibes-vids-webroot" [
     {
       name = "index.html";
@@ -56,8 +49,6 @@ in
     isSystemUser = true;
   };
 
-  # the category structure the app expects (was an activation script on the
-  # host); guest-side so ownership uses the guest's uid mapping
   systemd.tmpfiles.rules = [
     "d ${mediaRoot}/media 0775 vibes media -"
     "d ${mediaRoot}/cat/bop 0775 vibes media -"

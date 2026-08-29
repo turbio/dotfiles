@@ -1,6 +1,3 @@
-# evaldb — first stateful vm (PLAN.md M4): state rides the vm's tank
-# dataset via the /var share (StateDirectory=evaldb → /var/lib/private/
-# evaldb). moved from services/evaldb.nix, which keeps only the vhost.
 {
   pkgs,
   repos,
@@ -39,9 +36,6 @@ let
     cp ${evalers}/duktape $out/
   '';
 
-  # upstream binds ":" (all interfaces) — correct in a vm, where the guest
-  # firewall + host vmpolicy decide who reaches it (the old host-service
-  # version substituted 127.0.0.1 here)
   gateway = pkgs.buildGoModule {
     pname = "gateway";
     version = "0.0.1";
@@ -66,9 +60,6 @@ let
   port = 3005;
 in
 {
-  # static user, not DynamicUser: the dynamic-user private-dir setup needs
-  # acl/xattr ops that virtiofs (our /var share) doesn't support, and stable
-  # uids on snapshotted state are preferable anyway — the vm is the isolation
   users.users.evaldb = {
     isSystemUser = true;
     group = "evaldb";

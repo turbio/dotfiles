@@ -1,17 +1,6 @@
-# loki — stage-1 duplicate of the host instance (which keeps serving
-# promtail + grafana untouched until cutover). same schema/config as the
-# host version so migrated data lines up, but everything lives under the
-# persistVar /var. storage: virtiofs, per the 2026-07-28 bench — loki's
-# write volume is orders of magnitude below its limits.
-#
-# cutover notes (turbio's ledger):
-#   - data: /tank/enc/loki -> /tank/enc/vms/loki/var/lib/loki (+ in-guest
-#     chown -R loki:loki), while both lokis are stopped
-#   - retarget promtail clients url + grafana datasource, drop host loki +
-#     the enc/loki dataset declaration
 { config, ... }:
 let
-  dataDir = config.services.loki.dataDir; # /var/lib/loki (nixos default)
+  dataDir = config.services.loki.dataDir;
 in
 {
   services.loki = {

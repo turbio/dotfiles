@@ -1,26 +1,3 @@
-# akvorado — stage-1, fresh data, side by side with the untouched host
-# stack. same podman compose as services/akvorado.nix but in-guest: kafka
-# and the geoip dir ride the persistVar dataset, clickhouse gets a
-# virtio-blk volume per storage policy (it's the fsync/merge-heavy one).
-# the ccr dual-exports flows to both instances during stage-1
-# (appliances/ccr2004.nix akvorado_vm target), so this sees real traffic
-# without touching the host's feed. flow history is NOT migrated — it's
-# time-series; at cutover either accept the gap or copy the clickhouse
-# dataset then.
-#
-# turbio's ledger:
-#   - cutover DONE 2026-07-31 (host stack removed, ccr single-targets the
-#     vm). fresh clickhouse — host flow history not migrated (turbio:
-#     don't care about old data).
-#   - ipinfo token is now secrets/ipinfo-token.age (host-delivered at
-#     /run/host-secrets/ipinfo-token); the old out-of-band token FILES are
-#     deletable: host /var/lib/akvorado-geoip/ and
-#     /tank/enc/vms/akvorado/var/lib/akvorado-geoip/token
-#   - deletable when confident: tank/enc/akvorado-clickhouse (7.1G old
-#     flow history) + tank/enc/akvorado-kafka
-#   - console is direct http://akvorado.int.turb.io:8080 (anonymous, no
-#     auth headers); a proper name (flow.int) waits on the vhost-int-names
-#     DNS decision (PLAN)
 {
   pkgs,
   lib,
@@ -32,12 +9,10 @@ let
   net = "akvorado";
   image = "quay.io/akvorado/akvorado:2.4.0";
 
-  # blk volume (fsync-heavy clickhouse); kafka + geoip on persistVar /var
   clickhouseData = "/var/lib/akvorado-clickhouse";
   kafkaData = "/var/lib/akvorado-kafka";
   geoipDir = "/var/lib/akvorado-geoip";
 
-  # Container uids baked into the upstream images (no matching users).
   clickhouseUid = "101";
   kafkaUid = "1000";
 
@@ -56,6 +31,7 @@ let
      <latency_log><ttl>event_date + INTERVAL 30 DAY DELETE</ttl></latency_log>
     </clickhouse>
   '';
+
   observabilityXml = pkgs.writeText "akvorado-clickhouse-observability.xml" ''
     <clickhouse>
      <prometheus>
@@ -269,16 +245,6 @@ in
       environment = {
         AKVORADO_CFG_CONSOLE_DATABASE_DSN = "/run/akvorado/console.sqlite";
       };
-      # direct console access at <vm>:8080 (expose admits lan/tailscale);
-      # no nginx in front at stage-1 -> anonymous console user.
-      # war story (2026-07-31): first-boot restart churn (containers dying
-      # while images pulled / deps settled) left netavark with ORPHANED
-      # hostport DNAT rules pointing at dead container ips, shadowing the
-      # live one — symptom: container serves fine by its own ip, publish
-      # gives 000. fix: delete the stale `to:<dead-ip>` rules from
-      # NETAVARK-DN-* (or reboot the vm; rules are runtime state). clean
-      # systemd-driven restarts tear down properly — only unclean deaths
-      # orphan.
       ports = [ "8080:8080" ];
     };
   };
@@ -297,8 +263,6 @@ in
         '';
       };
 
-      # chown bind-mount targets to the container uids after mounts are up
-      # (the blk volume and virtiofs var both land via local-fs.target)
       akvorado-prepare = {
         description = "Prepare akvorado data directories";
         wantedBy = [ "multi-user.target" ];
@@ -314,8 +278,6 @@ in
 
       akvorado-geoip-update = {
         description = "Download IPinfo GeoIP databases for akvorado";
-        # timer-only: wantedBy=multi-user re-ran the download on every
-        # switch and 429'd the token (see the old host file's war story)
         after = [ "network-online.target" ];
         wants = [ "network-online.target" ];
         path = [ pkgs.curl ];
@@ -348,9 +310,6 @@ in
       ];
     }))
     {
-      # the router's export stream is one long-lived conntrack flow; a
-      # restarted inlet gets a new container ip and the stale DNAT entry
-      # blackholes everything until flushed (see host file's war story)
       podman-akvorado-inlet.serviceConfig.ExecStartPost = [
         "-${pkgs.conntrack-tools}/bin/conntrack -D -p udp --dport 2055"
         "-${pkgs.conntrack-tools}/bin/conntrack -D -p udp --dport 4739"
@@ -370,6 +329,5 @@ in
     };
   };
 
-  # containers' DNS to aardvark-dns on the podman bridge
   networking.firewall.trustedInterfaces = [ "podman1" ];
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"

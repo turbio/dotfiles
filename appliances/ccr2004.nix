@@ -156,6 +156,7 @@ let
     "input_lan"
     "input_dhcpv6"
     "input_drop"
+    "fwd_fasttrack"
     "fwd_established"
     "fwd_invalid"
     "fwd_bad_src"
@@ -215,8 +216,6 @@ in
   resource.routeros_interface_ethernet.sfp_sfpplus1 = {
     factory_name = "sfp-sfpplus1";
     name = "sfp-sfpplus1";
-    rx_flow_control = "on";
-    tx_flow_control = "on";
   };
 
   resource.routeros_interface_list = {
@@ -330,13 +329,16 @@ in
     ) lanMachines
     # the internal hierarchy (int.turb.io + reverse zones) lives on the
     # internal resolver (modules/int-dns.nix); lan clients use the ccr as
-    # dns, so it forwards those zones there (M3)
+    # dns, so it forwards those zones there (M3). that's joast since it
+    # took the pool — and with it unbound — off ballos; the forward was
+    # still pointing at the dead ballos address until 2026-08-28, which
+    # made every int.turb.io name time out for every ccr-served client
     // (
       let
         fwd = name: {
           inherit name;
           type = "FWD";
-          forward_to = inventory.machines.ballos.lan.ip4;
+          forward_to = inventory.machines.joast.lan.ip4;
           match_subdomain = true;
         };
       in
@@ -426,14 +428,13 @@ in
       chain = "input";
       action = "drop";
       log = true;
-      log_prefix = "unknown ipv4 to router";
     };
     fwd_fasttrack = {
       chain = "forward";
       action = "fasttrack-connection";
       connection_state = "established,related";
       hw_offload = true;
-      comment = "fasttrack";
+      comment = "fasttrack established/related";
     };
     fwd_established = {
       chain = "forward";
@@ -456,7 +457,6 @@ in
     fwd_drop = {
       chain = "forward";
       action = "drop";
-      log = true;
     };
   };
 
@@ -627,12 +627,12 @@ in
     };
 
     # the vm tier (PLAN.md §2/M1): lan clients reach vms through their
-    # hypervisor. single aggregate while everything lives on ballos;
+    # hypervisor. single aggregate while everything lives on joast;
     # per-host routes generate from inventory placement once vms spread (M6)
     vm_net = {
       comment = "VM_NET";
       dst_address = inventory.net.vm.cidr4;
-      gateway = inventory.machines.ballos.lan.ip4;
+      gateway = inventory.machines.joast.lan.ip4;
     };
   };
 
@@ -702,7 +702,7 @@ in
       chain = "input";
       action = "accept";
       connection_state = "established,related,untracked";
-      comment = "allow established and related";
+      comment = "allow established/related";
     };
     input_invalid = {
       chain = "input";
@@ -741,21 +741,23 @@ in
     input_drop = {
       chain = "input";
       action = "drop";
-      log = true;
-      log_prefix = "unknown ipv6";
+    };
+    fwd_fasttrack = {
+      chain = "forward";
+      action = "fasttrack-connection";
+      connection_state = "established,related";
+      comment = "fasttrack established/related";
     };
     fwd_established = {
       chain = "forward";
       action = "accept";
       connection_state = "established,related,untracked";
-      comment = "established,related";
+      comment = "accept established/related/untracked";
     };
     fwd_invalid = {
       chain = "forward";
       action = "drop";
       connection_state = "invalid";
-      log = true;
-      log_prefix = "ipv6,invalid";
       comment = "invalid";
     };
     fwd_bad_src = {
@@ -792,8 +794,6 @@ in
     fwd_drop = {
       chain = "forward";
       action = "drop";
-      log = true;
-      log_prefix = "unknown ipv6";
     };
   };
 

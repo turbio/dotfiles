@@ -397,11 +397,7 @@
       host = "joast";
       persistVar = true;
       expose = [ { port = 80; } ];
-      # ml model downloads (huggingface), reverse-geocoding data, version
-      # checks
       egress = true;
-      # server peaked 835M + ml 171M on the host; models and transcodes
-      # want headroom
       vcpu = 8;
       mem = 6144;
     };
@@ -435,41 +431,25 @@
       host = "joast";
       persistVar = true;
       expose = [
-        # peer protocol; syncthing's default listener is tcp+quic on the
-        # same port. lan + tailscale (the default `to`) covers every device
-        # that syncs with this instance
         { port = 22000; }
         {
           port = 22000;
           proto = "udp";
         }
-        # gui/rest api on the plain name: http://syncthing.int.turb.io
-        # (vms/syncthing makes :80 unprivileged, same trick as immich)
         { port = 80; }
       ];
-      # discovery is off fleet-wide, so every device dials explicit
-      # addresses: peers dial in (trusted tiers cover that), and this end
-      # dials out to curly's tailscale address
       allow = [ { network = "tailscale"; } ];
-      # the folders keep their host paths inside the guest, so the config
-      # coming across needs no path rewrites — and the webcam archive
-      # timer, which stays a host unit, keeps working on the same dataset
       mounts = {
         "/tank/enc/misc".dataset = "enc/misc";
         "/tank/enc/photos".dataset = "enc/photos";
         "/tank/enc/code".dataset = "enc/code";
         "/tank/enc/webcamlog".dataset = "enc/webcamlog";
       };
-      # the device identity (cert/key — losing it means re-pairing every
-      # peer) and the gui password, host-delivered at /run/host-secrets
       secrets = [
         "syncthing-cert"
         "syncthing-key"
         "syncthing-gui-password"
       ];
-      # hashing during a rescan uses every core it is given; the host
-      # instance sat around 1G rss (2048 exactly trips microvm.nix's
-      # "qemu hangs at exactly 2GB" warning)
       vcpu = 4;
       mem = 3072;
     };

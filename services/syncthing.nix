@@ -45,14 +45,6 @@
             "itoh"
           ];
         };
-        "ios_photos" = {
-          enable = lib.mkDefault false;
-          path = lib.mkDefault "/none";
-          devices = [
-            "syncthing"
-            "iphone"
-          ];
-        };
         "clips" = {
           enable = lib.mkDefault false;
           path = lib.mkDefault "/none";

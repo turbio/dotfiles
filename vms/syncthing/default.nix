@@ -50,10 +50,6 @@ in
   services.syncthing = {
     enable = true;
 
-    # gui + rest api on the plain name, http://syncthing.int.turb.io. the
-    # module's hardened unit (PrivateUsers) strips ambient capabilities so
-    # CAP_NET_BIND_SERVICE can't work — make :80 unprivileged instead, same
-    # posture as vms/immich: the whole guest is syncthing's
     guiAddress = "0.0.0.0:80";
 
     settings.gui.user = "turbio";
@@ -83,10 +79,6 @@ in
       "notes" = {
         enable = true;
         path = "/tank/enc/misc/notes";
-      };
-      "ios_photos" = {
-        enable = true;
-        path = "/tank/enc/misc/ios_photos";
       };
       "clips" = {
         enable = true;

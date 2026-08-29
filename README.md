@@ -16,3 +16,8 @@ To actually get this whole thing installed from a live image ya wanna go through
 sudo nixos-install --flake /mnt/etc/nixos#<hostname>
 ```
 when it's time to build the system.
+
+
+```
+nix run github:ryantm/agenix -- -r
+```

@@ -1,6 +1,3 @@
-# CCR2004-16G-2S+ — the router. Faithful translation of ccr2004_latest.rsc
-# (2026-07-25); adoption-first, cleanups come later through this config.
-# Known-unmodelable leftovers are listed in appliances/README.md.
 { lib, ... }:
 let
   inventory = import ../lib/inventory.nix;

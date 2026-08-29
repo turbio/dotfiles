@@ -1,8 +1,3 @@
-# provider wiring for the single appliance root: one aliased routeros
-# provider per device. endpoints default to the known stable addresses;
-# credentials come from the environment at plan/apply time, never the repo:
-#   ROS_PASSWORD=...   (shared admin password; TF_VAR_username to override user)
-# see appliances/README.md for the adoption workflow.
 { lib, ... }:
 let
   hosturls = {

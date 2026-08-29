@@ -70,12 +70,6 @@
         iphone = {
           id = "U6DSDQT-RHHKWPS-T5AI3LN-VVZSIAP-WOLWDDJ-GEC4JE6-LSL45CH-GGCXZQU";
         };
-        # the home instance, in vms/syncthing on joast since 2026-08-28 —
-        # hence the vm's address, reachable from the lan directly and from
-        # the tailnet over the 10.42.0.0/16 route joast advertises. the id
-        # predates the move and was named after ballos: the cert travelled
-        # with the tank pool when joast took over, so the machine changed
-        # underneath it twice while the device stayed the same
         syncthing = {
           addresses = [
             "tcp://[${inventory.vms.syncthing.addr.ip6}]:22000"

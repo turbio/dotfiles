@@ -1,9 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, ... }:
 let
   root = (
     pkgs.writeTextDir "index.txt" ''

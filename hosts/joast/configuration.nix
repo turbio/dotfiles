@@ -20,7 +20,6 @@ in
     ../../services/turbio-index.nix
     ../../services/flippyflops.nix
     ../../services/evaldb.nix
-    ../../services/forgejo.nix
     #../../services/gerrit.nix
     # *.turb.io doesn't cover second-level labels; internal vhosts need the
     # explicit *.int SAN (PLAN.md §4)
@@ -44,6 +43,41 @@ in
   vmhost.enable = true;
   intDns.enable = true;
 
+  services.nginx.virtualHosts."dots.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.flippyflops.addr.ip4}:3001";
+    };
+
+    extraConfig = ''
+      proxy_http_version 1.1;
+      chunked_transfer_encoding off;
+      proxy_buffering off;
+      proxy_cache off;
+    '';
+  };
+
+  services.nginx.virtualHosts."evaldb.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.evaldb.addr.ip4}:3005";
+      extraConfig = ''
+        proxy_set_header Host $host;
+      '';
+    };
+
+    extraConfig = ''
+      proxy_http_version 1.1;
+      chunked_transfer_encoding off;
+      proxy_buffering off;
+      proxy_cache off;
+    '';
+  };
+
   # lan-resident server: dns comes from the ccr (which forwards int zones to
   # unbound here), never from magicdns — tailscale's ~. claim would capture
   # every query and leak them to public dns (.lan breaks, int names get the
@@ -51,6 +85,23 @@ in
   services.tailscale.extraSetFlags = [ "--accept-dns=false" ];
 
   environment.enableAllTerminfo = true; # test
+
+  services.nginx.virtualHosts."forge.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+    http2 = true;
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.forgejo.addr.ip4}:3300";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 512M;
+      '';
+    };
+  };
 
   zfs.pools.tank.datasets = {
     "enc/media" = {
@@ -181,22 +232,6 @@ in
       proxyPass = "http://${inventory.vms.vibes.addr.ip4}:80";
     };
   };
-  #services.nginx.virtualHosts."wow.nice.meme" = {
-  #  http2 = true;
-  #  forceSSL = true;
-  #  useACMEHost = "nice.meme";
-  #  locations."/".proxyPass = "http://joast.int.turb.io:8085";
-  #};
-  #services.nginx.virtualHosts."*.nice.meme" = {
-  #  http2 = true;
-  #  forceSSL = true;
-  #  useACMEHost = "nice.meme";
-  #  root = ./nice.meme;
-  #  extraConfig = ''
-  #    error_page 404 =200 /index.html;
-  #    charset utf-8;
-  #  '';
-  #};
 
   services.nginx.virtualHosts."turbi.ooo" = {
     forceSSL = true;

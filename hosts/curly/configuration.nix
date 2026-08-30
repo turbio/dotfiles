@@ -63,13 +63,18 @@ in
         fsType = "nfs";
         neededForBoot = false;
         options = [
+          "fsc" # use cachefilesd
           "rw"
           "noatime"
           "nofail"
-          "fsc"
+          "nconnect=8"
+          "rsize=1048576"
+          "wsize=1048576"
           "proto=tcp"
-          "noac"
-          "async"
+          "actimeo=60"
+          "nocto"
+          "hard"
+          "softreval"
           "x-systemd.automount"
           "x-systemd.mount-timeout=5s"
           "x-systemd.idle-timeout=10m"
@@ -78,10 +83,10 @@ in
     in
     {
       "tank/photos" = nfsopts // {
-        device = "ballos:/tank/enc/photos";
+        device = "joast:/tank/enc/photos";
       };
       "tank/backups" = nfsopts // {
-        device = "ballos:/tank/enc/backups";
+        device = "joast:/tank/enc/backups";
       };
     };
 

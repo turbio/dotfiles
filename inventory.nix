@@ -368,10 +368,16 @@
       host = "joast";
       persistVar = true;
       expose = [
-        # flow ingest from the ccr (dual-exported during stage-1)
         {
           port = 2055;
           proto = "udp";
+          # the crs305 (wan side) exports flows from 192.168.1.69; the ccr
+          # dst-nats them here with the original source intact
+          to = [
+            { network = "lan"; }
+            { network = "tailscale"; }
+            { cidr = "192.168.1.0/24"; }
+          ];
         }
         {
           port = 4739;
@@ -381,15 +387,16 @@
           port = 6343;
           proto = "udp";
         }
-        # console; ballos's flowtest vhost injects the auth headers
         { port = 8080; }
       ];
-      # snmp metadata queries to the ccr/switches
-      allow = [ { network = "lan"; } ];
-      # container image pulls (quay/docker.io) + ipinfo geoip downloads
+      # 192.168.1.0/24: snmp metadata polls of the wan-side crs305 exporter
+      # (rfc1918, so plain egress doesn't cover it)
+      allow = [
+        { network = "lan"; }
+        { cidr = "192.168.1.0/24"; }
+      ];
       egress = true;
       secrets = [ "ipinfo-token" ];
-      # clickhouse is the hungry one
       vcpu = 8;
       mem = 8192;
     };

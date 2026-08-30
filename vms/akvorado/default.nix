@@ -67,6 +67,7 @@ let
       networks:
         192.168.88.0/24: { name: lan, role: internal }
         192.168.50.0/24: { name: lan-iot, role: internal }
+        192.168.1.0/24: { name: upstream, role: internal }
         10.100.0.0/24: { name: vpn, role: internal }
         100.64.0.0/10: { name: tailscale, role: internal }
 
@@ -86,11 +87,7 @@ let
 
     outlet:
       core:
-        # MikroTik Traffic Flow exports unsampled (1:1) and sends no
-        # sampling-rate options template; 1 = each flow counts as-is.
         default-sampling-rate: 1
-        # In/OutIfBoundary by interface name (the router's SNMP interface
-        # descriptions are empty). First matching Classify* wins.
         interface-classifiers:
           - |
             Interface.Name matches "^(ether1|ether2|sfp-sfpplus1)$" && ClassifyExternal()

@@ -18,9 +18,6 @@ in
     ../../modules/ipmi-exporter.nix
     ../../modules/zfs-datasets.nix
     ../../services/turbio-index.nix
-    ../../services/flippyflops.nix
-    ../../services/evaldb.nix
-    #../../services/gerrit.nix
     # *.turb.io doesn't cover second-level labels; internal vhosts need the
     # explicit *.int SAN (PLAN.md §4)
     (import ./acme-wildcard.nix {

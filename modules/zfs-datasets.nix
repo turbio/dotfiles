@@ -206,6 +206,7 @@ let
             poolName = name;
           })
         );
+        default = { };
       };
     };
 in

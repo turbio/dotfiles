@@ -11,10 +11,6 @@
 
   boot.kernelParams = [ "zfs.zfs_arc_sys_free=8589934592" ];
 
-  boot.supportedFilesystems = [ "zfs" ];
-  boot.zfs.extraPools = [ "tank" ];
-  networking.hostId = "00ba1105";
-
   boot.initrd.availableKernelModules = [
     "ahci"
     "ehci_pci"

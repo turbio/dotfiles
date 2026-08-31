@@ -6,7 +6,7 @@
     ];
   };
 
-  vmhost.enable = true;
+  #vmhost.enable = true;
   intDns.enable = true;
 
   services.tailscale.extraSetFlags = [ "--accept-dns=false" ];

@@ -130,13 +130,19 @@ in
     };
   };
 
+  # uid/gid pinned to what the enc/git data has always carried (the ballos
+  # git user) and what vms/cgit pins its git group to (976): the dataset
+  # travels between hosts and into the cgit vm by raw ids, so a dynamically
+  # allocated uid here silently locks the vm out (joast's 997 did exactly
+  # that when the pool moved — cgit served 404s for every repo)
   users.users.git = {
     isSystemUser = true;
     group = "git";
     home = gitDir;
     createHome = false;
+    uid = 977;
   };
-  users.groups.git = { };
+  users.groups.git.gid = 976;
 
   environment.etc.gitconfig.text = ''
     [safe]

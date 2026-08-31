@@ -168,10 +168,6 @@
 
       tailscale.ip4 = "100.100.109.112";
     };
-    gero = {
-      arch = "x86_64-linux";
-      secrets = [ "userpassword" ];
-    };
     itoh = {
       arch = "x86_64-linux";
       secrets = [ "userpassword" ];

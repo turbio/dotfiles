@@ -153,12 +153,6 @@
           specialArgs = hostSpecialArgs hostname;
         };
 
-      applianceNames = [
-        "ccr2004"
-        "crs326"
-        "crs305"
-      ];
-
       applianceConfig = inputs.terranix.lib.terranixConfiguration {
         system = "x86_64-linux";
         modules = [

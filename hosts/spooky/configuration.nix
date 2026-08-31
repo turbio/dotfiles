@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, inventory, ... }: {
   boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
   networking.hostName = "spooky";
@@ -21,12 +21,12 @@
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iifname "enX0" tcp dport { 22, 80, 443 } dnat to 100.100.57.46
+          iifname "enX0" tcp dport { 22, 80, 443 } dnat to ${inventory.machines.joast.tailscale.ip4}
         }
 
         chain postrouting {
           type nat hook postrouting priority 100;
-          #iifname "enX0" tcp dport { 80, 443 } snat to 100.100.57.46
+          #iifname "enX0" tcp dport { 80, 443 } snat to ${inventory.machines.joast.tailscale.ip4}
           oifname "tailscale0" masquerade
         }
       }

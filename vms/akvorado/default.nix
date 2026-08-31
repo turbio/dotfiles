@@ -6,6 +6,7 @@
   ...
 }:
 let
+  inv = inventory;
   net = "akvorado";
   image = "quay.io/akvorado/akvorado:2.4.0";
 
@@ -15,6 +16,67 @@ let
 
   clickhouseUid = "101";
   kafkaUid = "1000";
+
+  # flow attribution. akvorado has no reverse-dns step (by design), so every
+  # address inventory knows about becomes a /32 (/128) entry named after its
+  # host, nested inside the network entries. when the orchestrator builds
+  # networks.csv it merges supernet attributes into each leaf, so a host entry
+  # only needs `name` and inherits role/site. net: SrcNetName/DstNetName show
+  # the hostname where known (network name otherwise) and SrcNetSite/DstNetSite
+  # still group by network.
+  networkEntries =
+    let
+      seg = name: {
+        inherit name;
+        site = name;
+        role = "internal";
+      };
+    in
+    {
+      ${inv.net.lan.cidr4} = seg "lan";
+      ${inv.net.lan.ula} = seg "lan";
+      ${inv.net.mgmt.cidr4} = seg "mgmt";
+      ${inv.net.mgmt.ula} = seg "mgmt";
+      ${inv.net.vm.cidr4} = seg "vm";
+      ${inv.net.vm.ula} = seg "vm";
+      ${inv.net.tailscale} = seg "tailscale";
+      ${inv.net.tailscale6} = seg "tailscale";
+      "192.168.50.0/24" = seg "lan-iot";
+      "192.168.1.0/24" = seg "upstream";
+    };
+
+  hostEntries =
+    let
+      host = name: ip: {
+        name = "${ip}/${if lib.hasInfix ":" ip then "128" else "32"}";
+        value = { inherit name; };
+      };
+      machines = lib.concatLists (
+        lib.mapAttrsToList (
+          name: m:
+          lib.optional (m ? lan.ip4) (host name m.lan.ip4)
+          # extra nics carry their dns label (mgmt.joast, aux.ballos)
+          ++ lib.mapAttrsToList (label: nic: host "${label}.${name}" nic.ip4) (m.lan.extra or { })
+          ++ lib.optional (m ? tailscale.ip4) (host name m.tailscale.ip4)
+          ++ lib.optional (m ? tailscale.ip6) (host name m.tailscale.ip6)
+          ++ lib.optional (m ? public.ip4) (host name m.public.ip4)
+          ++ lib.optional (m ? public.ip6) (host name m.public.ip6)
+        ) inv.machines
+      );
+      appliances = lib.concatLists (
+        lib.mapAttrsToList (
+          name: a:
+          lib.optional (a ? lan.ip4) (host name a.lan.ip4) ++ lib.optional (a ? wan.ip4) (host name a.wan.ip4)
+        ) inv.appliances
+      );
+      vms = lib.concatLists (
+        lib.mapAttrsToList (name: v: [
+          (host name v.addr.ip4)
+          (host name v.addr.ip6)
+        ]) inv.vms
+      );
+    in
+    lib.listToAttrs (machines ++ appliances ++ vms);
 
   serverXml = pkgs.writeText "akvorado-clickhouse-server.xml" ''
     <clickhouse>
@@ -43,68 +105,71 @@ let
     </clickhouse>
   '';
 
-  akvoradoConfig = pkgs.writeText "akvorado.yaml" ''
-    kafka:
-      topic: flows
-      brokers:
-        - kafka:9092
-      topic-configuration:
-        num-partitions: 4
-        replication-factor: 1
-        config-entries:
-          segment.bytes: 1073741824
-          retention.ms: 86400000 # 1 day buffer for clickhouse
-          cleanup.policy: delete
-          compression.type: producer
+  flowInput = decoder: port: {
+    type = "udp";
+    inherit decoder;
+    listen = ":${toString port}";
+    workers = 4;
+    receive-buffer = 212992;
+  };
 
-    clickhousedb:
-      servers:
-        - clickhouse:9000
+  akvoradoConfig = (pkgs.formats.yaml { }).generate "akvorado.yaml" {
+    kafka = {
+      topic = "flows";
+      brokers = [ "kafka:9092" ];
+      topic-configuration = {
+        num-partitions = 4;
+        replication-factor = 1;
+        config-entries = {
+          "segment.bytes" = 1073741824;
+          "retention.ms" = 86400000; # 1 day buffer for clickhouse
+          "cleanup.policy" = "delete";
+          "compression.type" = "producer";
+        };
+      };
+    };
 
-    clickhouse:
-      orchestrator-url: http://akvorado-orchestrator:8080
-      prometheus-endpoint: /metrics
-      networks:
-        192.168.88.0/24: { name: lan, role: internal }
-        192.168.50.0/24: { name: lan-iot, role: internal }
-        192.168.1.0/24: { name: upstream, role: internal }
-        10.100.0.0/24: { name: vpn, role: internal }
-        100.64.0.0/10: { name: tailscale, role: internal }
+    clickhousedb.servers = [ "clickhouse:9000" ];
 
-    geoip:
-      optional: true
-      asn-database:
-        - /usr/share/GeoIP/asn.mmdb
-      geo-database:
-        - /usr/share/GeoIP/country.mmdb
+    clickhouse = {
+      orchestrator-url = "http://akvorado-orchestrator:8080";
+      prometheus-endpoint = "/metrics";
+      networks = networkEntries // hostEntries;
+    };
 
-    inlet:
-      flow:
-        inputs:
-          - { type: udp, decoder: netflow, listen: ":2055", workers: 4, receive-buffer: 212992 }
-          - { type: udp, decoder: netflow, listen: ":4739", workers: 4, receive-buffer: 212992 }
-          - { type: udp, decoder: sflow,   listen: ":6343", workers: 4, receive-buffer: 212992 }
+    geoip = {
+      optional = true;
+      asn-database = [ "/usr/share/GeoIP/asn.mmdb" ];
+      geo-database = [ "/usr/share/GeoIP/country.mmdb" ];
+    };
 
-    outlet:
-      core:
-        default-sampling-rate: 1
-        interface-classifiers:
-          - |
-            Interface.Name matches "^(ether1|ether2|sfp-sfpplus1)$" && ClassifyExternal()
-          - ClassifyInternal()
-      metadata:
-        providers:
-          - type: snmp
-            credentials:
-              ::/0:
-                communities: public
+    inlet.flow.inputs = [
+      (flowInput "netflow" 2055)
+      (flowInput "netflow" 4739)
+      (flowInput "sflow" 6343)
+    ];
 
-    console:
-      http:
-        cache:
-          type: redis
-          server: redis:6379
-  '';
+    outlet = {
+      core = {
+        default-sampling-rate = 1;
+        interface-classifiers = [
+          ''Interface.Name matches "^(ether1|ether2|sfp-sfpplus1)$" && ClassifyExternal()''
+          "ClassifyInternal()"
+        ];
+      };
+      metadata.providers = [
+        {
+          type = "snmp";
+          credentials."::/0".communities = "public";
+        }
+      ];
+    };
+
+    console.http.cache = {
+      type = "redis";
+      server = "redis:6379";
+    };
+  };
 
   containerNames = [
     "kafka"

@@ -6,7 +6,9 @@
   ...
 }:
 let
-  internalIp = (import ../../assignments.nix).vpn.internal;
+  assignments = import ../../assignments.nix;
+  internalIp = assignments.vpn.internal;
+  pandoIp = assignments.vpn.hosts.pando.ip;
   gitDir = config.zfs.pools.tank.datasets."enc/git".mountpoint;
 
 in
@@ -30,6 +32,8 @@ in
     #(import ./acme-wildcard.nix { domain = "nice.meme"; })
     (import ./acme-wildcard.nix { domain = "molters.xyz"; })
   ];
+
+  nix.settings.secret-key-files = [ config.age.secrets."nixcache-key".path ];
 
   users.users.turbio = {
     openssh.authorizedKeys.keys = [
@@ -106,18 +110,18 @@ in
       perms.group = "media";
       perms.mode = "775";
       properties.sync = "standard";
-      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
+      properties.sharenfs = "rw=@${internalIp}:192.168.0.0/16,async";
     };
     "enc/jellyfin" = {
       perms.owner = "jellyfin";
       perms.group = "media";
       perms.mode = "775";
       properties.sync = "standard";
-      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
+      properties.sharenfs = "rw=@${internalIp}:192.168.0.0/16,async";
     };
     "enc/photos" = {
       properties.sync = "standard";
-      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
+      properties.sharenfs = "rw=@${internalIp}:192.168.0.0/16,async";
     };
     "enc/git" = {
       perms.owner = "git";
@@ -344,7 +348,7 @@ in
   zfs.pools.tank.datasets = {
     "enc/misc" = {
       properties.sync = "disabled";
-      properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
+      properties.sharenfs = "rw=@${internalIp}:192.168.0.0/16,async";
     };
     "enc/molters" = {
       properties.sync = "standard";
@@ -519,7 +523,7 @@ in
     useACMEHost = "turb.io";
 
     locations."/" = {
-      proxyPass = "http://10.100.0.6";
+      proxyPass = "http://${pandoIp}";
       extraConfig = ''
         proxy_set_header Host $host;
       '';
@@ -531,13 +535,13 @@ in
     useACMEHost = "turb.io";
 
     locations."/" = {
-      proxyPass = "http://10.100.0.6";
+      proxyPass = "http://${pandoIp}";
       extraConfig = ''
         proxy_set_header Host $host;
       '';
     };
     locations."/ws" = {
-      proxyPass = "http://10.100.0.6";
+      proxyPass = "http://${pandoIp}";
       extraConfig = ''
         proxy_set_header Host $host;
         proxy_http_version 1.1;
@@ -672,21 +676,7 @@ in
     ping = {
       enable = true;
       listenAddress = "0.0.0.0";
-      settings = {
-        targets = [
-          "8.8.8.8"
-          "1.1.1.1"
-
-          "192.168.100.1"
-          "192.168.100.2"
-
-          "192.168.101.1"
-          "192.168.101.2"
-
-          "192.168.102.1"
-          "192.168.102.2"
-        ];
-      };
+      settings.targets = inventory.probeTargets;
     };
     nginxlog = {
       enable = true;

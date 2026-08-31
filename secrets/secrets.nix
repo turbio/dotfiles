@@ -45,4 +45,5 @@ in
   "syncthing-cert.age".publicKeys = all;
   "syncthing-key.age".publicKeys = all;
   "syncthing-gui-password.age".publicKeys = all;
+  "nixcache-key.age".publicKeys = all;
 }

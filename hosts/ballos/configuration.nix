@@ -13,12 +13,8 @@ in
   imports = [
     ../../modules/zfs-datasets.nix
     ../../services/turbio-index.nix
-    ../../services/flippyflops.nix
-    ../../services/evaldb.nix
-    ../../services/forgejo.nix
     ../../services/nix-builders.nix
-    #../../services/gerrit.nix
-    ../../services/netboot_host.nix
+    #../../services/netboot_host.nix - netboot moved to joast (still TODO there)
     ./ipmi.nix
     ./incus.nix
     # *.turb.io doesn't cover second-level labels; internal vhosts need the

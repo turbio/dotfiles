@@ -167,16 +167,6 @@
         ];
       };
 
-      # review artifact: the same resources rendered as a RouterOS script,
-      # for eyeball-diffing against the device's own /export
-      applianceRsc =
-        device:
-        nixpkgs.legacyPackages.x86_64-linux.writeText "${device}.rsc" (
-          import ./appliances/render-rsc.nix { inherit lib; } (
-            (import (./appliances + "/${device}.nix") { inherit lib; }).resource
-          )
-        );
-
       # tofu with the routeros plugin from nixpkgs-unstable (25.11 has 1.92,
       # we want 1.99.x) — no registry access needed anywhere.
       # carries a local fix until it lands upstream: RouterOS REST returns
@@ -259,14 +249,6 @@
         // {
           appliance-config = applianceConfig;
         }
-        // (
-          applianceNames
-          |> map (d: {
-            name = "appliance-${d}-rsc";
-            value = applianceRsc d;
-          })
-          |> builtins.listToAttrs
-        )
         // {
           vim =
             let

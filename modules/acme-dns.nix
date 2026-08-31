@@ -3,12 +3,13 @@
   lib,
   pkgs,
   hostname,
+  inventory,
   ...
 }:
 let
   master = hostname == "aackle";
 
-  ns1Ip = "100.64.177.49";
+  ns1Ip = inventory.machines.aackle.tailscale.ip4;
   ns1Host = "ns1.turb.io";
   adminEmail = "hostmaster.turb.io";
 
@@ -77,7 +78,7 @@ in
             file = zonepath;
             extraConfig = lib.optionalString master ''
               notify yes;
-              also-notify { 100.64.52.73 key "rfc2136-xfer"; };
+              also-notify { ${inventory.machines.backle.tailscale.ip4} key "rfc2136-xfer"; };
               allow-update { key rfc2136-acme; };
             '';
           };

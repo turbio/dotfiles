@@ -1,6 +1,16 @@
 { inventory, ... }:
 let
   joast = port: "${inventory.machines.joast.lan.ip4}:${toString port}"; # TODO: don't hardcode these
+
+  # everything the snmp exporter walks; the pepwave-side gateway and the
+  # .252 switch aren't in inventory (yet)
+  snmpTargets = [
+    inventory.appliances.ccr2004.lan.ip4
+    inventory.appliances.crs326.lan.ip4
+    "192.168.88.252"
+    "192.168.50.1"
+    inventory.appliances.crs305.wan.ip4
+  ];
 in
 {
   services.prometheus = {
@@ -213,17 +223,7 @@ in
         scrape_interval = "300s";
         scrape_timeout = "20s";
         metrics_path = "/snmp";
-        static_configs = [
-          {
-            targets = [
-              "192.168.88.1"
-              "192.168.88.245"
-              "192.168.88.252"
-              "192.168.50.1"
-              "192.168.1.69"
-            ];
-          }
-        ];
+        static_configs = [ { targets = snmpTargets; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
@@ -245,17 +245,7 @@ in
         scrape_timeout = "9s";
         metrics_path = "/snmp";
         params.module = [ "if_bw_fast" ];
-        static_configs = [
-          {
-            targets = [
-              "192.168.88.1"
-              "192.168.88.245"
-              "192.168.88.252"
-              "192.168.50.1"
-              "192.168.1.69"
-            ];
-          }
-        ];
+        static_configs = [ { targets = snmpTargets; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];

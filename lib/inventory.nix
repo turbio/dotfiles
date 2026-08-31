@@ -176,6 +176,17 @@ in
 
   vms = builtins.deepSeq checks normalized;
 
+  # what the ping exporters probe: the real upstreams plus every per-wan
+  # probe address, so each wan's reachability shows up as its own series
+  probeTargets = [
+    "8.8.8.8"
+    "1.1.1.1"
+  ]
+  ++ builtins.concatMap (w: [
+    w.probes.cf
+    w.probes.goog
+  ]) (builtins.attrValues net.wanProbes);
+
   lib = {
     inherit
       hash16

@@ -10,10 +10,6 @@ let
   bridgePorts = map (i: "ether${toString i}") (lib.range 3 16) ++ [ "sfp-sfpplus2" ];
   sanitize = lib.replaceStrings [ "-" ] [ "_" ];
 
-  # on (re)bind: repoint this wan's routes, then kill flows pinned to this
-  # wan — their masquerade source was chosen when the flow began, so an
-  # address change leaves them egressing with a dead ip, and chatty flows
-  # (netwatch probes, wireguard) refresh conntrack faster than it expires
   wanScript = n: ''
     :if ($bound = 1) do={
     /ip route set [find comment=MAIN_WAN${n}] gateway=($"gateway-address" . "%" . $interface)
@@ -38,12 +34,6 @@ let
     }
   '';
 
-  # preference order: wan3 (sfp+) > wan1 > wan2 (pepwave). when the
-  # preferred wan changes (failover either direction), flows pinned to the
-  # other wans are stale — established during an outage or masqueraded to a
-  # now-idle path — and the chatty ones never expire on their own; kill them
-  # so they re-establish on the right wan. only marked flows die: lan<->
-  # router sessions are unmarked and never touched
   recomputeWan = ''
     :global wanPref
     :if ([:typeof $wanPref] = "nothing") do={ :set wanPref "" }
@@ -70,41 +60,24 @@ let
     }
   '';
 
-  # per-wan probe machinery: mangle marks, dst-nat probe redirects, netwatch
-  wans = {
+  wans = lib.mapAttrs (name: w: w // inventory.net.wanProbes.${name}) {
     wan1 = {
       n = "1";
       iface = "ether1";
-      probeNet = "192.168.100.0/24";
-      probes = {
-        cf = "192.168.100.1";
-        goog = "192.168.100.2";
-      };
     };
     wan2 = {
       n = "2";
       iface = "ether2";
-      probeNet = "192.168.101.0/24";
-      probes = {
-        cf = "192.168.101.1";
-        goog = "192.168.101.2";
-      };
     };
     wan3 = {
       n = "3";
       iface = "sfp-sfpplus1";
-      probeNet = "192.168.102.0/24";
-      probes = {
-        cf = "192.168.102.1";
-        goog = "192.168.102.2";
-      };
     };
   };
   probeTarget = p: if p == "cf" then "1.1.1.1" else "8.8.8.8";
 
   netwatchScript = "/system script run recompute_wan";
 
-  # ordered rule lists; the attr names below double as the move_items sequence
   filterOrder = [
     "input_established"
     "input_invalid"
@@ -278,11 +251,6 @@ in
     lease_time = "2d";
   };
 
-  # static leases + .lan names, generated from inventory for every machine
-  # that declares lan.{ip4,macs}. STOPGAP: .lan registration died with the
-  # previous router and configs still depend on it (zote.lan, j2.lan, ...);
-  # this resurrects those names declaratively. eventually .lan gets abandoned
-  # entirely for the unified int.turb.io hierarchy (PLAN.md §4, M3/M5).
   resource.routeros_ip_dhcp_server_lease = lib.concatMapAttrs (
     host: m:
     {
@@ -314,7 +282,6 @@ in
           type = "A";
         };
       }
-      # extra nics resolve as <label>.<host>.lan (aux.ballos.lan, mgmt.j2.lan)
       // lib.mapAttrs' (
         label: nic:
         lib.nameValuePair "lan_${host}_${label}" {
@@ -324,12 +291,6 @@ in
         }
       ) (m.lan.extra or { })
     ) lanMachines
-    # the internal hierarchy (int.turb.io + reverse zones) lives on the
-    # internal resolver (modules/int-dns.nix); lan clients use the ccr as
-    # dns, so it forwards those zones there (M3). that's joast since it
-    # took the pool — and with it unbound — off ballos; the forward was
-    # still pointing at the dead ballos address until 2026-08-28, which
-    # made every int.turb.io name time out for every ccr-served client
     // (
       let
         fwd = name: {
@@ -490,10 +451,6 @@ in
         new_routing_mark = "via_wan3";
       };
     }
-    # tag every new flow with the wan it egresses, so the wan scripts can
-    # surgically kill a wan's flows on rebind/failover instead of flushing
-    # the world. postrouting catches forwarded and router-originated traffic;
-    # marking only `new` flows sidesteps fasttrack (first packets never are)
     // lib.mapAttrs' (
       wname: w:
       lib.nameValuePair "conn_mark_${wname}" {
@@ -535,12 +492,6 @@ in
       }) w.probes
     ) wans;
 
-  # the MAIN_/VIA_ wan routes are jointly owned: tofu manages their
-  # existence/table/dst, but `gateway` is rewritten by the dhcp-client
-  # on-bound scripts and `distance` (MAIN_ only) by recompute_wan on
-  # netwatch flips — both are runtime state, so tofu must never revert
-  # them (the pepwave's carrier ip changing taught us this the hard way).
-  # config gateways are bootstrap-only values for a fresh device.
   resource.routeros_ip_route = {
     via_wan2 = {
       comment = "VIA_WAN2";
@@ -623,9 +574,6 @@ in
       ];
     };
 
-    # the vm tier (PLAN.md §2/M1): lan clients reach vms through their
-    # hypervisor. single aggregate while everything lives on joast;
-    # per-host routes generate from inventory placement once vms spread (M6)
     vm_net = {
       comment = "VM_NET";
       dst_address = inventory.net.vm.cidr4;
@@ -633,14 +581,6 @@ in
     };
   };
 
-  # vm→lan flows are asymmetric through the ccr: the syn goes straight from
-  # the hypervisor to the lan target (same L2), but the target's reply
-  # follows its default route back here — a syn-ack for a connection
-  # conntrack never saw the front of, classified invalid and dropped by the
-  # forward filter. notrack the reply direction so those packets ride the
-  # "untracked" accept instead; policy enforcement for vm traffic lives on
-  # the hypervisor, the ccr just forwards. scoped to lan→vmnet so nat'd
-  # flows (wan probes etc) keep their conntrack.
   resource.routeros_ip_firewall_raw.vmnet_hairpin_notrack = {
     chain = "prerouting";
     action = "notrack";
@@ -649,20 +589,12 @@ in
     comment = "vm hairpin replies untracked";
   };
 
-  # `enabled = true` isn't in the provider schema (v1.99); the device is
-  # already enabled and terraform won't touch that flag — see README gaps
   resource.routeros_ip_traffic_flow.settings = {
-    # akvorado's docs recommend 5-10s for BOTH timeouts (it bins each flow
-    # record at one timestamp, ignoring duration — long timeouts turn
-    # steady transfers into combs on short-range graphs). the classic "60s"
-    # netflow advice assumes 1-minute-granularity collectors, which
-    # akvorado isn't. was 1m/15s before 2026-07-31.
     active_flow_timeout = "10s";
     inactive_flow_timeout = "10s";
     cache_entries = "32k";
   };
 
-  # flows go to the akvorado vm (host stack retired 2026-07-31)
   resource.routeros_ip_traffic_flow_target.akvorado = {
     dst_address = inventory.vms.akvorado.addr.ip4;
     port = 2055;
@@ -670,9 +602,7 @@ in
     v9_template_timeout = "1m";
   };
 
-  # lan gets ::1 out of the delegated at&t prefix; advertised via SLAAC
   resource.routeros_ipv6_address.lan = {
-    # device normalizes the pool-template address to ::1/64
     address = "::1/64";
     from_pool = ref "routeros_ipv6_dhcp_client.attwan.pool_name";
     advertise = true;
@@ -797,17 +727,11 @@ in
   resource.routeros_ipv6_neighbor_discovery.default = {
     interface = ref "routeros_interface_bridge.bridge1.name";
     advertise_mac_address = false;
-    # routeros RDNSS relays the *upstream* (bgw) resolver, which answers from
-    # public dns and silently bypasses the internal zones — never advertise
-    # it. proper v6 dns advertisement (RDNSS from the resolver itself, on a
-    # ula) is a queued M3 follow-up; until then clients use the v4 dhcp dns
-    # (the ccr), which forwards internal zones to unbound
     advertise_dns = false;
     hop_limit = 64;
     other_configuration = true;
   };
 
-  # keep rule order pinned; rules land in chain order per these sequences
   resource.routeros_move_items = {
     fw_filter = {
       resource_name = "routeros_ip_firewall_filter";

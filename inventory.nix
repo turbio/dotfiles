@@ -56,10 +56,44 @@
 
     tailscale = "100.64.0.0/10";
     tailscale6 = "fd7a:115c:a1e0::/48";
+
+    # per-wan probe nets: the ccr dst-nats these fake addresses out one
+    # specific wan (appliances/ccr2004.nix), so pinging them from inside
+    # measures that wan's health. cf lands on 1.1.1.1, goog on 8.8.8.8. the
+    # ping exporters (vms/pingexp, hosts) probe every one.
+    wanProbes = {
+      wan1 = {
+        probeNet = "192.168.100.0/24";
+        probes = {
+          cf = "192.168.100.1";
+          goog = "192.168.100.2";
+        };
+      };
+      wan2 = {
+        probeNet = "192.168.101.0/24";
+        probes = {
+          cf = "192.168.101.1";
+          goog = "192.168.101.2";
+        };
+      };
+      wan3 = {
+        probeNet = "192.168.102.0/24";
+        probes = {
+          cf = "192.168.102.1";
+          goog = "192.168.102.2";
+        };
+      };
+    };
   };
 
   machines = {
     ballos = {
+      arch = "x86_64-linux";
+      secrets = [
+        "userpassword"
+        "rfc2136-acme"
+        "nix-builders-ssh-key"
+      ];
       lan.ip4 = "192.168.88.242";
       lan.mac = "02:a8:22:41:26:a8"; # bond0
       lan.extra.aux = {
@@ -85,6 +119,7 @@
         "forgejo-webhook-secret"
         "forgejo-admin-password"
         "nix-builders-ssh-key"
+        "nixcache-key"
       ];
 
       lan.ip4 = "192.168.88.227";
@@ -104,6 +139,7 @@
     };
 
     j2 = {
+      arch = "x86_64-linux";
       lan.ip4 = "192.168.88.82";
       lan.mac = "b8:83:03:7f:01:54"; # bond
       lan.extra.mgmt = {
@@ -112,10 +148,14 @@
       };
     };
     zote = {
+      arch = "x86_64-linux";
       lan.ip4 = "192.168.88.81";
       lan.mac = "70:10:6f:aa:cd:d0";
     };
-    star = { };
+    star = {
+      arch = "x86_64-linux";
+      secrets = [ "userpassword" ];
+    };
     curly = {
       arch = "x86_64-linux";
 
@@ -128,12 +168,22 @@
 
       tailscale.ip4 = "100.100.109.112";
     };
-    gero = { };
-    itoh = { };
-    tivni = { };
+    gero = {
+      arch = "x86_64-linux";
+      secrets = [ "userpassword" ];
+    };
+    itoh = {
+      arch = "x86_64-linux";
+      secrets = [ "userpassword" ];
+    };
+    tivni = {
+      arch = "x86_64-linux";
+      secrets = [ "userpassword" ];
+    };
 
     # cloud edges
     aackle = {
+      arch = "x86_64-linux";
       secrets = [
         "userpassword"
         "rfc2136-acme"
@@ -158,15 +208,19 @@
     };
     cackle = {
       arch = "aarch64-linux";
+      secrets = [ "userpassword" ];
       public.ip4 = "163.192.60.165";
       public.ip6 = "2603:c024:c018:6b00:0:54b7:d0b:9783";
       tailscale.ip4 = "100.64.144.3";
     };
     jenka = {
       arch = "aarch64-linux";
+      secrets = [ "userpassword" ];
     };
-    spooky = { };
-    balrog = { };
+    spooky = {
+      arch = "x86_64-linux";
+      secrets = [ "userpassword" ];
+    };
   };
 
   appliances = {

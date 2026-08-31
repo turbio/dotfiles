@@ -280,6 +280,30 @@
         in
         pkgs.linkFarm "netboot-images" pairs;
 
+      # ci (buildbot) builds the checks tree. host toplevels are the real
+      # signal: each embeds the host's full closure, and the hypervisors'
+      # toplevels embed every vm they place — so "joast builds" covers the
+      # whole vm fleet. split by arch so each attr lands on a worker that
+      # can actually build it.
+      checks =
+        let
+          toplevels = lib.mapAttrs' (
+            name: cfg: lib.nameValuePair "host-${name}" cfg.config.system.build.toplevel
+          );
+          hostsBy =
+            system:
+            lib.filterAttrs (name: _: inventory.machines.${name}.arch == system) self.nixosConfigurations;
+        in
+        {
+          x86_64-linux = toplevels (hostsBy "x86_64-linux") // {
+            # the terranix render of every appliance: catches routeros config
+            # eval breakage (missing files, bad references) without touching
+            # a device
+            appliance-config = applianceConfig;
+          };
+          aarch64-linux = toplevels (hostsBy "aarch64-linux");
+        };
+
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     };
 }

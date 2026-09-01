@@ -65,6 +65,9 @@
 
     buildbot-nix.url = "github:nix-community/buildbot-nix";
     buildbot-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+    vmshell.url = "git+https://git.turb.io/vmshell";
+    vmshell.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -76,6 +79,7 @@
       wrappers,
       agenix,
       nix-index-database,
+      vmshell,
       ...
     }@inputs:
     let
@@ -237,29 +241,55 @@
       );
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
-      packages.x86_64-linux =
-        { }
-        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
-        // {
-          appliance-config = applianceConfig;
-        }
-        // {
-          vim =
-            let
-              pkgs = import nixpkgs {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-            in
-            nixvim.legacyPackages.x86_64-linux.makeNixvimWithModule {
-              inherit pkgs;
-              module = import ./vimconfig.nix {
-                inherit pkgs;
-                repos = inputs;
-                isDesktop = false;
-              };
-            };
+      packages.x86_64-linux = {
+        devvm = vmshell.lib.mkVMPackage {
+          vm = {
+            hostPlatform = "x86_64-linux";
+            modules = [
+              {
+                _module.args = {
+                  hostname = "devvm";
+                  repos = inputs;
+                };
+              }
+              ./configuration.nix
+              nix-index-database.nixosModules.default
+              ./desktop.nix
+              ./home.nix
+              ./vim.nix
+              nixvim.nixosModules.nixvim
+              {
+                nixpkgs.overlays = [
+                  wrappersOverlay
+                ];
+              }
+            ];
+          };
         };
+      }
+      //
+
+        (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+      // {
+        appliance-config = applianceConfig;
+      }
+      // {
+        vim =
+          let
+            pkgs = import nixpkgs {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+          in
+          nixvim.legacyPackages.x86_64-linux.makeNixvimWithModule {
+            inherit pkgs;
+            module = import ./vimconfig.nix {
+              inherit pkgs;
+              repos = inputs;
+              isDesktop = false;
+            };
+          };
+      };
 
       netbootImages =
         let

@@ -141,6 +141,14 @@ in
     home = gitDir;
     createHome = false;
     uid = 977;
+    # ssh push for the cgit-served repos: same keys as turbio, jailed to
+    # git plumbing by git-shell. home is the dataset root, so the remote is
+    #   git@joast.int.turb.io:repositories/<repo>.git
+    # (git@git.turb.io won't work: that name resolves to the edges, whose
+    # :22 dnats to the forgejo vm). cgit picks pushes up on the next page
+    # load — it scans per request through the read-only mount.
+    shell = "${pkgs.git}/bin/git-shell";
+    openssh.authorizedKeys.keys = config.users.users.turbio.openssh.authorizedKeys.keys;
   };
   users.groups.git.gid = 976;
 

@@ -65,9 +65,6 @@
 
     buildbot-nix.url = "github:nix-community/buildbot-nix";
     buildbot-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
-
-    vmshell.url = "git+https://git.turb.io/vmshell";
-    vmshell.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -79,7 +76,6 @@
       wrappers,
       agenix,
       nix-index-database,
-      vmshell,
       ...
     }@inputs:
     let
@@ -88,6 +84,13 @@
       # inventory.nix is data only; lib/inventory.nix derives the addresses,
       # checks and helpers from it
       inventory = import ./lib/inventory.nix;
+
+      # local copy of git+https://git.turb.io/vmshell while both sides are
+      # being iterated on together; push it back upstream once it settles
+      vmshellLib = import ./vmshell {
+        inherit nixpkgs;
+        microvm = inputs.microvm;
+      };
 
       wrappersOverlay =
         final: prev:
@@ -242,15 +245,21 @@
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
       packages.x86_64-linux = {
-        devvm = vmshell.lib.mkVMPackage {
+        devvm = vmshellLib.mkVMPackage {
           vm = {
             hostPlatform = "x86_64-linux";
+            user = "turbio";
             modules = [
               {
                 _module.args = {
                   hostname = "devvm";
                   repos = inputs;
                 };
+              }
+              {
+                # fresh home every boot: an empty ~/.zshrc keeps
+                # zsh-newuser-install from eating the first keystroke
+                systemd.tmpfiles.rules = [ "f /home/turbio/.zshrc 0644 turbio users -" ];
               }
               ./configuration.nix
               nix-index-database.nixosModules.default
@@ -267,9 +276,7 @@
           };
         };
       }
-      //
-
-        (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+      // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
       // {
         appliance-config = applianceConfig;
       }

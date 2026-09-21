@@ -176,9 +176,8 @@ in
     rust_analyzer = {
       enable = true;
       package = null;
-      installCargo = false;
-      installRustc = false;
     };
+
     hls.enable = true;
     ts_ls.enable = true;
     bashls.enable = true;

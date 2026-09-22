@@ -41,6 +41,8 @@ in
     ];
   };
 
+  nix.nrBuildUsers = 80;
+
   vmhost.enable = true;
   intDns.enable = true;
 

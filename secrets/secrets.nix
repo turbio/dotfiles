@@ -28,22 +28,18 @@ in
   "forgejo-oauth-secret.age".publicKeys = all;
   "forgejo-webhook-secret.age".publicKeys = all;
   "forgejo-admin-password.age".publicKeys = all;
-  # buildbot's forgejo api token (was minted imperatively by the old
-  # forgejo-bootstrap unit at /var/lib/forgejo-bootstrap/api-token; the
-  # buildbot vm receives it host-delivered)
   "forgejo-api-token.age".publicKeys = all;
-  # ipinfo.io geoip download token (akvorado vm, host-delivered; was an
-  # out-of-band file at /var/lib/akvorado-geoip/token)
+
   "ipinfo-token.age".publicKeys = all;
   "nix-builders-ssh-key.age".publicKeys = all;
 
-  # syncthing (vms/syncthing, host-delivered). cert/key ARE the device
-  # identity — the id peers dial is derived from the cert, so these are the
-  # copies of the pair that used to sit unencrypted in
-  # /tank/enc/misc/config. the gui password is plaintext; syncthing-init
-  # bcrypts it into config.xml
   "syncthing-cert.age".publicKeys = all;
   "syncthing-key.age".publicKeys = all;
   "syncthing-gui-password.age".publicKeys = all;
   "nixcache-key.age".publicKeys = all;
+
+  "gcp-backups-service-account.age".publicKeys = [
+    me
+    joast
+  ];
 }

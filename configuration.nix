@@ -57,7 +57,7 @@ in
 
     #package = pkgs.nixVersions.latest;
     extraOptions = ''
-      experimental-features = nix-command flakes pipe-operators auto-allocate-uids no-url-literals
+      experimental-features = nix-command flakes pipe-operators auto-allocate-uids no-url-literals ca-derivations
       builders-use-substitutes = true
     '';
   };

@@ -41,6 +41,31 @@ in
     ];
   };
 
+  boot.kernelModules = [ "tcp_bbr" ];
+  boot.kernel.sysctl = {
+    "net.ipv4.tcp_congestion_control" = "bbr";
+    "net.ipv4.tcp_wmem" = "4096 262144 67108864";
+    "net.ipv4.tcp_rmem" = "4096 262144 67108864";
+    "net.core.wmem_max" = 67108864;
+    "net.core.rmem_max" = 67108864;
+  };
+
+  # nix daemon ooms first
+  systemd = {
+    slices."nix-daemon".sliceConfig = {
+      ManagedOOMMemoryPressure = "kill";
+      ManagedOOMMemoryPressureLimit = "50%";
+    };
+    services."nix-daemon".serviceConfig.Slice = "nix-daemon.slice";
+
+    services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
+  };
+
+  nix.settings.log-lines = lib.mkDefault 25;
+  nix.daemonCPUSchedPolicy = lib.mkDefault "batch";
+  nix.daemonIOSchedClass = lib.mkDefault "idle";
+  nix.daemonIOSchedPriority = lib.mkDefault 7;
+
   nix.nrBuildUsers = 80;
 
   vmhost.enable = true;

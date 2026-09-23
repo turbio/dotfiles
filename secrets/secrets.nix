@@ -42,4 +42,11 @@ in
     me
     joast
   ];
+
+  # hmac key for the s3/xml api (multipart upload); two lines, access id
+  # then secret. `gcloud storage hmac create backups@personal-214003...`
+  "gcp-backups-hmac.age".publicKeys = [
+    me
+    joast
+  ];
 }

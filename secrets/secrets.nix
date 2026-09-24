@@ -40,6 +40,8 @@ in
   "syncthing-gui-password.age".publicKeys = all;
   "nixcache-key.age".publicKeys = all;
 
+  "radicle-key.age".publicKeys = all;
+
   "gcp-backups-service-account.age".publicKeys = [
     me
     joast

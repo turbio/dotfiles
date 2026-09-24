@@ -46,15 +46,27 @@ let
         mp="$(zfs get -H -o value mountpoint ${fullName})"
       '';
 
-      chownCmd = lib.optionalString ((ds.perms.owner != null) || (ds.perms.group != null)) ''
-        if [ "$mp" != "legacy" ] && [ "$mp" != "none" ] && [ -d "$mp" ]; then
-          chown ${lib.defaultTo "" ds.perms.owner}:${lib.defaultTo "" ds.perms.group} "$mp"
-        fi
-      '';
+      hasPerms =
+        (ds.perms.owner != null) || (ds.perms.group != null) || (ds.perms.mode != null) || (ds.dirs != [ ]);
 
-      chmodCmd = lib.optionalString (ds.perms.mode != null) ''
-        if [ "$mp" != "legacy" ] && [ "$mp" != "none" ] && [ -d "$mp" ]; then
-          chmod ${ds.perms.mode} "$mp"
+      owner = lib.defaultTo "" ds.perms.owner;
+      group = lib.defaultTo "" ds.perms.group;
+
+      shouldChown = ds.perms.owner != null || ds.perms.group != null;
+      shouldChmod = ds.perms.mode != null;
+
+      mkdir = d: ''mkdir -p "$mp"/${lib.escapeShellArg d}'';
+      mkdirs = ds.dirs |> lib.map mkdir |> lib.concatLines;
+
+      permsCmd = lib.optionalString (ds.type != "volume" && hasPerms) ''
+        if [ "$mp" != "legacy" ] && [ "$mp" != "none" ]; then
+          if [ "$(zfs get -H -o value mounted ${fullName})" != "yes" ]; then
+            echo "zfs-ensure: ${fullName} is not mounted at $mp (encrypted pool locked?); not touching the path" >&2
+            exit 1
+          fi
+          ${lib.optionalString shouldChown ''chown ${owner}:${group} "$mp"''}
+          ${lib.optionalString shouldChmod ''chmod ${ds.perms.mode} "$mp"''}
+          ${mkdirs}
         fi
       '';
 
@@ -116,9 +128,8 @@ let
             ${lib.optionalString (ds.mountpoint != defaultMountpoint) setMountpointCmd}
           fi
           ${getmpCmd}
-          ${chownCmd}
-          ${chmodCmd}
           ${mkdirsCmd}
+          ${permsCmd}
         '';
       };
     };

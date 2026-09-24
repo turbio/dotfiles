@@ -205,6 +205,24 @@ in
     };
   };
 
+  # radicle lives in vms/radicle: the vm serves the explorer + httpd api on
+  # :80; the p2p port is dnat-ed straight to the vm by the edges
+  services.nginx.virtualHosts."radicle.turb.io" = {
+    forceSSL = true;
+    useACMEHost = "turb.io";
+    http2 = true;
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.radicle.addr.ip4}:80";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      '';
+    };
+  };
+
   services.nginx.virtualHosts."colotop.turb.io" = {
     forceSSL = true;
     useACMEHost = "turb.io";

@@ -437,6 +437,20 @@
         readOnly = true;
       };
     };
+    radicle = {
+      host = "joast";
+      persistVar = true;
+      expose = [
+        { port = 8776; } # p2p; edges dnat public :8776 here
+        { port = 80; } # explorer + httpd api, behind the radicle.turb.io vhost
+      ];
+      # gossip/fetch with the public radicle seeds
+      egress = true;
+      secrets = [ "radicle-key" ];
+      vcpu = 2;
+      # not 2048: qemu hangs at exactly 2G (microvm.nix#171)
+      mem = 1536;
+    };
     grafana = {
       host = "joast";
       persistVar = true;

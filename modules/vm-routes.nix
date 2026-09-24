@@ -23,7 +23,6 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
       };
-      # TODO(turbio): proto 201 marks the routes ours??? wat
       script = ''
         ${pkgs.iproute2}/bin/ip route flush proto 201 || true
         ${lib.concatStrings (

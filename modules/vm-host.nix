@@ -6,6 +6,7 @@
   repos,
   hostname,
   microvm,
+  pkgs,
   ...
 }:
 let
@@ -195,6 +196,7 @@ in
         ) statefulVms
         // mountDatasets
       );
+
       age.secrets = lib.mkMerge (
         lib.mapAttrsToList (
           name: vm:
@@ -212,7 +214,35 @@ in
         ) myVms
       );
 
+      systemd.services = lib.mkMerge (
+        lib.mapAttrsToList (
+          name: vm:
+          let
+            paths =
+              lib.optional (vm.persistVar or false) "${inv.storage.vmsPath}/${name}"
+              ++ map (m: inv.storage.datasetPath m.dataset) (lib.attrValues (vm.mounts or { }));
+            guard = pkgs.writeShellScript "vm-${name}-datasets-mounted" ''
+              for p in ${lib.escapeShellArgs paths}; do
+                if ! ${pkgs.util-linux}/bin/mountpoint -q "$p"; then
+                  echo "vmhost: $p is not a mountpoint (encrypted pool locked?); not starting ${name}" >&2
+                  exit 1
+                fi
+              done
+            '';
+            dropin = {
+              overrideStrategy = "asDropin";
+              serviceConfig.ExecStartPre = [ "${guard}" ];
+            };
+          in
+          lib.optionalAttrs (paths != [ ]) {
+            "microvm@${name}" = dropin;
+            "microvm-virtiofsd@${name}" = dropin;
+          }
+        ) myVms
+      );
+
       users.users.microvm.uid = 994;
+
       microvm.vms = lib.mapAttrs (name: vmEntry: {
         restartIfChanged = true;
         config = {

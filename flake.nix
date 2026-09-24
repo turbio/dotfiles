@@ -118,28 +118,7 @@
 
       hostModulesList =
         extraModules: hostname:
-
-        lib.optional (hostname == "ballos") {
-          age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
-          age.secrets."rfc2136-acme".owner = "acme";
-
-          age.secrets."forgejo-oauth-secret".file = ./secrets/forgejo-oauth-secret.age;
-          age.secrets."forgejo-webhook-secret".file = ./secrets/forgejo-webhook-secret.age;
-          age.secrets."forgejo-admin-password".file = ./secrets/forgejo-admin-password.age;
-          age.secrets."nix-builders-ssh-key".file = ./secrets/nix-builders-ssh-key.age;
-        }
-        ++ lib.optional (hostname == "aackle" || hostname == "backle") {
-          age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
-          age.secrets."rfc2136-acme".owner = "named";
-
-          age.secrets."rfc2136-xfer".file = ./secrets/rfc2136-xfer.age;
-          age.secrets."rfc2136-xfer".owner = "named";
-        }
-
-        ++ lib.optional (hostname != "zote" && hostname != "joast" && hostname != "j2") {
-          age.secrets.userpassword.file = ./secrets/userpassword.age;
-        }
-        ++ [
+        [
           nix-index-database.nixosModules.default
           agenix.nixosModules.default
           #./modules/wg-vpn.nix

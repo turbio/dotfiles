@@ -2,13 +2,6 @@
 let
   joast = port: "${inventory.machines.joast.lan.ip4}:${toString port}"; # TODO: don't hardcode these
 
-  pinInstance = old: [
-    {
-      target_label = "instance";
-      replacement = old;
-    }
-  ];
-
   # everything the snmp exporter walks; the pepwave-side gateway and the
   # .252 switch aren't in inventory (yet)
   snmpTargets = [
@@ -39,7 +32,6 @@ in
         # the app serves prometheus text with no content-type and the parser
         # demands a trailing "# EOF"
         fallback_scrape_protocol = "PrometheusText0.0.4";
-        relabel_configs = pinInstance "127.0.0.1:3001";
       }
 
       {
@@ -137,14 +129,6 @@ in
             labels.host = "j2";
           }
         ];
-        relabel_configs = [
-          {
-            source_labels = [ "__address__" ];
-            regex = builtins.replaceStrings [ "." ] [ "\\." ] (joast 9092);
-            target_label = "instance";
-            replacement = "127.0.0.1:9092";
-          }
-        ];
       }
       {
         job_name = "smartctl";
@@ -152,7 +136,6 @@ in
         static_configs = [
           { targets = [ (joast 9633) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9633";
       }
       {
         job_name = "nut";
@@ -187,7 +170,6 @@ in
         static_configs = [
           { targets = [ (joast 9113) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9113";
       }
       {
         job_name = "nginxlog";
@@ -195,7 +177,6 @@ in
         static_configs = [
           { targets = [ (joast 9117) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9117";
       }
       {
         job_name = "ping";
@@ -203,7 +184,6 @@ in
         static_configs = [
           { targets = [ (joast 9427) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9427";
       }
       {
         # the permanent vm/host ping-exporter pair (perf comparison)
@@ -219,7 +199,6 @@ in
         static_configs = [
           { targets = [ (joast 9586) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9586";
       }
       {
         job_name = "zfs";
@@ -227,7 +206,6 @@ in
         static_configs = [
           { targets = [ (joast 9134) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9134";
       }
       {
         job_name = "process";
@@ -236,7 +214,6 @@ in
         static_configs = [
           { targets = [ (joast 9256) ]; }
         ];
-        relabel_configs = pinInstance "127.0.0.1:9256";
       }
       {
         job_name = "snmp_exporter";

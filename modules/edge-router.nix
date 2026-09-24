@@ -4,6 +4,7 @@ let
   ballosTs4 = inventory.machines.joast.tailscale.ip4;
   ballosTs6 = inventory.machines.joast.tailscale.ip6;
   forgejo = inventory.vms.forgejo.addr;
+  radicle = inventory.vms.radicle.addr;
 in
 {
   services.tailscale.extraSetFlags = [ "--accept-routes" ];
@@ -16,6 +17,7 @@ in
     80
     443
     23
+    8776
   ];
 
   networking.nftables = {
@@ -26,6 +28,7 @@ in
         chain prerouting {
           type nat hook prerouting priority -100;
           iiftype ether tcp dport 22 dnat to ${forgejo.ip4}:2222
+          iiftype ether tcp dport 8776 dnat to ${radicle.ip4}:8776
           iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs4}
         }
 
@@ -39,6 +42,7 @@ in
         chain prerouting {
           type nat hook prerouting priority -100;
           iiftype ether tcp dport 22 dnat to [${forgejo.ip6}]:2222
+          iiftype ether tcp dport 8776 dnat to [${radicle.ip6}]:8776
           iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs6}
         }
 

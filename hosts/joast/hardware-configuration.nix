@@ -46,10 +46,6 @@
 
   systemd.network.networks."40-bond0".dhcpV4Config.RouteMetric = 100;
   systemd.network.networks."40-bond0".ipv6AcceptRAConfig.RouteMetric = 100;
-
-  # pin the bond to eno5np0's hardware mac instead of the machine-id-derived
-  # one, so the pxe phase and the running os share one dhcp identity and the
-  # inventory lease pin holds (inventory.nix machines.joast)
   networking.interfaces.bond0.macAddress = "b8:83:03:8a:10:ac";
   systemd.network.networks."50-eno1" = {
     matchConfig.Name = "eno1";

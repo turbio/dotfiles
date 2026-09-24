@@ -14,29 +14,22 @@ in
     ether1 = {
       factory_name = "ether1";
       name = "ether1";
-      disabled = true;
     };
     sfp_sfpplus1 = {
       factory_name = "sfp-sfpplus1";
       name = "sfp-sfpplus1";
-      rx_flow_control = "on";
-      tx_flow_control = "on";
     };
     sfp_sfpplus2 = {
       factory_name = "sfp-sfpplus2";
       name = "sfp-sfpplus2";
-      rx_flow_control = "on";
-      tx_flow_control = "on";
     };
     sfp_sfpplus3 = {
       factory_name = "sfp-sfpplus3";
       name = "sfp-sfpplus3";
-      disabled = true;
     };
     sfp_sfpplus4 = {
       factory_name = "sfp-sfpplus4";
       name = "sfp-sfpplus4";
-      disabled = true;
     };
   };
 

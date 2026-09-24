@@ -1,6 +1,6 @@
 { lib, ... }:
 let
-  inventory = import ../inventory.nix;
+  inventory = import ../lib/inventory.nix;
 
   lanMachines = lib.filterAttrs (_: m: m ? lan && m.lan ? ip4 && m.lan ? mac) inventory.machines;
 
@@ -60,33 +60,18 @@ let
     }
   '';
 
-  wans = {
+  wans = lib.mapAttrs (name: w: w // inventory.net.wanProbes.${name}) {
     wan1 = {
       n = "1";
       iface = "ether1";
-      probeNet = "192.168.100.0/24";
-      probes = {
-        cf = "192.168.100.1";
-        goog = "192.168.100.2";
-      };
     };
     wan2 = {
       n = "2";
       iface = "ether2";
-      probeNet = "192.168.101.0/24";
-      probes = {
-        cf = "192.168.101.1";
-        goog = "192.168.101.2";
-      };
     };
     wan3 = {
       n = "3";
       iface = "sfp-sfpplus1";
-      probeNet = "192.168.102.0/24";
-      probes = {
-        cf = "192.168.102.1";
-        goog = "192.168.102.2";
-      };
     };
   };
   probeTarget = p: if p == "cf" then "1.1.1.1" else "8.8.8.8";
@@ -141,6 +126,7 @@ let
     "input_lan"
     "input_dhcpv6"
     "input_drop"
+    "fwd_fasttrack"
     "fwd_established"
     "fwd_invalid"
     "fwd_bad_src"
@@ -200,8 +186,6 @@ in
   resource.routeros_interface_ethernet.sfp_sfpplus1 = {
     factory_name = "sfp-sfpplus1";
     name = "sfp-sfpplus1";
-    rx_flow_control = "on";
-    tx_flow_control = "on";
   };
 
   resource.routeros_interface_list = {
@@ -312,7 +296,7 @@ in
         fwd = name: {
           inherit name;
           type = "FWD";
-          forward_to = inventory.machines.ballos.lan.ip4;
+          forward_to = inventory.machines.joast.lan.ip4;
           match_subdomain = true;
         };
       in
@@ -402,14 +386,13 @@ in
       chain = "input";
       action = "drop";
       log = true;
-      log_prefix = "unknown ipv4 to router";
     };
     fwd_fasttrack = {
       chain = "forward";
       action = "fasttrack-connection";
       connection_state = "established,related";
       hw_offload = true;
-      comment = "fasttrack";
+      comment = "fasttrack established/related";
     };
     fwd_established = {
       chain = "forward";
@@ -432,7 +415,6 @@ in
     fwd_drop = {
       chain = "forward";
       action = "drop";
-      log = true;
     };
   };
 
@@ -595,7 +577,7 @@ in
     vm_net = {
       comment = "VM_NET";
       dst_address = inventory.net.vm.cidr4;
-      gateway = inventory.machines.ballos.lan.ip4;
+      gateway = inventory.machines.joast.lan.ip4;
     };
   };
 
@@ -647,7 +629,7 @@ in
       chain = "input";
       action = "accept";
       connection_state = "established,related,untracked";
-      comment = "allow established and related";
+      comment = "allow established/related";
     };
     input_invalid = {
       chain = "input";
@@ -686,21 +668,23 @@ in
     input_drop = {
       chain = "input";
       action = "drop";
-      log = true;
-      log_prefix = "unknown ipv6";
+    };
+    fwd_fasttrack = {
+      chain = "forward";
+      action = "fasttrack-connection";
+      connection_state = "established,related";
+      comment = "fasttrack established/related";
     };
     fwd_established = {
       chain = "forward";
       action = "accept";
       connection_state = "established,related,untracked";
-      comment = "established,related";
+      comment = "accept established/related/untracked";
     };
     fwd_invalid = {
       chain = "forward";
       action = "drop";
       connection_state = "invalid";
-      log = true;
-      log_prefix = "ipv6,invalid";
       comment = "invalid";
     };
     fwd_bad_src = {
@@ -737,8 +721,6 @@ in
     fwd_drop = {
       chain = "forward";
       action = "drop";
-      log = true;
-      log_prefix = "unknown ipv6";
     };
   };
 

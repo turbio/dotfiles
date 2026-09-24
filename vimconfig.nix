@@ -171,7 +171,13 @@ in
   lsp.servers = {
     clangd.enable = true;
     gopls.enable = true;
-    rust_analyzer.enable = true;
+
+    # prefer rust-analyzer to come from the project's toolchain
+    rust_analyzer = {
+      enable = true;
+      package = null;
+    };
+
     hls.enable = true;
     ts_ls.enable = true;
     bashls.enable = true;

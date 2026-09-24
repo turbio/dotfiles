@@ -36,7 +36,7 @@ let
     if (s._class or null) == "policy-selector" then
       s
     else
-      throw "vmhost: policy entry must be a selector built with inventory.lib.{network,vm,machine,cidr}, got a ${builtins.typeOf s}";
+      throw "vmhost: policy entry must be a normalized inventory selector, got a ${builtins.typeOf s}";
 
   allowsOf = vm: map checkSel (vm.allow or [ ]);
   machineAllows = vm: lib.filter (s: s.kind == "machine") (allowsOf vm);
@@ -212,6 +212,7 @@ in
         ) myVms
       );
 
+      users.users.microvm.uid = 994;
       microvm.vms = lib.mapAttrs (name: vmEntry: {
         restartIfChanged = true;
         config = {

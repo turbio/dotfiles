@@ -1,121 +1,19 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
+let
+  # blurred-screenshot locker; runtime deps are baked into the script
+  lock = pkgs.callPackage ../../packages/lock.nix { };
+in
 {
-  services.kanata = {
-    enable = false;
-    package = pkgs.kanata.overrideAttrs (old: rec {
-      version = "1.12.0-prerelease-2";
-      src = pkgs.fetchFromGitHub {
-        owner = "jtroo";
-        repo = "kanata";
-        rev = "v${version}";
-        hash = "sha256-bNUlQBsyGxCu3GHP+qgrYLikLagXxzLjjuZFZFi7Vzk=";
-      };
-      doCheck = false;
-      cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
-        inherit src;
-        name = "${old.pname}-${version}-vendor";
-        hash = "sha256-da7kmSvm+z6C+RPqEBEY9PNWxrAEQ8h/ZGDvS9WJ1J8=";
-      };
-    });
-    keyboards.internal = {
-      extraDefCfg = "process-unmapped-keys yes";
-      config = ''
-        (defsrc
-          grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-          tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-          caps a    s    d    f    g    h    j    k    l    ;    '    ret
-          lsft z    x    c    v    b    n    m    ,    .    /    rsft
-          lctl lmet lalt           spc            ralt rmet rctl
-        )
-
-        ;; Chordal hold: matches voyager chordal_hold_layout (L/R/*).
-        (defhands
-          (left  grv 1 2 3 4 5 tab q w e r t caps a s d f g lsft z x c v b lctl lmet lalt)
-          (right 6 7 8 9 0 - = bspc y u i o p [ ] \ h j k l ; ' ret n m , . / rsft ralt rmet rctl)
-        )
-
-        (defalias
-          ;; Home row mods (GACS) - left hand
-          gui_a (tap-hold-opposite-hand 250 a lmet)
-          alt_s (tap-hold-opposite-hand 250 s lalt)
-          ctl_d (tap-hold-opposite-hand 250 d lctl)
-          sft_f (tap-hold-opposite-hand 250 f lsft)
-
-          ;; Home row mods (GACS) - right hand
-          sft_j (tap-hold-opposite-hand 250 j rsft)
-          ctl_k (tap-hold-opposite-hand 250 k rctl)
-          alt_l (tap-hold-opposite-hand 250 l ralt)
-          gui_sc (tap-hold-opposite-hand 250 ; rmet)
-
-          ;; Z with gui
-          gui_z (tap-hold-opposite-hand 250 z lmet)
-
-          ;; Layer taps
-          l1_sl (tap-hold-press 200 250 / (layer-while-held symbols))
-          l1_ent (tap-hold-press 200 250 ret (layer-while-held symbols))
-        )
-
-        (deflayer base
-          grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-          tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-          (layer-while-held symbols) @gui_a @alt_s @ctl_d @sft_f g h @sft_j @ctl_k @alt_l @gui_sc ' @l1_ent
-          lsft @gui_z x    c    v    b    n    m    ,    .    @l1_sl rsft
-          lctl lmet lalt           spc            ralt rmet rctl
-        )
-
-        ;; Matches voyager layer 1: brackets, arrows, +/=
-        (deflayer symbols
-          _    _    _    _    _    S-[  S-]  _    _    _    S-=  =    _    esc
-          _    _    _    _    _    [    ]    _    up   _    _    _    _    _
-          _    _    _    S-=  =    S-9  S-0  left down rght _    _    _
-          _    _    _    _    _    _    _    _    _    _    _    _
-          _    _    _              _              _    _    _
-        )
-      '';
-    };
-  };
-
   # logind's uaccess tagging (via 60-steam-input.rules) sets ACLs on /dev/uinput
   # that strip group permissions, breaking kanata's DynamicUser group-based access.
   # Fix the ACL right before kanata starts.
   systemd.services.kanata-internal.serviceConfig.ExecStartPre =
     "+${pkgs.acl}/bin/setfacl -m g:uinput:rw /dev/uinput";
 
-  hardware.keyboard.zsa.enable = true;
-  services.udev.extraRules = ''
-    # Rules for Oryx web flashing and live training
-    KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", MODE="0664", GROUP="plugdev"
-    KERNEL=="hidraw*", ATTRS{idVendor}=="3297", MODE="0664", GROUP="plugdev"
-
-    # Legacy rules for live training over webusb (Not needed for firmware v21+)
-    # Rule for all ZSA keyboards
-    SUBSYSTEM=="usb", ATTR{idVendor}=="3297", GROUP="plugdev"
-    # Rule for the Moonlander
-    SUBSYSTEM=="usb", ATTR{idVendor}=="3297", ATTR{idProduct}=="1969", GROUP="plugdev"
-    # Rule for the Ergodox EZ
-    SUBSYSTEM=="usb", ATTR{idVendor}=="feed", ATTR{idProduct}=="1307", GROUP="plugdev"
-    # Rule for the Planck EZ
-    SUBSYSTEM=="usb", ATTR{idVendor}=="feed", ATTR{idProduct}=="6060", GROUP="plugdev"
-
-    # Wally Flashing rules for the Ergodox EZ
-    ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04[789B]?", ENV{ID_MM_DEVICE_IGNORE}="1"
-    ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04[789A]?", ENV{MTP_NO_PROBE}="1"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04[789ABCD]?", MODE:="0666"
-    KERNEL=="ttyACM*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04[789B]?", MODE:="0666"
-
-    # Keymapp / Wally Flashing rules for the Moonlander and Planck EZ
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666", SYMLINK+="stm32_dfu"
-    # Keymapp Flashing rules for the Voyager
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="3297", MODE:="0666", SYMLINK+="ignition_dfu"
-  '';
-  users.users.turbio.extraGroups = [ "plugdev" ];
-
   nix.settings.extra-platforms = [ "armv7l-linux" ];
   boot.binfmt.emulatedSystems = [ "armv7l-linux" ];
 
-  services.cachefilesd = {
-    enable = true;
-  };
+  services.cachefilesd.enable = true;
 
   virtualisation.virtualbox.host.enable = true;
 
@@ -165,13 +63,18 @@
         fsType = "nfs";
         neededForBoot = false;
         options = [
+          "fsc" # use cachefilesd
           "rw"
           "noatime"
           "nofail"
-          "fsc"
+          "nconnect=8"
+          "rsize=1048576"
+          "wsize=1048576"
           "proto=tcp"
-          "noac"
-          "async"
+          "actimeo=60"
+          "nocto"
+          "hard"
+          "softreval"
           "x-systemd.automount"
           "x-systemd.mount-timeout=5s"
           "x-systemd.idle-timeout=10m"
@@ -180,42 +83,15 @@
     in
     {
       "tank/photos" = nfsopts // {
-        device = "ballos:/tank/enc/photos";
+        device = "joast:/tank/enc/photos";
       };
       "tank/backups" = nfsopts // {
-        device = "ballos:/tank/enc/backups";
+        device = "joast:/tank/enc/backups";
       };
     };
-
-  /*
-    TODO
-    fileSystems = {
-      "/" = {
-        neededForBoot = true;
-        fsType = "tmpfs";
-      };
-      "/nix" = {
-        device = "/persist/nix";
-        options = [ "bind" ];
-      };
-      "/home" = {
-        device = "/persist/home";
-        options = [ "bind" ];
-      };
-      "/etc/machine-id" = {
-        device = "/persist/machine-id";
-        options = [ "bind" ];
-      };
-      "/var" = {
-        device = "/persist/var";
-        options = [ "bind" ];
-      };
-    };
-  */
 
   # clobber it right over your disk:
   # $ sudo nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
-
   disko.devices.disk.main = {
     type = "disk";
     content = {
@@ -231,14 +107,6 @@
             mountOptions = [ "umask=0077" ];
           };
         };
-        # root = {
-        #   size = "100%";
-        #   content = {
-        #     type = "filesystem";
-        #     format = "ext4";
-        #     mountpoint = "/";
-        #   };
-        # };
         persist = {
           size = "100%";
           content = {
@@ -268,7 +136,6 @@
           content = {
             type = "filesystem";
             format = "ext4";
-            #mountpoint = "/persist";
             mountpoint = "/";
             mountOptions = [
               "defaults"
@@ -299,8 +166,9 @@
 
   security.pam.services.swaylock = { };
 
-  environment.systemPackages = with pkgs; [
-    swaylock
+  environment.systemPackages = [
+    pkgs.swaylock
+    lock
   ];
 
   systemd.user.services.swayidle = {
@@ -308,21 +176,19 @@
     after = [ "graphical-session.target" ];
     wantedBy = [ "graphical-session.target" ];
 
-    # Make sure these binaries are in PATH for the service
-    path = with pkgs; [
-      swaylock
-      niri
-    ];
-
     serviceConfig = {
+      # -w holds the sleep inhibitor until lock returns, so we never suspend
+      # ahead of the lock actually being up. 'lock' picks up
+      # loginctl lock-session too.
       ExecStart = ''
         ${pkgs.swayidle}/bin/swayidle -w \
-          timeout 600 'swaylock -f' \
-          before-sleep 'swaylock -f'
+          timeout 600 '${lock}/bin/lock' \
+          before-sleep '${lock}/bin/lock' \
+          lock '${lock}/bin/lock'
       '';
-      Restart = "on-failure";
+      # the watcher dying is itself a way to end up never locking
+      Restart = "always";
+      RestartSec = 1;
     };
   };
-
-  # services.homed.enable = true;
 }

@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+# Back up a zfs dataset to a GCS bucket via raw sends, over the S3-compatible
+# XML API so each chunk uploads over many concurrent connections.
+#
+#   zfs-gcs-backup <dataset> <hmac-creds-file> <bucket[/prefix]>
+#
+# The GCS native API uploads a single object over one TCP connection, which
+# on a lossy/upstream-limited path pins throughput per-flow. The S3 XML API
+# does multipart: rclone splits each object into parts and uploads
+# RCLONE_S3_UPLOAD_CONCURRENCY of them at once, so per-flow loss only drags
+# one part stream while the rest push. Auth is therefore an HMAC key (access
+# id + secret) for the bucket's service account, NOT a JSON key: the creds
+# file is two lines, access id then secret.
+#
+# Bucket storage class: set the bucket DEFAULT to STANDARD, NOT Archive,
+# with a lifecycle rule that transitions objects to ARCHIVE after age 1 day.
+# Multipart parts inherit the bucket default and are billed like objects, so
+# on an Archive-default bucket every retried/overwritten/aborted part hits
+# Archive's 365-day early-deletion minimum — and this lossy link produces
+# exactly that churn. Standard has no minimum, so the churn is free; the
+# assembled object rides the lifecycle rule into Archive a day later (the
+# transition from Standard is free, and starts a fresh Archive clock).
+# Successfully assembled parts are never early-deleted regardless.
+# Also add an AbortIncompleteMultipartUpload lifecycle rule (~1 day) to
+# reap abandoned uploads (free, since the parts are Standard).
+#
+# First run uploads a full raw send and leaves a marker snapshot
+# (@gcs-backup-<utc timestamp>). Later runs send a raw incremental from the
+# newest marker to a fresh one. Each chain step is a deterministically named
+# directory of CHUNK_SIZE objects:
+#   <bucket>/<prefix>/<dataset>/full/chunk-00000...
+#   <bucket>/<prefix>/<dataset>/from-<prevmarker>/chunk-00000...
+#
+# The snapshot name carries the run's status: it's created as
+# @gcs-pending-<ts> and only renamed to the @gcs-backup-<ts> marker after
+# the upload fully succeeds and verifies, so no cleanup code ever needs to
+# run for the chain to stay correct. A failed run leaves the pending
+# snapshot behind; the next run resumes it — same point in time, and (zfs
+# send output is deterministic for a given snapshot pair) the same byte
+# stream to the same chunk names — skipping chunks that already landed.
+# Multipart only finalizes an object once every part is in, so any object
+# present is complete; a chunk is still skipped only when its listed size is
+# exactly CHUNK_SIZE, so the genuine short final chunk is re-uploaded on
+# resume. Incremental receive matches snapshots by GUID, not name, so the
+# rename never breaks the chain.
+#
+# Cost design: each chunk is one multipart insert, never read back, and only
+# rewritten when a retry replaces the final short chunk. Uploads land in
+# Standard and the lifecycle rule moves them to Archive (see above), so
+# part churn never triggers an early-deletion fee. no_check_bucket skips the
+# bucket probe. The only non-insert ops are one listing before (to find
+# skippable chunks) and one after (to verify).
+#
+# Env overrides: UPLOAD_CONCURRENCY (default 16), PART_SIZE (default 64M),
+# CHUNK_SIZE bytes (default 4GiB), BWLIMIT (rclone --bwlimit, unset =
+# uncapped; note it caps the *aggregate* across all parts, so leave it off
+# to actually beat the per-flow ceiling).
+#
+# Restore: receive `full`, then each `from-*` in name order (marker
+# timestamps sort chronologically), oldest first, chunks in name order:
+#   rclone lsf :s3:bucket/path/dataset/full/ | sort \
+#     | while read -r f; do rclone cat ":s3:bucket/path/dataset/full/$f"; done \
+#     | zfs receive pool/restored
+
+set -euo pipefail
+export LC_ALL=C
+
+if [[ $# -ne 3 ]]; then
+	echo "usage: $(basename "$0") <dataset> <hmac-creds-file> <bucket[/prefix]>" >&2
+	exit 1
+fi
+
+DATASET="$1"
+CREDS="$2"
+BUCKET="$3"
+MARKER_PREFIX="gcs-backup-"
+PENDING_PREFIX="gcs-pending-"
+CHUNK_SIZE="${CHUNK_SIZE:-$((4 * 1024 ** 3))}"
+
+command -v rclone >/dev/null || { echo "rclone not found" >&2; exit 1; }
+command -v pv >/dev/null || { echo "pv not found" >&2; exit 1; }
+[[ -r "$CREDS" ]] || { echo "can't read creds file: $CREDS" >&2; exit 1; }
+
+# hmac creds: access id on line 1, secret on line 2
+{ IFS= read -r S3_ACCESS_ID; IFS= read -r S3_SECRET; } < "$CREDS" || true
+[[ -n "${S3_ACCESS_ID:-}" && -n "${S3_SECRET:-}" ]] \
+	|| { echo "creds file needs the HMAC access id on line 1, secret on line 2" >&2; exit 1; }
+[[ "$S3_ACCESS_ID" == GOOG* ]] \
+	|| { echo "creds line 1 is '${S3_ACCESS_ID:0:12}...', not an HMAC access id (want GOOG...); is this the raw gcloud YAML instead of the 2-line access-id/secret file?" >&2; exit 1; }
+
+zfs list -H -o name "$DATASET" >/dev/null
+
+export RCLONE_CONFIG=/dev/null
+export RCLONE_S3_PROVIDER=GCS
+export RCLONE_S3_ENDPOINT=https://storage.googleapis.com
+export RCLONE_S3_ACCESS_KEY_ID="$S3_ACCESS_ID"
+export RCLONE_S3_SECRET_ACCESS_KEY="$S3_SECRET"
+export RCLONE_S3_NO_CHECK_BUCKET=true
+export RCLONE_S3_UPLOAD_CONCURRENCY="${UPLOAD_CONCURRENCY:-32}"
+export RCLONE_S3_CHUNK_SIZE="${PART_SIZE:-5M}"
+
+snaps() {
+	zfs list -H -t snapshot -o name -s createtxg -d 1 "$DATASET" \
+		| awk -F@ -v p="$1" 'index($2, p) == 1 { print $2 }'
+}
+
+# a pending snapshot from a failed run is reused: same point in time, same
+# chunk names, so the retry skips what already landed
+pending="$(snaps "$PENDING_PREFIX" | tail -n1)"
+prev="$(snaps "$MARKER_PREFIX" | tail -n1)"
+
+if [[ -n "$pending" ]]; then
+	echo "resuming failed upload of ${pending}"
+else
+	pending="${PENDING_PREFIX}$(date -u +%Y_%m_%d-%H:%M:%SZ)"
+	zfs snapshot "${DATASET}@${pending}"
+fi
+
+marker="${MARKER_PREFIX}${pending#"$PENDING_PREFIX"}"
+if [[ "$marker" == "$prev" ]]; then
+	echo "marker $prev already exists for this second, try again" >&2
+	exit 1
+fi
+
+if [[ -n "$prev" ]]; then
+	dest=":s3:${BUCKET}/${DATASET}/from-${prev}"
+	sendargs=(-w -i "@${prev}" "${DATASET}@${pending}")
+	echo "incremental ${prev} -> ${marker}"
+else
+	dest=":s3:${BUCKET}/${DATASET}/full"
+	sendargs=(-w "${DATASET}@${pending}")
+	echo "full send of ${marker}"
+fi
+
+est="$(zfs send -nP "${sendargs[@]}" 2>&1 | awk '$1 == "size" { print $2 }')"
+[[ -n "$est" ]] || { echo "couldn't estimate send size" >&2; exit 1; }
+total_chunks=$(( (est + CHUNK_SIZE - 1) / CHUNK_SIZE )) # ceil; the send is an estimate
+
+# complete chunks from a previous attempt, skippable; a chunk listed at any
+# size but CHUNK_SIZE is the (re-uploaded) final chunk. if this listing fails
+# we just re-upload everything
+existing="$(rclone lsf --format sp "${dest}/" 2>/dev/null || true)"
+
+echo "uploading ~$((est / 2 ** 20))MiB to ${dest}"
+
+export dest existing CHUNK_SIZE total_chunks # the split --filter subshell reads these
+# each chunk streams to rclone, which uploads it as multipart parts,
+# RCLONE_S3_UPLOAD_CONCURRENCY at a time. only the chunk name goes to stdout,
+# captured into "processed" for the post-upload verify.
+# shellcheck disable=SC2016 # the filter expands in split's subshell
+processed="$(zfs send "${sendargs[@]}" \
+	| pv -pterbT -B 4G -N "zfs send" -s "$est" \
+	| split -b "$CHUNK_SIZE" -a 5 -d --filter='
+		if printf "%s\n" "$existing" | grep -qxF "$CHUNK_SIZE;$FILE"; then
+			echo "skipping $dest/$FILE (already uploaded)" >&2
+			cat > /dev/null
+		else
+			echo "uploading $dest/$FILE" >&2
+			rclone --log-level ERROR rcat "$dest/$FILE"
+		fi
+		printf "%s\n" "$FILE"' - "chunk-")"
+
+# the bucket must hold exactly the chunks this stream produced before the
+# marker rename commits the backup; this also catches stale chunks left by
+# some other stream that once targeted this name
+want="$(sort <<<"$processed")"
+have="$(rclone lsf "${dest}/" | sort)"
+if [[ "$want" != "$have" ]]; then
+	echo "bucket contents don't match the sent stream:" >&2
+	diff <(echo "$want") <(echo "$have") >&2 || true
+	exit 1
+fi
+
+zfs rename "${DATASET}@${pending}" "${DATASET}@${marker}"
+
+echo "done: $(wc -l <<<"$want") chunks at ${dest}"
+echo "marker left at ${DATASET}@${marker}"

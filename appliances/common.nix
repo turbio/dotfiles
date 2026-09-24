@@ -1,9 +1,10 @@
 { lib, ... }:
 let
+  inventory = import ../lib/inventory.nix;
   hosturls = {
-    ccr2004 = "http://192.168.88.1"; # TODO hard coded ips
-    crs326 = "http://192.168.88.245";
-    crs305 = "http://192.168.1.69";
+    ccr2004 = "http://${inventory.appliances.ccr2004.lan.ip4}";
+    crs326 = "http://${inventory.appliances.crs326.lan.ip4}";
+    crs305 = "http://${inventory.appliances.crs305.wan.ip4}";
   };
 in
 {
@@ -30,9 +31,6 @@ in
     alias = d;
     hosturl = "\${var.${d}_hosturl}";
     username = "\${var.username}";
-    # password passed in through ROS_PASSWORD env at plan/apply time
-
-    # for self singed
     insecure = true;
   }) hosturls;
 }

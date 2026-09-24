@@ -26,15 +26,8 @@
         name = "Prometheus";
         type = "prometheus";
         uid = "prometheus";
-        url = "http://${inventory.machines.ballos.lan.ip4}:9090";
-        isDefault = true;
-      }
-      {
-        name = "Prometheus (vm)";
-        type = "prometheus";
-        uid = "prometheus-vm";
         url = "http://${inventory.vms.prometheus.addr.ip4}:9090";
-        isDefault = false;
+        isDefault = true;
       }
     ];
 

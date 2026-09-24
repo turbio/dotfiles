@@ -1,8 +1,3 @@
-# base profile for every vm guest. addressing, routes, ssh, and firewall all
-# derive from the inventory entry passed in as `vm` (see modules/vm-host.nix).
-# guests are untrusted: they get their /32+/128, the anycast gateway, and
-# whatever their expose list opens — everything else is the host's nftables
-# policy's problem.
 {
   lib,
   inventory,

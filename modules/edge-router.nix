@@ -1,8 +1,8 @@
 { inventory, ... }:
 let
   # TODO(turbio): todo don't hard code lol, should be part of inventory
-  ballosTs4 = inventory.machines.ballos.tailscale.ip4;
-  ballosTs6 = inventory.machines.ballos.tailscale.ip6;
+  ballosTs4 = inventory.machines.joast.tailscale.ip4;
+  ballosTs6 = inventory.machines.joast.tailscale.ip6;
   forgejo = inventory.vms.forgejo.addr;
 in
 {

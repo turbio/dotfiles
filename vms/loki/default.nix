@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  dataDir = config.services.loki.dataDir; # /var/lib/loki (nixos default)
+  dataDir = config.services.loki.dataDir;
 in
 {
   services.loki = {

@@ -1,12 +1,22 @@
 { inventory, ... }:
 let
-  ballos = port: "${inventory.machines.ballos.lan.ip4}:${toString port}";
+  joast = port: "${inventory.machines.joast.lan.ip4}:${toString port}"; # TODO: don't hardcode these
 
   pinInstance = old: [
     {
       target_label = "instance";
       replacement = old;
     }
+  ];
+
+  # everything the snmp exporter walks; the pepwave-side gateway and the
+  # .252 switch aren't in inventory (yet)
+  snmpTargets = [
+    inventory.appliances.ccr2004.lan.ip4
+    inventory.appliances.crs326.lan.ip4
+    "192.168.88.252"
+    "192.168.50.1"
+    inventory.appliances.crs305.wan.ip4
   ];
 in
 {
@@ -31,6 +41,31 @@ in
         fallback_scrape_protocol = "PrometheusText0.0.4";
         relabel_configs = pinInstance "127.0.0.1:3001";
       }
+
+      {
+        job_name = "ipmi";
+        scrape_interval = "10s";
+        scrape_timeout = "8s";
+        static_configs = [
+          {
+            targets = [ (joast 9290) ];
+            labels.host = "joast";
+          }
+          {
+            targets = [ "zote.int.turb.io:9290" ];
+            labels.host = "zote";
+          }
+          {
+            targets = [ "ballos.int.turb.io:9290" ];
+            labels.host = "ballos";
+          }
+          {
+            targets = [ "j2.int.turb.io:9290" ];
+            labels.host = "j2";
+          }
+        ];
+      }
+
       {
         job_name = "prometheus";
         scrape_interval = "5s";
@@ -74,14 +109,8 @@ in
         scrape_interval = "30s";
         static_configs = [
           {
-            # instance pinned to the host-era loopback label (conditional:
-            # the job's other targets keep their int names)
-            targets = [ (ballos 9092) ];
+            targets = [ "ballos.int.turb.io:9100" ];
             labels.host = "ballos";
-          }
-          {
-            targets = [ "mote.int.turb.io:9100" ];
-            labels.host = "mote";
           }
           {
             targets = [ "aackle.int.turb.io:9100" ];
@@ -100,7 +129,7 @@ in
             labels.host = "zote";
           }
           {
-            targets = [ "joast.int.turb.io:9100" ];
+            targets = [ (joast 9100) ]; # // TODO
             labels.host = "joast";
           }
           {
@@ -111,7 +140,7 @@ in
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
-            regex = builtins.replaceStrings [ "." ] [ "\\." ] (ballos 9092);
+            regex = builtins.replaceStrings [ "." ] [ "\\." ] (joast 9092);
             target_label = "instance";
             replacement = "127.0.0.1:9092";
           }
@@ -121,7 +150,7 @@ in
         job_name = "smartctl";
         scrape_interval = "1m";
         static_configs = [
-          { targets = [ (ballos 9633) ]; }
+          { targets = [ (joast 9633) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9633";
       }
@@ -148,7 +177,7 @@ in
           }
           {
             target_label = "__address__";
-            replacement = ballos 9199;
+            replacement = joast 9199;
           }
         ];
       }
@@ -156,7 +185,7 @@ in
         job_name = "nginx";
         scrape_interval = "1s";
         static_configs = [
-          { targets = [ (ballos 9113) ]; }
+          { targets = [ (joast 9113) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9113";
       }
@@ -164,7 +193,7 @@ in
         job_name = "nginxlog";
         scrape_interval = "1s";
         static_configs = [
-          { targets = [ (ballos 9117) ]; }
+          { targets = [ (joast 9117) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9117";
       }
@@ -172,7 +201,7 @@ in
         job_name = "ping";
         scrape_interval = "1s";
         static_configs = [
-          { targets = [ (ballos 9427) ]; }
+          { targets = [ (joast 9427) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9427";
       }
@@ -188,7 +217,7 @@ in
         job_name = "wireguard";
         scrape_interval = "5s";
         static_configs = [
-          { targets = [ (ballos 9586) ]; }
+          { targets = [ (joast 9586) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9586";
       }
@@ -196,20 +225,16 @@ in
         job_name = "zfs";
         scrape_interval = "1m";
         static_configs = [
-          { targets = [ (ballos 9134) ]; }
+          { targets = [ (joast 9134) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9134";
       }
       {
         job_name = "process";
         scrape_interval = "1m";
-        # the global 1s scrape_interval caps the *default* timeout at 1s;
-        # process-exporter walks all of /proc and answers in ~1.1s and
-        # growing (every microvm adds qemu threads) — needs an explicit
-        # timeout
         scrape_timeout = "30s";
         static_configs = [
-          { targets = [ (ballos 9256) ]; }
+          { targets = [ (joast 9256) ]; }
         ];
         relabel_configs = pinInstance "127.0.0.1:9256";
       }
@@ -225,16 +250,7 @@ in
         scrape_interval = "300s";
         scrape_timeout = "20s";
         metrics_path = "/snmp";
-        static_configs = [
-          {
-            targets = [
-              "192.168.88.1"
-              "192.168.88.245"
-              "192.168.88.252"
-              "192.168.50.1"
-            ];
-          }
-        ];
+        static_configs = [ { targets = snmpTargets; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
@@ -256,16 +272,7 @@ in
         scrape_timeout = "9s";
         metrics_path = "/snmp";
         params.module = [ "if_bw_fast" ];
-        static_configs = [
-          {
-            targets = [
-              "192.168.88.1"
-              "192.168.88.245"
-              "192.168.88.252"
-              "192.168.50.1"
-            ];
-          }
-        ];
+        static_configs = [ { targets = snmpTargets; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];

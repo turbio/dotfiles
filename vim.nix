@@ -1,4 +1,3 @@
-# NixOS module for nixvim
 {
   pkgs,
   repos,

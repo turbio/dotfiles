@@ -43,20 +43,20 @@ setopt LIST_PACKED
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' \
 	'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=yellow'
-ZSH_HIGHLIGHT_STYLES[path]='fg=cyan'
-ZSH_HIGHLIGHT_STYLES[function]='fg=blue'
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=blue'
-ZSH_HIGHLIGHT_STYLES[command]='fg=green'
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=blue,bold'
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red'
-ZSH_HIGHLIGHT_STYLES[default]='fg=blue'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=green'
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=magenta,none'
-ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=cyan,bold'
-ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=red'
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=magenta,bold'
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=magenta'
+#ZSH_HIGHLIGHT_STYLES[globbing]='fg=yellow'
+#ZSH_HIGHLIGHT_STYLES[path]='fg=cyan'
+#ZSH_HIGHLIGHT_STYLES[function]='fg=blue'
+#ZSH_HIGHLIGHT_STYLES[builtin]='fg=blue'
+#ZSH_HIGHLIGHT_STYLES[command]='fg=green'
+#ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=blue,bold'
+#ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red'
+#ZSH_HIGHLIGHT_STYLES[default]='fg=blue'
+#ZSH_HIGHLIGHT_STYLES[alias]='fg=green'
+#ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=magenta,none'
+#ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=cyan,bold'
+#ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=red'
+#ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=magenta,bold'
+#ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=magenta'
 
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='fg=yellow,bold'
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND='fg=red,bold'
@@ -174,8 +174,6 @@ function print_exit_status() {
 		echo -e "\x1b[43m exit $st \x1b[m"
 	fi
 }
-
-add-zsh-hook precmd print_exit_status
 
 export GTK_IM_MODULE=xim
 export XMODIFIERS=@im=ibus

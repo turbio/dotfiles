@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, inventory, ... }: {
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [
     22
@@ -12,12 +12,12 @@
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iifname "enp0s6" tcp dport { 22, 80, 443 } dnat to 100.100.57.46
+          iifname "enp0s6" tcp dport { 22, 80, 443 } dnat to ${inventory.machines.joast.tailscale.ip4}
         }
 
         chain postrouting {
           type nat hook postrouting priority 100;
-          #iifname "enp0s6" tcp dport { 80, 443 } snat to 100.100.57.46
+          #iifname "enp0s6" tcp dport { 80, 443 } snat to ${inventory.machines.joast.tailscale.ip4}
           oifname "tailscale0" masquerade
         }
       }

@@ -4,16 +4,16 @@ let
   backle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFPCXE7qQxOFsDTxN0/LLExtNr2oRYxnMvJyW7UddWhO";
   cackle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM5hSwGfL0Ff+jvnpfPdEQA6uuFCNF0NpBbsCW4i8Qgp";
   ballos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJWYDyDSh9zG0qFoJHMOM0W4QnXPsPZ7Z2D/QkdOQYIq";
-  mote = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEIKavDGGzGemCCwZ0n06JlwW/hAPxLMbLTdrrm2hAKS";
   curly = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLLasBaQX/IdGPbnrD5TyPKHOBwaSnZNC9irMv16Bi1";
   itoh = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMRyt+V0ZWL+ISnC7J/d07Sj8k8/yZn2pkFCDC16XTvA";
+  joast = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBOJ/J+mKaSFqz6HwYJv0jNhfNRGKdWydZaCDfW5iAdK";
   all = [
     me
     aackle
     backle
     cackle
     ballos
-    mote
+    joast
     curly
     itoh
   ];
@@ -32,7 +32,23 @@ in
   # buildbot forgejo api token
   "forgejo-api-token.age".publicKeys = all;
 
-  # fork akvorado info
   "ipinfo-token.age".publicKeys = all;
   "nix-builders-ssh-key.age".publicKeys = all;
+
+  "syncthing-cert.age".publicKeys = all;
+  "syncthing-key.age".publicKeys = all;
+  "syncthing-gui-password.age".publicKeys = all;
+  "nixcache-key.age".publicKeys = all;
+
+  "gcp-backups-service-account.age".publicKeys = [
+    me
+    joast
+  ];
+
+  # hmac key for the s3/xml api (multipart upload); two lines, access id
+  # then secret. `gcloud storage hmac create backups@personal-214003...`
+  "gcp-backups-hmac.age".publicKeys = [
+    me
+    joast
+  ];
 }

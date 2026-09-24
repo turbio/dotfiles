@@ -10,11 +10,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixvim.url = "github:nix-community/nixvim/nixos-25.11";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager.url = "github:rycee/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -29,15 +26,6 @@
     lsp-lines-nvim = {
       flake = false;
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
-    };
-
-    zsh-syntax-highlighting = {
-      flake = false;
-      url = "github:zsh-users/zsh-syntax-highlighting";
-    };
-    zsh-history-substring-search = {
-      flake = false;
-      url = "github:zsh-users/zsh-history-substring-search";
     };
     livewallpaper = {
       flake = false;
@@ -75,35 +63,34 @@
     microvm.url = "github:microvm-nix/microvm.nix";
     microvm.inputs.nixpkgs.follows = "nixpkgs";
 
-    redex.url = "git+https://git.turb.io/redex";
-    redex.inputs.nixpkgs.follows = "nixpkgs";
-
     buildbot-nix.url = "github:nix-community/buildbot-nix";
     buildbot-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs =
     {
+      self,
       nixpkgs,
-      home-manager,
-      nixos-hardware,
       disko,
       nixvim,
       wrappers,
       agenix,
       nix-index-database,
-      redex,
       ...
     }@inputs:
     let
-      arch =
-        hostname:
-        if (hostname == "jenka" || hostname == "backle" || hostname == "cackle") then
-          "aarch64-linux"
-        else
-          "x86_64-linux";
-
       lib = nixpkgs.lib;
+
+      # inventory.nix is data only; lib/inventory.nix derives the addresses,
+      # checks and helpers from it
+      inventory = import ./lib/inventory.nix;
+
+      # local copy of git+https://git.turb.io/vmshell while both sides are
+      # being iterated on together; push it back upstream once it settles
+      vmshell = import ./vmshell {
+        inherit nixpkgs;
+        microvm = inputs.microvm;
+      };
 
       wrappersOverlay =
         final: prev:
@@ -122,10 +109,17 @@
           |> (a: a.wrapper)
         ));
 
+      secretsModuleFor =
+        hostname:
+        (inventory.machines.${hostname}.secrets or [ ])
+        |> lib.map (s: {
+          age.secrets.${s}.file = ./secrets/${s}.age;
+        });
+
       hostModulesList =
         extraModules: hostname:
-        lib.optional (hostname == "ballos") redex.nixosModules.default
-        ++ lib.optional (hostname == "ballos") {
+
+        lib.optional (hostname == "ballos") {
           age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
           age.secrets."rfc2136-acme".owner = "acme";
 
@@ -156,40 +150,25 @@
           ./desktop.nix
           ./home.nix
           ./services/syncthing.nix
+          ./vim.nix
           (./hosts + "/${hostname}" + /configuration.nix)
           (./hosts + "/${hostname}" + /hardware-configuration.nix)
           #./vpn.nix
           disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
           nixvim.nixosModules.nixvim
           {
             nixpkgs.overlays = [
               wrappersOverlay
-              (final: prev: {
-                gixy = prev.gixy.overrideAttrs (old: {
-                  patches = [
-                    (final.fetchpatch2 {
-                      url = "https://github.com/yandex/gixy/compare/6f68624a7540ee51316651bda656894dc14c9a3e...b1c6899b3733b619c244368f0121a01be028e8c2.patch";
-                      hash = "sha256-jAF5WxMwTKTiCvEQF2xQnTBp6S2Yzpgq6mPugVKQksM=";
-                    })
-                  ]
-                  ++ builtins.tail old.patches;
-                });
-              })
             ];
           }
         ]
-        ++ (lib.optional (hostname != "balrog" && hostname != "backle" && hostname != "aackle") ./vim.nix)
-        ++ extraModules
-        ++ (lib.optional (hostname == "gero") nixos-hardware.nixosModules.framework-13-7040-amd)
-        ++ (lib.optional (hostname == "mote") {
-          #nixpkgs.config.contentAddressedByDefault = true;
-        });
+        ++ (secretsModuleFor hostname)
+        ++ extraModules;
 
       hostSpecialArgs = hostname: {
         inherit hostname;
         assignments = import ./assignments.nix;
-        inventory = import ./inventory.nix;
+        inherit inventory;
         microvm = inputs.microvm;
         repos = inputs;
       };
@@ -197,31 +176,10 @@
       mksystem =
         extraModules: hostname:
         nixpkgs.lib.nixosSystem {
-          system = arch hostname;
+          system = inventory.machines.${hostname}.arch;
           modules = hostModulesList extraModules hostname;
           specialArgs = hostSpecialArgs hostname;
         };
-
-      pxeExecScript =
-        system:
-        nixpkgs.legacyPackages.x86_64-linux.writers.writeBash "pixiecore" ''
-          exec ${nixpkgs.legacyPackages.x86_64-linux.pixiecore}/bin/pixiecore \
-            boot ${system.config.system.build.kernel}/bzImage ${system.config.system.build.netbootRamdisk}/initrd \
-            --cmdline "init=${system.config.system.build.toplevel} loglevel=4"
-            --debug --dhcp-no-bind \
-            --port 64172 --status-port 64172 "$@"
-        '';
-
-      pxeModules = [
-        (
-          { modulesPath, ... }:
-          {
-            imports = [
-              (modulesPath + "/installer/netboot/netboot-minimal.nix")
-            ];
-          }
-        )
-      ];
 
       # `nix run .#appliance`
       appliances = import ./appliances {
@@ -242,11 +200,11 @@
         })
         |> builtins.listToAttrs;
     in
-    rec {
+    {
       overlays.default = wrappersOverlay;
 
       nixosConfigurations = (mapEachHost <| mksystem [ ]) // {
-        ballos = mksystem [ { _module.args.netbootImages = netbootImages; } ] "ballos";
+        joast = mksystem [ { _module.args.netbootImages = self.netbootImages; } ] "joast";
       };
 
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
@@ -256,42 +214,72 @@
       netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_scratch.nix ];
 
       netbootableSystems = mapEachHost (
-        h: netbootableConfigurations.${h}.config.system.build.netbootSystem
+        h: self.netbootableConfigurations.${h}.config.system.build.netbootSystem
       );
 
       # nix run 'github:nix-community/disko/latest#disko-install' -- --write-efi-boot-entries --flake '.#<host>' --disk main /dev/<disk>
-      packages.x86_64-linux =
-        { }
-        // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
-        // appliances.packages
-        // {
-          vim =
-            let
-              pkgs = import nixpkgs {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-            in
-            nixvim.legacyPackages.x86_64-linux.makeNixvimWithModule {
-              inherit pkgs;
-              module = import ./vimconfig.nix {
-                inherit pkgs;
-                repos = inputs;
-                isDesktop = false;
-              };
-            };
+      packages.x86_64-linux = {
+        devvm = vmshell.lib.mkVMPackage {
+          vm = {
+            hostPlatform = "x86_64-linux";
+            user = "turbio";
+            modules = [
+              {
+                _module.args = {
+                  hostname = "devvm";
+                  repos = inputs;
+                };
+              }
+              {
+                # fresh home every boot: an empty ~/.zshrc keeps
+                # zsh-newuser-install from eating the first keystroke
+                systemd.tmpfiles.rules = [ "f /home/turbio/.zshrc 0644 turbio users -" ];
+              }
+              ./configuration.nix
+              nix-index-database.nixosModules.default
+              ./desktop.nix
+              ./home.nix
+              ./vim.nix
+              nixvim.nixosModules.nixvim
+              {
+                nixpkgs.overlays = [
+                  wrappersOverlay
+                ];
+              }
+            ];
+          };
         };
+      }
+      // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+      // appliances.packages
+      // {
+        vim =
+          let
+            pkgs = import nixpkgs {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+          in
+          nixvim.legacyPackages.x86_64-linux.makeNixvimWithModule {
+            inherit pkgs;
+            module = import ./vimconfig.nix {
+              inherit pkgs;
+              repos = inputs;
+              isDesktop = false;
+            };
+          };
+      };
 
       netbootImages =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          allHosts = builtins.attrNames netbootableConfigurations;
+          allHosts = builtins.attrNames self.netbootableConfigurations;
           pairs = builtins.concatMap (
             hostname:
             let
-              cfg = netbootableConfigurations.${hostname};
+              cfg = self.netbootableConfigurations.${hostname};
               macs = cfg.config.netboot.macAddresses;
-              system = netbootableSystems.${hostname};
+              system = self.netbootableSystems.${hostname};
             in
             map (mac: {
               name = mac;
@@ -301,27 +289,22 @@
         in
         pkgs.linkFarm "netboot-images" pairs;
 
-      pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
-
+      # ci (buildbot) builds the checks tree. host toplevels are the real
+      # signal: each embeds the host's full closure, and the hypervisors'
+      # toplevels embed every vm they place — so "joast builds" covers the
+      # whole vm fleet. split by arch so each attr lands on a worker that
+      # can actually build it.
       checks =
         let
-          hostsBy = system: lib.filterAttrs (name: _: arch name == system) nixosConfigurations;
-          toplevels = lib.mapAttrs (_: cfg: cfg.config.system.build.toplevel);
+          toplevels = lib.mapAttrs' (
+            name: cfg: lib.nameValuePair "host-${name}" cfg.config.system.build.toplevel
+          );
+          hostsBy =
+            system:
+            lib.filterAttrs (name: _: inventory.machines.${name}.arch == system) self.nixosConfigurations;
         in
         {
-          x86_64-linux = toplevels (hostsBy "x86_64-linux") // {
-            appliances = appliances.validate;
-            ballos-vm = import ./tests/ballos-vm.nix {
-              pkgs = nixpkgs.legacyPackages.x86_64-linux;
-              hostModulesList =
-                extraModules: hostname:
-                hostModulesList extraModules hostname
-                ++ lib.optional (hostname == "ballos") {
-                  _module.args.netbootImages = netbootImages;
-                };
-              inherit hostSpecialArgs;
-            };
-          };
+          x86_64-linux = toplevels (hostsBy "x86_64-linux");
           aarch64-linux = toplevels (hostsBy "aarch64-linux");
         };
 

@@ -286,6 +286,9 @@ local lualine_opts = {
   sections = {
     lualine_c = { { 'filename', path = 1 } },
   },
+  inactive_sections = {
+    lualine_c = { { 'filename', path = 1 } },
+  },
 }
 
 require('lualine').setup(lualine_opts)

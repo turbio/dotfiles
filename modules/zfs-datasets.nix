@@ -17,6 +17,10 @@ let
 
       defaultMountpoint = "/${pool}/${dsName}";
 
+      # -p: sibling ensure-units are unordered, so a nested dataset (e.g.
+      # enc/vms/evaldb) may be created before its declared parent's unit runs;
+      # missing ancestors get default props and the parent's own unit upserts
+      # its declared props when it gets there
       createCmd =
         if ds.type == "volume" then
           "zfs create -p -V ${ds.size} ${optsStr} ${fullName}"
@@ -199,6 +203,7 @@ let
             poolName = name;
           })
         );
+        default = { };
       };
     };
 in

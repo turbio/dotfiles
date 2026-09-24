@@ -2,6 +2,7 @@
   lib,
   inventory,
   hostname,
+  pkgs,
   ...
 }:
 let
@@ -22,14 +23,15 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
       };
-
       # TODO(turbio): proto 201 marks the routes ours??? wat
       script = ''
-        ip route flush proto 201 || true
+        ${pkgs.iproute2}/bin/ip route flush proto 201 || true
         ${lib.concatStrings (
           lib.mapAttrsToList (
             name: vm:
-            "ip route replace ${vm.addr.ip4}/32 via ${inventory.machines.${vm.host}.lan.ip4} proto 201\n"
+            "${pkgs.iproute2}/bin/ip route replace ${vm.addr.ip4}/32 via ${
+              inventory.machines.${vm.host}.lan.ip4
+            } proto 201\n"
           ) routedVms
         )}
       '';

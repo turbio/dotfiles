@@ -1,5 +1,3 @@
-# kinda a pile of hacks tbh
-# should copy up to my nix cache tbh
 {
   pkgs,
   lib,
@@ -30,6 +28,7 @@
     dates = "daily";
     options = "--delete-older-than 3d";
   };
+
   services.fstrim.enable = true;
 
   nix.enable = lib.mkForce true;
@@ -38,6 +37,7 @@
     "flakes"
     "pipe-operators"
   ];
+
   nix.settings.substituters = [
     "https://nixcache.int.turb.io"
     "https://nix-community.cachix.org"

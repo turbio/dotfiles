@@ -5,7 +5,6 @@ let
 
   sfp = i: "sfp-sfpplus${toString i}";
 
-  # sfp9/10 and 19/20 are bonded
   bridgePorts =
     map
       (p: {

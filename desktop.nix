@@ -62,6 +62,9 @@ in
   };
 
   config = lib.mkIf config.isDesktop {
+    services.gnome.gnome-keyring.enable = true;
+    services.gnome.gcr-ssh-agent.enable = true;
+
     services.playerctld.enable = true;
 
     services.usbmuxd.enable = true;

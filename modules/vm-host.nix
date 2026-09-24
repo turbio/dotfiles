@@ -10,6 +10,7 @@
 {
   config,
   lib,
+  pkgs,
   inventory,
   assignments,
   repos,
@@ -254,6 +255,42 @@ in
               }
             ) (vm.secrets or [ ])
           )
+        ) myVms
+      );
+
+      # a locked pool must never look like an empty dataset. booting with
+      # tank/enc's key not loaded leaves ${vmsPath}/<name> as a bare directory
+      # on the pool root: qemu creates its volume images there, virtiofsd
+      # serves it as /var, and the guest writes state into a shadow tree that
+      # disappears under the real mount once the key loads. 2026-08-17 did
+      # exactly that; the shadow clickhouse.img it left behind (owned by the
+      # then-dynamic microvm uid) was akvorado's EACCES restart loop on
+      # 2026-09-23. refuse to start qemu and virtiofsd until every dataset the
+      # vm depends on is mounted; Restart=always/5s turns that into a wait
+      systemd.services = lib.mkMerge (
+        lib.mapAttrsToList (
+          name: vm:
+          let
+            paths =
+              lib.optional (vm.persistVar or false) "${inv.storage.vmsPath}/${name}"
+              ++ map (m: inv.storage.datasetPath m.dataset) (lib.attrValues (vm.mounts or { }));
+            guard = pkgs.writeShellScript "vm-${name}-datasets-mounted" ''
+              for p in ${lib.escapeShellArgs paths}; do
+                if ! ${pkgs.util-linux}/bin/mountpoint -q "$p"; then
+                  echo "vmhost: $p is not a mountpoint (encrypted pool locked?); not starting ${name}" >&2
+                  exit 1
+                fi
+              done
+            '';
+            dropin = {
+              overrideStrategy = "asDropin";
+              serviceConfig.ExecStartPre = [ "${guard}" ];
+            };
+          in
+          lib.optionalAttrs (paths != [ ]) {
+            "microvm@${name}" = dropin;
+            "microvm-virtiofsd@${name}" = dropin;
+          }
         ) myVms
       );
 

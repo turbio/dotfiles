@@ -38,6 +38,10 @@ in
   "syncthing-gui-password.age".publicKeys = all;
   "nixcache-key.age".publicKeys = all;
 
+  # radicle seed node identity: unencrypted openssh ed25519 key from
+  # `rad auth`, public half pinned in vms/radicle
+  "radicle-key.age".publicKeys = all;
+
   "gcp-backups-service-account.age".publicKeys = [
     me
     joast

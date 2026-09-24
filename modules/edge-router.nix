@@ -3,6 +3,7 @@ let
   ballosTs4 = inventory.machines.joast.tailscale.ip4;
   ballosTs6 = inventory.machines.joast.tailscale.ip6;
   forgejo = inventory.vms.forgejo.addr;
+  radicle = inventory.vms.radicle.addr;
 in
 {
   # accept ballos's advertised vm-tier subnet routes (10.42.0.0/16 + ula):
@@ -17,6 +18,7 @@ in
     80
     443
     23
+    8776
   ];
 
   networking.nftables = {
@@ -27,11 +29,14 @@ in
     # sshd — forge.turb.io resolves via public DNS even from the tailnet, so
     # `git@forge.turb.io` naturally rides this DNAT. http/https/23 still
     # land on ballos (nginx).
+    # 8776 is radicle's p2p port: same trick, straight to the radicle vm so
+    # other nodes can dial our seed at radicle.turb.io.
     ruleset = ''
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
           iiftype ether tcp dport 22 dnat to ${forgejo.ip4}:2222
+          iiftype ether tcp dport 8776 dnat to ${radicle.ip4}:8776
           iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs4}
         }
 
@@ -45,6 +50,7 @@ in
         chain prerouting {
           type nat hook prerouting priority -100;
           iiftype ether tcp dport 22 dnat to [${forgejo.ip6}]:2222
+          iiftype ether tcp dport 8776 dnat to [${radicle.ip6}]:8776
           iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs6}
         }
 

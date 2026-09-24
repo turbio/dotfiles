@@ -258,15 +258,6 @@ in
         ) myVms
       );
 
-      # a locked pool must never look like an empty dataset. booting with
-      # tank/enc's key not loaded leaves ${vmsPath}/<name> as a bare directory
-      # on the pool root: qemu creates its volume images there, virtiofsd
-      # serves it as /var, and the guest writes state into a shadow tree that
-      # disappears under the real mount once the key loads. 2026-08-17 did
-      # exactly that; the shadow clickhouse.img it left behind (owned by the
-      # then-dynamic microvm uid) was akvorado's EACCES restart loop on
-      # 2026-09-23. refuse to start qemu and virtiofsd until every dataset the
-      # vm depends on is mounted; Restart=always/5s turns that into a wait
       systemd.services = lib.mkMerge (
         lib.mapAttrsToList (
           name: vm:

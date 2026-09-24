@@ -49,30 +49,27 @@ let
         mp="$(zfs get -H -o value mountpoint ${fullName})"
       '';
 
-      # perms and dirs only apply to a *mounted* filesystem. with the encrypted
-      # parent locked (key not loaded at boot) the mountpoint is a bare
-      # directory on the ancestor's filesystem; chown/mkdir there builds a
-      # shadow tree that gets hidden under the real mount later and misleads
-      # whatever else starts against the path (see modules/vm-host.nix). fail
-      # loudly instead: the unit is only wanted by local-fs.target, so this
-      # doesn't block boot, it just shows in --failed until the key loads
       hasPerms =
         (ds.perms.owner != null) || (ds.perms.group != null) || (ds.perms.mode != null) || (ds.dirs != [ ]);
+
+      owner = lib.defaultTo "" ds.perms.owner;
+      group = lib.defaultTo "" ds.perms.group;
+
+      shouldChown = ds.perms.owner != null || ds.perms.group != null;
+      shouldChmod = ds.perms.mode != null;
+
+      mkdir = d: ''mkdir -p "$mp"/${lib.escapeShellArg d}'';
+      mkdirs = ds.dirs |> lib.map mkdir |> lib.concatLines;
+
       permsCmd = lib.optionalString (ds.type != "volume" && hasPerms) ''
         if [ "$mp" != "legacy" ] && [ "$mp" != "none" ]; then
           if [ "$(zfs get -H -o value mounted ${fullName})" != "yes" ]; then
             echo "zfs-ensure: ${fullName} is not mounted at $mp (encrypted pool locked?); not touching the path" >&2
             exit 1
           fi
-          ${lib.optionalString ((ds.perms.owner != null) || (ds.perms.group != null)) ''
-            chown ${lib.defaultTo "" ds.perms.owner}:${lib.defaultTo "" ds.perms.group} "$mp"
-          ''}
-          ${lib.optionalString (ds.perms.mode != null) ''
-            chmod ${ds.perms.mode} "$mp"
-          ''}
-          ${lib.optionalString (ds.dirs != [ ]) ''
-            mkdir -p ${lib.concatMapStringsSep " " (d: ''"$mp"/${lib.escapeShellArg d}'') ds.dirs}
-          ''}
+          ${lib.optionalString shouldChown ''chown ${owner}:${group} "$mp"''}
+          ${lib.optionalString shouldChmod ''chmod ${ds.perms.mode} "$mp"''}
+          ${mkdirs}
         fi
       '';
 

@@ -19,11 +19,24 @@ let
 
       createCmd =
         if ds.type == "volume" then
-          "zfs create -V ${ds.size} ${optsStr} ${fullName}"
+          "zfs create -p -V ${ds.size} ${optsStr} ${fullName}"
         else
-          "zfs create ${optsStr} ${fullName}";
+          "zfs create -p ${optsStr} ${fullName}";
 
       serviceName = "zfs-ensure-" + (lib.strings.replaceStrings [ "/" ] [ "-" ] fullName);
+
+      ancestorServices =
+        let
+          parts = lib.splitString "/" dsName;
+          prefixes = lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (
+            lib.length parts - 1
+          );
+        in
+        prefixes
+        |> lib.filter (a: cfg.pools.${pool}.datasets ? ${a})
+        |> map (
+          a: "zfs-ensure-" + (lib.strings.replaceStrings [ "/" ] [ "-" ] "${pool}/${a}") + ".service"
+        );
 
       getmpCmd = ''
         mp="$(zfs get -H -o value mountpoint ${fullName})"
@@ -38,6 +51,12 @@ let
       chmodCmd = lib.optionalString (ds.perms.mode != null) ''
         if [ "$mp" != "legacy" ] && [ "$mp" != "none" ] && [ -d "$mp" ]; then
           chmod ${ds.perms.mode} "$mp"
+        fi
+      '';
+
+      mkdirsCmd = lib.optionalString (ds.dirs != [ ]) ''
+        if [ "$mp" != "legacy" ] && [ "$mp" != "none" ] && [ -d "$mp" ]; then
+          mkdir -p ${lib.concatMapStringsSep " " (d: ''"$mp"/${lib.escapeShellArg d}'') ds.dirs}
         fi
       '';
 
@@ -71,7 +90,8 @@ let
         after = [
           "zfs-import-${pool}.service"
           "zfs-mount.service"
-        ];
+        ]
+        ++ ancestorServices;
         before = [
           "local-fs.target"
           "shutdown.target"
@@ -83,7 +103,9 @@ let
           set -euo pipefail
           if ! zfs list -H -o name ${fullName} >/dev/null 2>&1; then
             :;
-            ${createCmd}
+            # a concurrent unit may create it between the check and here;
+            # losing that race is fine as long as the dataset exists after
+            ${createCmd} || zfs list -H -o name ${fullName} >/dev/null
           else
             :;
             ${setOptionsCmd}
@@ -92,6 +114,7 @@ let
           ${getmpCmd}
           ${chownCmd}
           ${chmodCmd}
+          ${mkdirsCmd}
         '';
       };
     };
@@ -153,6 +176,12 @@ let
           type = lib.types.nullOr lib.types.str;
           default = null;
           description = "chmod mode (e.g. 0750) for the mountpoint (filesystems only).";
+        };
+
+        dirs = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Subdirectories to ensure exist inside the mounted dataset (filesystems only).";
         };
       };
 

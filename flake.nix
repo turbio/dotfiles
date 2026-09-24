@@ -69,6 +69,12 @@
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
 
+    terranix.url = "github:terranix/terranix";
+    terranix.inputs.nixpkgs.follows = "nixpkgs";
+
+    microvm.url = "github:microvm-nix/microvm.nix";
+    microvm.inputs.nixpkgs.follows = "nixpkgs";
+
     redex.url = "git+https://git.turb.io/redex";
     redex.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -119,8 +125,6 @@
       hostModulesList =
         extraModules: hostname:
         lib.optional (hostname == "ballos") redex.nixosModules.default
-        ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-master
-        ++ lib.optional (hostname == "ballos") inputs.buildbot-nix.nixosModules.buildbot-worker
         ++ lib.optional (hostname == "ballos") {
           age.secrets."rfc2136-acme".file = ./secrets/rfc2136-acme.age;
           age.secrets."rfc2136-acme".owner = "acme";
@@ -145,6 +149,9 @@
           nix-index-database.nixosModules.default
           agenix.nixosModules.default
           #./modules/wg-vpn.nix
+          ./modules/vm-host.nix
+          ./modules/vm-routes.nix
+          ./modules/int-dns.nix
           ./configuration.nix
           ./desktop.nix
           ./home.nix
@@ -182,6 +189,8 @@
       hostSpecialArgs = hostname: {
         inherit hostname;
         assignments = import ./assignments.nix;
+        inventory = import ./inventory.nix;
+        microvm = inputs.microvm;
         repos = inputs;
       };
 
@@ -214,6 +223,12 @@
         )
       ];
 
+      # `nix run .#appliance`
+      appliances = import ./appliances {
+        pkgs = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        inherit (inputs) terranix;
+      };
+
       mapEachHost =
         fn:
         builtins.readDir ./hosts
@@ -236,6 +251,8 @@
 
       nixosModules.wg-vpn = import ./modules/wg-vpn.nix;
 
+      apps.x86_64-linux.appliance = appliances.app;
+
       netbootableConfigurations = mapEachHost <| mksystem [ ./modules/netbootable_scratch.nix ];
 
       netbootableSystems = mapEachHost (
@@ -246,6 +263,7 @@
       packages.x86_64-linux =
         { }
         // (wrappersOverlay nixpkgs.legacyPackages.x86_64-linux nixpkgs.legacyPackages.x86_64-linux)
+        // appliances.packages
         // {
           vim =
             let
@@ -285,21 +303,6 @@
 
       pxeScript = mapEachHost (h: mksystem pxeModules h |> pxeExecScript);
 
-      devShells.x86_64-linux.infra =
-        let
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        in
-        pkgs.mkShell {
-          packages = [
-            pkgs.google-cloud-sdk
-            pkgs.oci-cli
-            pkgs.opentofu
-          ];
-          shellHook = ''
-            echo "Infrastructure shell - gcloud, oci, tofu available"
-          '';
-        };
-
       checks =
         let
           hostsBy = system: lib.filterAttrs (name: _: arch name == system) nixosConfigurations;
@@ -307,6 +310,7 @@
         in
         {
           x86_64-linux = toplevels (hostsBy "x86_64-linux") // {
+            appliances = appliances.validate;
             ballos-vm = import ./tests/ballos-vm.nix {
               pkgs = nixpkgs.legacyPackages.x86_64-linux;
               hostModulesList =

@@ -117,19 +117,6 @@
     enable = true;
   };
 
-  networking.hosts = {
-    "100.100.57.46" = [
-      "turb.io"
-      "nixcache.turb.io"
-      "int.turb.io"
-      "bt.int.turb.io"
-      "jelly.int.turb.io"
-      "ollama.int.turb.io"
-      "sync.int.turb.io"
-      "home.int.turb.io"
-    ];
-  };
-
   virtualisation.virtualbox.host.enable = true;
 
   systemd.network.wait-online.enable = false;

@@ -1,6 +1,16 @@
-{ ... }:
+{ inventory, ... }:
+let
+  # TODO(turbio): todo don't hard code lol, should be part of inventory
+  ballosTs4 = inventory.machines.ballos.tailscale.ip4;
+  ballosTs6 = inventory.machines.ballos.tailscale.ip6;
+  forgejo = inventory.vms.forgejo.addr;
+in
 {
+  services.tailscale.extraSetFlags = [ "--accept-routes" ];
+
   networking.firewall.enable = true;
+
+  # TODO(turbio): should be part of inventory
   networking.firewall.allowedTCPPorts = [
     22
     80
@@ -10,16 +20,13 @@
 
   networking.nftables = {
     enable = true;
-    # Port 22 from the public internet is redirected to ballos's forgejo SSH
-    # port (2222). Tailscale-direct SSH to ballos (ballos:22) keeps going to
-    # the system sshd — forge.turb.io resolves via public DNS even from the
-    # tailnet, so `git@forge.turb.io` naturally rides this DNAT.
+    # TODO(turbio): should be part of inventory
     ruleset = ''
       table ip vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iiftype ether tcp dport 22 dnat to 100.100.57.46:2222
-          iiftype ether tcp dport { 80, 443, 23 } dnat to 100.100.57.46
+          iiftype ether tcp dport 22 dnat to ${forgejo.ip4}:2222
+          iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs4}
         }
 
         chain postrouting {
@@ -31,8 +38,8 @@
       table ip6 vpn {
         chain prerouting {
           type nat hook prerouting priority -100;
-          iiftype ether tcp dport 22 dnat to [fd7a:115c:a1e0::2233:392e]:2222
-          iiftype ether tcp dport { 80, 443, 23 } dnat to fd7a:115c:a1e0::2233:392e
+          iiftype ether tcp dport 22 dnat to [${forgejo.ip6}]:2222
+          iiftype ether tcp dport { 80, 443, 23 } dnat to ${ballosTs6}
         }
 
         chain postrouting {

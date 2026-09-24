@@ -1,14 +1,24 @@
-{ domain }:
+{
+  domain,
+  extraNames ? [ ],
+}:
+{
+  config,
+  pkgs,
+  inventory,
+  ...
+}:
 let
-  dnsServer = "aackle:53";
+  # rfc2136 updates go to the acme-dns master (aackle) over tailscale, by
+  # address — a bare magicdns name here broke when accept-dns went off
+  dnsServer = "${inventory.machines.aackle.tailscale.ip4}:53";
 in
-{ config, pkgs, ... }:
 {
   security.acme.certs."${domain}" = {
     email = "acme@turb.io";
     webroot = null;
     group = "nginx";
-    extraDomainNames = [ "*.${domain}" ];
+    extraDomainNames = [ "*.${domain}" ] ++ extraNames;
     dnsProvider = "rfc2136";
     environmentFile = pkgs.writeText "acme-rfc2136-${domain}" ''
       RFC2136_NAMESERVER='${dnsServer}'

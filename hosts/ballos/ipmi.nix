@@ -13,15 +13,15 @@
           labels.host = "ballos";
         }
         {
-          targets = [ "zote.lan:${toString config.services.prometheus.exporters.ipmi.port}" ];
+          targets = [ "zote.int.turb.io:${toString config.services.prometheus.exporters.ipmi.port}" ];
           labels.host = "zote";
         }
         {
-          targets = [ "joast.lan:${toString config.services.prometheus.exporters.ipmi.port}" ];
+          targets = [ "joast.int.turb.io:${toString config.services.prometheus.exporters.ipmi.port}" ];
           labels.host = "joast";
         }
         {
-          targets = [ "j2.lan:${toString config.services.prometheus.exporters.ipmi.port}" ];
+          targets = [ "j2.int.turb.io:${toString config.services.prometheus.exporters.ipmi.port}" ];
           labels.host = "j2";
         }
       ];

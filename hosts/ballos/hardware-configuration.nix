@@ -48,6 +48,10 @@
   networking.interfaces.bond0.useDHCP = true;
 
   systemd.network.networks."40-bond0".dhcpV4Config.RouteMetric = 100;
+
+  # make the (previously machine-id-derived) bond mac explicit so the dhcp
+  # lease pin in inventory.nix can never shift; value is what it already was
+  networking.interfaces.bond0.macAddress = "02:a8:22:41:26:a8";
   systemd.network.networks."50-eno1" = {
     matchConfig.Name = "eno1";
     networkConfig.DHCP = "yes";

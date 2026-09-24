@@ -1,5 +1,14 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  environment.systemPackages = with pkgs; [
+    qemu
+    virtiofsd
+
+    swaylock
+  ];
+
+  security.pam.services.swaylock = { };
+
   hardware.keyboard.zsa.enable = true;
   services.udev.extraRules = ''
     # Rules for Oryx web flashing and live training

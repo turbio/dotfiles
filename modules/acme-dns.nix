@@ -14,6 +14,7 @@ let
 
   domains = [
     "turb.io"
+    "int.turb.io"
     "turbi.ooo"
     "masonclayton.com"
     "nice.meme"

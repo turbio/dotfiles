@@ -2,17 +2,21 @@
 {
   networking.firewall.enable = false;
 
+  # lan-resident server whose nfs mounts resolve ballos.int.turb.io — magicdns's ~.
+  # claim would send that to public dns (NXDOMAIN) and break the mounts
+  services.tailscale.extraSetFlags = [ "--accept-dns=false" ];
+
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   boot.supportedFilesystems = [ "nfs" ];
 
   fileSystems."/persist" = {
-    device = "ballos.lan:/tank/enc/jellyfin";
+    device = "ballos.int.turb.io:/tank/enc/jellyfin";
     fsType = "nfs";
   };
 
   fileSystems."/media" = {
-    device = "ballos.lan:/tank/enc/media";
+    device = "ballos.int.turb.io:/tank/enc/media";
     fsType = "nfs";
     options = [
       "rw"

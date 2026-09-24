@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inventory,
   ...
 }:
 let
@@ -19,7 +20,13 @@ in
     #../../services/gerrit.nix
     ../../services/netboot_host.nix
     ./ipmi.nix
-    (import ./acme-wildcard.nix { domain = "turb.io"; })
+    ./incus.nix
+    # *.turb.io doesn't cover second-level labels; internal vhosts need the
+    # explicit *.int SAN (PLAN.md §4)
+    (import ./acme-wildcard.nix {
+      domain = "turb.io";
+      extraNames = [ "*.int.turb.io" ];
+    })
     (import ./acme-wildcard.nix { domain = "turbi.ooo"; })
     (import ./acme-wildcard.nix { domain = "masonclayton.com"; })
     (import ./acme-wildcard.nix { domain = "nice.meme"; })
@@ -51,6 +58,15 @@ in
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPaSIYZYHcTVrctash3bTrayw2D4psofDHsbGZH3BxLP iphone" # TODO(turbio): key management
     ];
   };
+
+  vmhost.enable = true;
+  intDns.enable = true;
+
+  # lan-resident server: dns comes from the ccr (which forwards int zones to
+  # unbound here), never from magicdns — tailscale's ~. claim would capture
+  # every query and leak them to public dns (.lan breaks, int names get the
+  # public wildcard hack)
+  services.tailscale.extraSetFlags = [ "--accept-dns=false" ];
 
   environment.enableAllTerminfo = true; # test
 
@@ -93,28 +109,25 @@ in
       directory = *
   '';
 
-  services.cgit.default = {
-    group = "git";
-    enable = true;
-    scanPath = "${gitDir}/repositories";
-    nginx.virtualHost = "git.turb.io";
+  # immich lives in vms/immich (cut over 2026-07-31, data migrated).
+  # leftovers on disk, remove later (turbio): tank/enc/immich (the old
+  # library — the vm's copy reflink-shares its blocks, so destroying frees
+  # little until both diverge) and the `immich` db in ballos postgres.
 
-    gitHttpBackend.enable = true;
-    gitHttpBackend.checkExportOkFiles = false;
-
-    settings = {
-      enable-git-config = 1;
-      remove-suffix = 1;
-      enable-index-owner = 0;
-      logo = "";
-      root-title = "turbio git";
-      clone-url = "https://git.turb.io/$CGIT_REPO_URL";
-    };
-  };
+  # cgit lives in vms/cgit (cut over 2026-07-31), reading enc/git through a
+  # read-only mount; the git user/group and dataset stay host-owned here
   services.nginx.virtualHosts."git.turb.io" = {
     forceSSL = true;
     useACMEHost = "turb.io";
     http2 = true;
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.cgit.addr.ip4}:80";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      '';
+    };
   };
 
   services.nginx.virtualHosts."jelly.turb.io" = {
@@ -124,7 +137,7 @@ in
 
     extraConfig = ''
       resolver 127.0.0.53;
-      set $jellyfin_url "http://mote.lan:8096";
+      set $jellyfin_url "http://mote.int.turb.io:8096";
     '';
 
     locations."/" = {
@@ -160,7 +173,7 @@ in
       allow ${internalIp};
       deny all;
       resolver 127.0.0.53;
-      set $u "http://mote.lan:9696";
+      set $u "http://mote.int.turb.io:9696";
     '';
     locations."/".proxyPass = "$u";
   };
@@ -169,7 +182,7 @@ in
       allow ${internalIp};
       deny all;
       resolver 127.0.0.53;
-      set $u "http://mote.lan:7878";
+      set $u "http://mote.int.turb.io:7878";
     '';
     locations."/".proxyPass = "$u";
   };
@@ -178,7 +191,7 @@ in
       allow ${internalIp};
       deny all;
       resolver 127.0.0.53;
-      set $u "http://mote.lan:8989";
+      set $u "http://mote.int.turb.io:8989";
     '';
     locations."/".proxyPass = "$u";
   };
@@ -187,7 +200,7 @@ in
       allow ${internalIp};
       deny all;
       resolver 127.0.0.53;
-      set $u "http://mote.lan:5055";
+      set $u "http://mote.int.turb.io:5055";
     '';
     locations."/".proxyPass = "$u";
   };
@@ -196,7 +209,7 @@ in
       allow ${internalIp};
       deny all;
       resolver 127.0.0.53;
-      set $u "http://mote.lan:9472";
+      set $u "http://mote.int.turb.io:9472";
     '';
     locations."/" = {
       extraConfig = ''
@@ -250,6 +263,12 @@ in
       return = "302 /reddit/";
     };
   };
+  services.nginx.virtualHosts."wow.nice.meme" = {
+    http2 = true;
+    forceSSL = true;
+    useACMEHost = "nice.meme";
+    locations."/".proxyPass = "http://127.0.0.1:8085";
+  };
   services.nginx.virtualHosts."*.nice.meme" = {
     http2 = true;
     forceSSL = true;
@@ -302,7 +321,7 @@ in
     useACMEHost = "molters.xyz";
     extraConfig = ''
       resolver 127.0.0.53;
-      set $zote_url "http://zote.lan";
+      set $zote_url "http://zote.int.turb.io";
     '';
     locations."/" = {
       extraConfig = ''
@@ -322,7 +341,7 @@ in
     useACMEHost = "molters.xyz";
     extraConfig = ''
       resolver 127.0.0.53;
-      set $zote_url "http://zote.lan";
+      set $zote_url "http://zote.int.turb.io";
     '';
     locations."/" = {
       extraConfig = ''
@@ -377,31 +396,12 @@ in
       properties.sync = "disabled";
       properties.sharenfs = "rw=@100.100.0.0/16:192.168.0.0/16,async";
     };
-    "enc/ollama" = {
-      properties.sync = "disabled";
-    };
     "enc/molters" = {
       properties.sync = "standard";
       properties.sharenfs = "rw=@192.168.0.0/16,async,no_root_squash";
       perms.owner = "molters";
       perms.group = "molters";
       perms.mode = "750";
-    };
-  };
-
-  zfs.pools.tank.datasets."enc/ollama" = {
-    perms.group = "ollama";
-    perms.mode = "775";
-  };
-
-  services.ollama = {
-    enable = true;
-    models = config.zfs.pools.tank.datasets."enc/ollama".mountpoint;
-    user = "ollama";
-    group = "ollama";
-    environmentVariables = {
-      OLLAMA_MAX_LOADED_MODELS = "2";
-      OLLAMA_NUM_PARALLEL = "5";
     };
   };
 
@@ -419,6 +419,11 @@ in
   services.nginx.virtualHosts."nixcache.turb.io" = {
     addSSL = true;
     useACMEHost = "turb.io";
+    # the internal name (inventory dnsAliases) — lan machines substitute
+    # from here directly, skipping the cloud-edge hairpin (bench
+    # 2026-07-31: ~6x throughput, ~3x latency). cert SAN *.int.turb.io
+    # covers it.
+    serverAliases = [ "nixcache.int.turb.io" ];
 
     root = "/tank/enc/nixcache";
 
@@ -466,6 +471,16 @@ in
   services.sanoid = {
     enable = true;
     datasets = {
+      # every stateful vm's /var (recursive picks up new vms automatically)
+      "${inventory.storage.pool}/${inventory.storage.vmsDataset}" = {
+        recursive = true;
+        hourly = 24;
+        daily = 30;
+        monthly = 12;
+
+        autosnap = true;
+        autoprune = true;
+      };
       "tank/enc/misc" = {
         hourly = 24;
         daily = 30;
@@ -475,6 +490,22 @@ in
         autoprune = true;
       };
       "tank/enc/code" = {
+        hourly = 24;
+        daily = 30;
+        monthly = 12;
+
+        autosnap = true;
+        autoprune = true;
+      };
+      "tank/enc/photos" = {
+        hourly = 24;
+        daily = 30;
+        monthly = 12;
+
+        autosnap = true;
+        autoprune = true;
+      };
+      "tank/enc/backups" = {
         hourly = 24;
         daily = 30;
         monthly = 12;
@@ -580,16 +611,6 @@ in
     };
 
   };
-  services.nginx.virtualHosts."ollama.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      deny all;
-    '';
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:11434";
-    };
-  };
-
   services.nginx.virtualHosts."sync.int.turb.io" = {
     extraConfig = ''
       allow ${internalIp};
@@ -598,24 +619,6 @@ in
     '';
     locations."/" = {
       proxyPass = "http://${config.services.syncthing.guiAddress}";
-    };
-  };
-
-  services.nginx.virtualHosts."home.int.turb.io" = {
-    extraConfig = ''
-      allow ${internalIp};
-      deny all;
-    '';
-    locations."/" = {
-      extraConfig = ''
-        resolver 127.0.0.53;
-        set $ha_url "http://homeassistant.lan:8123";
-        proxy_pass $ha_url;
-        proxy_set_header Host $host;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-      '';
     };
   };
 
@@ -652,111 +655,20 @@ in
     };
   };
 
-  users.groups.grafana.members = [ "nginx" ]; # so nginx can poke grafana's socket
-  services.grafana = {
-    enable = true;
-
-    settings.server = {
-      socket = "/run/grafana/grafana.sock";
-      root_url = "https://graf.turb.io/";
-      domain = "graf.turb.io";
-      protocol = "socket";
-    };
-
-    provision.datasources.settings.datasources = [
-      {
-        name = "Loki";
-        type = "loki";
-        uid = "loki";
-        url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
-        isDefault = false;
-      }
-    ];
-
-    provision.dashboards.settings.providers = [
-      {
-        name = "NixOS";
-        options.path = pkgs.linkFarm "grafana-dashboards" [
-          {
-            name = "node-exporter-full.json";
-            path = ./node_exporter_full.json;
-          }
-          {
-            name = "nginx-logs.json";
-            path = pkgs.writeText "nginx-logs.json" (
-              builtins.toJSON {
-                title = "Nginx Logs";
-                uid = "nginx-logs";
-                editable = false;
-                panels = [
-                  {
-                    type = "logs";
-                    title = "Access Logs";
-                    gridPos = {
-                      x = 0;
-                      y = 0;
-                      w = 24;
-                      h = 20;
-                    };
-                    datasource = {
-                      type = "loki";
-                      uid = "loki";
-                    };
-                    targets = [
-                      {
-                        expr = ''{syslog_identifier="nginx"}'';
-                        refId = "A";
-                      }
-                    ];
-                    options = {
-                      showTime = true;
-                      showLabels = true;
-                      wrapLogMessage = true;
-                      sortOrder = "Descending";
-                      enableLogDetails = true;
-                    };
-                  }
-                ];
-                templating.list = [ ];
-                time = {
-                  from = "now-1h";
-                  to = "now";
-                };
-                refresh = "5s";
-              }
-            );
-          }
-        ];
-      }
-    ];
-  };
-
-  virtualisation.oci-containers = lib.mkIf false {
-    backend = "podman";
-    containers.homeassistant = {
-      volumes = [ "home-assistant:/config" ];
-      environment.TZ = "America/Chicago";
-      image = "ghcr.io/home-assistant/home-assistant:stable"; # Warning: if the tag does not change, the image will not be updated
-      extraOptions = [
-        "--network=host"
-      ];
-    };
-  };
-
   services.nginx.virtualHosts = {
     "graf.turb.io" = {
       forceSSL = true;
       useACMEHost = "turb.io";
 
       locations."/" = {
-        proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
+        proxyPass = "http://${inventory.vms.grafana.addr.ip4}:3000";
         extraConfig = ''
           proxy_set_header Host $host;
         '';
       };
 
       locations."/api/live/" = {
-        proxyPass = "http://unix:/${config.services.grafana.settings.server.socket}";
+        proxyPass = "http://${inventory.vms.grafana.addr.ip4}:3000";
         extraConfig = ''
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
@@ -813,26 +725,28 @@ in
       }
     )
 
-    (
-      final:
-      { buildGoModule, fetchFromGitHub, ... }:
-      {
-        prometheus-comed-exporter = buildGoModule {
-          pname = "comed_exporter";
-          version = "1.0";
-          src = fetchFromGitHub {
-            owner = "kklipsch";
-            repo = "comed_exporter";
-            rev = "1a90f09ceb0ebdfe09c2b307b4080d81b7d8de5f";
-            hash = "sha256-oDvOp7SGz7RTWW3b74I1V3WhiNsHvO3hv01Gr4UkyiY=";
+    /*
+      (
+        final:
+        { buildGoModule, fetchFromGitHub, ... }:
+        {
+          prometheus-comed-exporter = buildGoModule {
+            pname = "comed_exporter";
+            version = "1.0";
+            src = fetchFromGitHub {
+              owner = "kklipsch";
+              repo = "comed_exporter";
+              rev = "1a90f09ceb0ebdfe09c2b307b4080d81b7d8de5f";
+              hash = "sha256-oDvOp7SGz7RTWW3b74I1V3WhiNsHvO3hv01Gr4UkyiY=";
+            };
+
+            vendorHash = null;
+
+            doCheck = false;
           };
-
-          vendorHash = null;
-
-          doCheck = false;
-        };
-      }
-    )
+        }
+      )
+    */
   ];
 
   zfs.pools.tank.datasets = {
@@ -876,13 +790,15 @@ in
     };
   };
 
-  systemd.services.prometheus-comed-exporter = {
-    enable = true;
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.prometheus-comed-exporter}/bin/comed_exporter --address :9010";
+  /*
+    systemd.services.prometheus-comed-exporter = {
+      enable = false;
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStart = "${pkgs.prometheus-comed-exporter}/bin/comed_exporter --address :9010";
+      };
     };
-  };
+  */
 
   power.ups = {
     enable = true;
@@ -911,15 +827,15 @@ in
   services.prometheus = {
     enable = true;
     port = 9090;
-    listenAddress = "127.0.0.1";
+    # 0.0.0.0 so vms holding a machine-ballos grant can reach it; nothing
+    # else gets in — 9090 isn't in allowedTCPPorts, only the inventory-
+    # generated input rules admit it
+    listenAddress = "0.0.0.0";
     retentionTime = "1y";
 
     globalConfig = {
       scrape_interval = "1s";
     };
-
-    pushgateway.enable = true;
-    pushgateway.web.listen-address = "127.0.0.1:9091";
 
     scrapeConfigs = [
       {
@@ -939,40 +855,44 @@ in
         job_name = "pushgateway";
         scrape_interval = "5s";
         static_configs = [
-          { targets = [ config.services.prometheus.pushgateway.web.listen-address ]; }
+          { targets = [ "${inventory.vms.pushgateway.addr.ip4}:9091" ]; }
         ];
       }
-      {
-        job_name = "comed_json";
-        metrics_path = "/probe";
-        params = {
-          module = [ "comed" ];
-        };
-        static_configs = [
-          { targets = [ "https://hourlypricing.comed.com/api?type=currenthouraverage" ]; }
-        ];
-        relabel_configs = [
-          {
-            source_labels = [ "__address__" ];
-            target_label = "__param_target";
-          }
-          {
-            source_labels = [ "__param_target" ];
-            target_label = "instance";
-          }
-          {
-            target_label = "__address__";
-            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.json.port}";
-          }
-        ];
-      }
-      {
-        job_name = "comed";
-        scrape_interval = "10s";
-        static_configs = [
-          { targets = [ "127.0.0.1:9010" ]; }
-        ];
-      }
+
+      /*
+        {
+          scrape_interval = "1m";
+          job_name = "comed_json";
+          metrics_path = "/probe";
+          params = {
+            module = [ "comed" ];
+          };
+          static_configs = [
+            { targets = [ "https://hourlypricing.comed.com/api?type=currenthouraverage" ]; }
+          ];
+          relabel_configs = [
+            {
+              source_labels = [ "__address__" ];
+              target_label = "__param_target";
+            }
+            {
+              source_labels = [ "__param_target" ];
+              target_label = "instance";
+            }
+            {
+              target_label = "__address__";
+              replacement = "127.0.0.1:${toString config.services.prometheus.exporters.json.port}";
+            }
+          ];
+        }
+        {
+          job_name = "comed";
+          scrape_interval = "1m";
+          static_configs = [
+            { targets = [ "127.0.0.1:9010" ]; }
+          ];
+        }
+      */
       {
         job_name = "raritan-pdu";
         scrape_interval = "30s";
@@ -1008,43 +928,43 @@ in
             };
           }
           {
-            targets = [ "mote.lan:9100" ];
+            targets = [ "mote.int.turb.io:9100" ];
             labels = {
               host = "mote";
             };
           }
           {
-            targets = [ "aackle:9100" ];
+            targets = [ "aackle.int.turb.io:9100" ];
             labels = {
               host = "aackle";
             };
           }
           {
-            targets = [ "backle:9100" ];
+            targets = [ "backle.int.turb.io:9100" ];
             labels = {
               host = "backle";
             };
           }
           {
-            targets = [ "cackle:9100" ];
+            targets = [ "cackle.int.turb.io:9100" ];
             labels = {
               host = "cackle";
             };
           }
           {
-            targets = [ "zote.lan:9100" ];
+            targets = [ "zote.int.turb.io:9100" ];
             labels = {
               host = "zote";
             };
           }
           {
-            targets = [ "joast.lan:9100" ];
+            targets = [ "joast.int.turb.io:9100" ];
             labels = {
               host = "joast";
             };
           }
           {
-            targets = [ "j2.lan:9100" ];
+            targets = [ "j2.int.turb.io:9100" ];
             labels = {
               host = "j2";
             };
@@ -1060,7 +980,7 @@ in
       }
       {
         job_name = "nut";
-        scrape_interval = "15s";
+        scrape_interval = "1s";
         metrics_path = "/ups_metrics";
         static_configs = [
           {
@@ -1107,6 +1027,15 @@ in
         ];
       }
       {
+        # stage-1 duplicate in a vm, same targets — side-by-side latency
+        # comparison against the host exporter before cutover
+        job_name = "ping-vm";
+        scrape_interval = "1s";
+        static_configs = [
+          { targets = [ "${inventory.vms.pingexp.addr.ip4}:9427" ]; }
+        ];
+      }
+      {
         job_name = "wireguard";
         scrape_interval = "5s";
         static_configs = [
@@ -1123,6 +1052,9 @@ in
       {
         job_name = "process";
         scrape_interval = "1m";
+        # the global 1s scrape_interval caps the default timeout at 1s;
+        # process-exporter answers in ~1.1s and growing
+        scrape_timeout = "30s";
         static_configs = [
           { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.process.port}" ]; }
         ];
@@ -1131,17 +1063,14 @@ in
         job_name = "snmp_exporter";
         scrape_interval = "1m";
         static_configs = [
-          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}" ]; }
+          { targets = [ "${inventory.vms.snmpexp.addr.ip4}:9116" ]; }
         ];
       }
-      # Low-res tier: full if_mib walk (everything) once a minute. The CRS326
-      # (.245) takes ~8.5s for this, so timeout is generous and well under 60s.
       {
         job_name = "snmp";
         scrape_interval = "300s";
         scrape_timeout = "20s";
         metrics_path = "/snmp";
-        # module defaults to if_mib when no __param_module is set
         static_configs = [
           {
             targets = [
@@ -1163,7 +1092,7 @@ in
           }
           {
             target_label = "__address__";
-            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}";
+            replacement = "${inventory.vms.snmpexp.addr.ip4}:9116";
           }
         ];
       }
@@ -1194,16 +1123,19 @@ in
           }
           {
             target_label = "__address__";
-            replacement = "127.0.0.1:${toString config.services.prometheus.exporters.snmp.port}";
+            replacement = "${inventory.vms.snmpexp.addr.ip4}:9116";
           }
         ];
       }
     ];
 
+    # exporters bind 0.0.0.0 but the firewall admits nothing beyond what the
+    # inventory machine-ballos grants generate (the prometheus vm scrapes
+    # them at ballos's lan address)
     exporters = {
       nut = {
         enable = true;
-        listenAddress = "127.0.0.1";
+        listenAddress = "0.0.0.0";
         nutVariables = [
           "battery.charge"
           "battery.runtime"
@@ -1218,17 +1150,6 @@ in
           "ups.status"
         ];
       };
-      snmp = {
-        enable = true;
-        configurationPath =
-          /*
-            pkgs.fetchurl {
-              url = "https://raw.githubusercontent.com/prometheus/snmp_exporter/1178915b46b49eb80a976eaadd6d7b3f921283d5/snmp.yml";
-              hash = "sha256-yztr+9T0wLXr/ZM9pXShbIfiGdNmgD8IbunvfAxicSQ=";
-            }
-          */
-          ./snmp.yml;
-      };
       process = {
         enable = true;
         settings.process_names = [
@@ -1238,27 +1159,31 @@ in
             cmdline = [ ".+" ];
           }
         ];
-        listenAddress = "127.0.0.1";
+        listenAddress = "0.0.0.0";
       };
       zfs = {
         enable = true;
-        listenAddress = "127.0.0.1";
+        listenAddress = "0.0.0.0";
       };
       wireguard = {
         enable = true;
       };
       ping = {
         enable = true;
-        listenAddress = "127.0.0.1";
+        listenAddress = "0.0.0.0";
         settings = {
           targets = [
             "8.8.8.8"
             "1.1.1.1"
-            "google.com"
-            "facebook.com"
-            "www.microsoft.com"
-            "www.apple.com"
-            "www.amazon.com"
+
+            "192.168.100.1"
+            "192.168.100.2"
+
+            "192.168.101.1"
+            "192.168.101.2"
+
+            "192.168.102.1"
+            "192.168.102.2"
           ];
         };
       };
@@ -1327,24 +1252,26 @@ in
       smartctl = {
         enable = true;
       };
-      json = {
-        enable = true;
-        configFile = pkgs.writeText "json-exporter-config" ''
-          modules:
-            comed:
-              metrics:
-              - name: comed
-                type: object
-                path: '{ [*] }'
-                values:
-                  price_per_kwh: '{ .price }'
-                  millis_utc: '{ .millisUTC }'
-        '';
-      };
+      /*
+        json = {
+          enable = true;
+          configFile = pkgs.writeText "json-exporter-config" ''
+            modules:
+              comed:
+                metrics:
+                - name: comed
+                  type: object
+                  path: '{ [*] }'
+                  values:
+                    price_per_kwh: '{ .price }'
+                    millis_utc: '{ .millisUTC }'
+          '';
+        };
+      */
       node = {
         enable = true;
         enabledCollectors = [ "systemd" ];
-        listenAddress = "127.0.0.1";
+        listenAddress = "0.0.0.0";
         port = 9092;
       };
     };
@@ -1363,131 +1290,41 @@ in
   #  ;
   #};
 
-  zfs.pools.tank.datasets."enc/loki" = {
-    perms.owner = "loki";
-    perms.group = "loki";
-    perms.mode = "750";
-  };
-
-  services.loki = {
-    enable = true;
-    dataDir = config.zfs.pools.tank.datasets."enc/loki".mountpoint;
-    configuration = {
-      auth_enabled = false;
-      server.http_listen_port = 3100;
-
-      ingester = {
-        lifecycler = {
-          address = "127.0.0.1";
-          ring = {
-            kvstore.store = "inmemory";
-            replication_factor = 1;
-          };
-          final_sleep = "0s";
-        };
-        chunk_idle_period = "5m";
-        chunk_retain_period = "30s";
-      };
-
-      schema_config.configs = [
-        {
-          from = "2025-01-01";
-          store = "tsdb";
-          object_store = "filesystem";
-          schema = "v13";
-          index = {
-            prefix = "index_";
-            period = "24h";
-          };
-        }
-      ];
-
-      storage_config = {
-        tsdb_shipper = {
-          active_index_directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/tsdb-index";
-          cache_location = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/tsdb-cache";
-        };
-        filesystem.directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/chunks";
-      };
-
-      limits_config = {
-        reject_old_samples = true;
-        reject_old_samples_max_age = "168h";
-      };
-
-      compactor = {
-        working_directory = "${config.zfs.pools.tank.datasets."enc/loki".mountpoint}/compactor";
-        compactor_ring.kvstore.store = "inmemory";
-        retention_enabled = false;
-      };
-    };
-  };
-
   services.postgresql.package = pkgs.postgresql_16;
 
-  services.buildbot-nix.master = {
-    enable = true;
-    domain = "ci.turb.io";
-    workersFile = pkgs.writeText "buildbot-workers.json" (
-      builtins.toJSON [
-        {
-          name = "ballos";
-          pass = "password";
-          cores = 32;
-        }
-      ]
-    );
-    useHTTPS = true;
-    authBackend = "gitea";
-    admins = [ "turbio" ];
-    gitea = {
-      enable = true;
-      instanceUrl = "https://forge.turb.io";
-      oauthId = "buildbot";
-      oauthSecretFile = config.age.secrets."forgejo-oauth-secret".path;
-      tokenFile = "/var/lib/forgejo-bootstrap/api-token";
-      webhookSecretFile = config.age.secrets."forgejo-webhook-secret".path;
-    };
-    buildSystems = [
-      "x86_64-linux"
-      #"aarch64-linux"
-    ];
-    branches.all.matchGlob = "*";
-    evalWorkerCount = 4;
-  };
-
-  services.buildbot-nix.worker = {
-    enable = true;
-    workerPasswordFile = pkgs.writeText "buildbot-worker-password" "password";
-  };
-
-  systemd.services.buildbot-master = {
-    after = [ "forgejo-bootstrap.service" ];
-    requires = [ "forgejo-bootstrap.service" ];
-    # Any change to forgejo's settings restarts buildbot-master. The
-    # preStart then blanks the gitea-project-cache so the reload scheduler
-    # refetches `ssh_url` etc. from the live API — otherwise a stale cached
-    # URL makes the SingleBranchScheduler's repository filter miss incoming
-    # webhooks (see buildbot_nix/project_config.py and gitea_projects.py).
-    restartTriggers = [
-      (builtins.toJSON config.services.forgejo.settings)
-    ];
-    serviceConfig.ExecStartPre = [
-      "${pkgs.coreutils}/bin/rm -f /var/lib/buildbot/gitea-project-cache.json"
-    ];
-  };
-
-  # Worker should track master — if master restarts, worker reconnects.
-  # On deploy, `systemctl restart buildbot-master` alone used to leave the
-  # worker stopped; bind them so the worker comes back automatically.
-  systemd.services.buildbot-worker = {
-    after = [ "buildbot-master.service" ];
-    bindsTo = [ "buildbot-master.service" ];
-  };
-
+  # buildbot (master, worker, and its postgres) lives in vms/buildbot — cut
+  # over 2026-07-30, builds now run inside the vm. this vhost terminates tls
+  # and mirrors the three locations the buildbot-nix module tunes on the
+  # vm's own nginx. ledger: ballos postgres still carries the old unused
+  # `buildbot` db.
   services.nginx.virtualHosts."ci.turb.io" = {
     forceSSL = true;
     useACMEHost = "turb.io";
+
+    locations."/" = {
+      proxyPass = "http://${inventory.vms.buildbot.addr.ip4}:80";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_connect_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
+      '';
+    };
+    locations."/sse" = {
+      proxyPass = "http://${inventory.vms.buildbot.addr.ip4}:80/sse";
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_buffering off;
+      '';
+    };
+    locations."/ws" = {
+      proxyPass = "http://${inventory.vms.buildbot.addr.ip4}:80/ws";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_read_timeout 6000s;
+      '';
+    };
   };
 
   services.promtail = {
@@ -1497,7 +1334,7 @@ in
         http_listen_port = 9080;
         grpc_listen_port = 0;
       };
-      clients = [ { url = "http://127.0.0.1:3100/loki/api/v1/push"; } ];
+      clients = [ { url = "http://${inventory.vms.loki.addr.ip4}:3100/loki/api/v1/push"; } ];
       scrape_configs = [
         {
           job_name = "journal";

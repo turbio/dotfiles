@@ -2,6 +2,7 @@
   config,
   hostname,
   localpkgs,
+  inventory,
   pkgs,
   lib,
   ...
@@ -33,9 +34,14 @@ in
 
       # todo(turbio): lol
       substituters = [
+        (
+          if inventory.machines.${hostname} ? lan then
+            "https://nixcache.int.turb.io"
+          else
+            "https://nixcache.turb.io"
+        )
         "https://nix-community.cachix.org"
         "https://cache.nixos.org/"
-        "https://nixcache.turb.io"
       ];
 
       trusted-public-keys = [

@@ -34,16 +34,22 @@ def main [] {
   # the item shows and polls fast on startup.
   mut last_change = (date now)
   mut prev_sig = ""
+  # Consecutive auth/fetch failures. Used to back off so a rate-limited token
+  # endpoint (429) isn't hammered every loop, which only prolongs the limit.
+  mut fails = 0
 
   loop {
     let usage = get_usage $creds_path
 
     if $usage == null {
-      log "no usage (auth/fetch failed)"
+      $fails = $fails + 1
+      let backoff = backoff_interval $fails
+      log $"no usage (auth/fetch failed), backoff ($backoff | into string)"
       print '{"text": ""}'
-      sleep 2min
+      sleep $backoff
       continue
     }
+    $fails = 0
 
     let now = (date now)
     let sig = usage_sig $usage
@@ -80,6 +86,20 @@ def pick_interval [idle: duration]: nothing -> duration {
     3min
   } else {
     5min
+  }
+}
+
+# Exponential backoff after consecutive failures, capped. Keeps us off a
+# rate-limited (429) token/usage endpoint instead of retrying every 2min.
+def backoff_interval [fails: int]: nothing -> duration {
+  if $fails <= 1 {
+    2min
+  } else if $fails == 2 {
+    5min
+  } else if $fails == 3 {
+    10min
+  } else {
+    20min
   }
 }
 

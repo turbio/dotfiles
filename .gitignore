@@ -7,4 +7,9 @@ vim/ycm_config.pyc
 */__pycache__/
 hostname.nix
 /result
+
+# per-device tofu working dirs: state + lock are committed, these are not
+appliances/*/.terraform/
+appliances/*/config.tf.json
+appliances/*/terraform.tfstate.backup
 hosts/panda/vanio/target

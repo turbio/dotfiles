@@ -7,10 +7,21 @@
 #   did:key:z6MkmgfLPL4FiuDTEZPz4kGKXiqz64nfQUs7Zwd7gMNN7Vwt
 # repos are seeded on request only (`rad-system seed <rid>` inside the vm);
 # the default policy blocks anything unsolicited from landing in storage.
-{ pkgs, ... }:
+{ pkgs, repos, ... }:
 let
   domain = "radicle.turb.io";
   httpdPort = 8080;
+
+  # radicle from nixpkgs-unstable: 25.11 ships 1.8.0 but the network moved
+  # on — the bootstrap seeds run 1.10.x and gossip an address type 1.8 can't
+  # parse, so it drops them as misbehaving and never joins. unstable tracks
+  # upstream closely (1.10.3 / httpd 0.28.0 at the time of writing); the
+  # overlay swaps all three so the module's config check and the explorer
+  # recipe come along for the ride
+  unstable = repos.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+  radicleOverlay = final: prev: {
+    inherit (unstable) radicle-node radicle-httpd radicle-explorer;
+  };
 
   # the explorer is a static spa configured at build time; point it at
   # ourselves so the landing page lists this seed's repos rather than the
@@ -26,6 +37,8 @@ let
   };
 in
 {
+  nixpkgs.overlays = [ radicleOverlay ];
+
   services.radicle = {
     enable = true;
 
@@ -51,8 +64,13 @@ in
         # allow-list seeding: only repos explicitly `rad seed`ed are stored
         seedingPolicy.default = "block";
       };
-      # preferredSeeds is left at the built-in default (the radicle.xyz
-      # bootstrap nodes) so we discover the rest of the network
+      # the bootstrap seeds (what `rad auth` writes by default). the nixos
+      # module generates config.json from scratch, and an absent list means
+      # *no* seeds — the node would sit alone forever
+      preferredSeeds = [
+        "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@iris.radicle.network:8776"
+        "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@rosa.radicle.network:8776"
+      ];
     };
   };
 

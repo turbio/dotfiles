@@ -75,9 +75,12 @@ in
   };
 
   # one origin for the browser: the spa at /, the httpd api and git
-  # smart-http underneath it. httpd owns /api, /raw and /<rid>/... (git
-  # fetch for `git clone https://radicle.turb.io/rad:z...`); everything else
-  # is an spa route
+  # smart-http underneath it. httpd owns /api, /raw, anything rad:-prefixed,
+  # and the smart-http endpoints of `git clone https://radicle.turb.io/<repo>`
+  # where <repo> is `rad:<rid>`, `<rid>`, `<rid>.git` or an alias (the explorer
+  # hands out the bare `<rid>.git` form). everything else is an spa route —
+  # and the spa fallback answers 200 with index.html, so a git path that slips
+  # through fails confusingly rather than 404ing
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
@@ -101,6 +104,8 @@ in
         "/api/".proxyPass = "http://127.0.0.1:${toString httpdPort}";
         "/raw/".proxyPass = "http://127.0.0.1:${toString httpdPort}";
         "~ ^/rad:".proxyPass = "http://127.0.0.1:${toString httpdPort}";
+        "~ ^/[^/]+/(info/refs|git-upload-pack|git-receive-pack)$".proxyPass =
+          "http://127.0.0.1:${toString httpdPort}";
       };
     };
   };

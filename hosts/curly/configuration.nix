@@ -164,6 +164,8 @@ in
     HibernateDelaySec=1h
   '';
 
+  programs.hyprlock.enable = true;
+
   security.pam.services.swaylock = { };
 
   environment.systemPackages = [

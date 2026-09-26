@@ -17,6 +17,12 @@ in
 
   nixpkgs.overlays = [
     (final: prev: {
+      # is this the best way to disable zsh's newuser thing???
+      zsh = prev.zsh.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          rm $out/lib/zsh/*/zsh/newuser.so $out/share/zsh/*/scripts/newuser
+        '';
+      });
     })
   ];
 

@@ -47,7 +47,10 @@
     };
   };
   mako = {
-    config.path = builtins.path { path = ./config/mako/config; name = "mako-config"; };
+    config.path = builtins.path {
+      path = ./config/mako/config;
+      name = "mako-config";
+    };
   };
   fuzzel = {
     settings = {
@@ -120,7 +123,7 @@
       }
     ];
     selection = {
-      semantic_escape_chars = '',?`|:"' ()[]{}<>'';
+      semantic_escape_chars = '',?`|:"' ()[]{}<>│┤├'';
     };
     window.dimensions = {
       columns = 80;
@@ -134,7 +137,10 @@
   };
   waybar = {
     settings = import ./waybar.nix { inherit pkgs lib; };
-    style.path = builtins.path { path = ./config/waybar/style.css; name = "waybar-style.css"; };
+    style.path = builtins.path {
+      path = ./config/waybar/style.css;
+      name = "waybar-style.css";
+    };
   };
   niri = {
     "config.kdl".content = ''
@@ -313,7 +319,12 @@
           Mod+Shift+Equal { set-window-height "+10%"; }
 
           Mod+Slash {
-              spawn "${builtins.path { path = ./bin/niri-rename-workspace; name = "niri-rename-workspace"; }}";
+              spawn "${
+                builtins.path {
+                  path = ./bin/niri-rename-workspace;
+                  name = "niri-rename-workspace";
+                }
+              }";
           }
       }
 

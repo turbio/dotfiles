@@ -6,7 +6,7 @@
 let
   port = 3001;
   tz = "America/Chicago";
-  bin = "${(import (repos.flippyflops + "/dots.turb.io")) { inherit pkgs; }}/bin/flippyflops";
+  bin = "${pkgs.flippyflops}/bin/flippyflops";
   wrapped = pkgs.writeShellScript "wrapped-flippys" "PORT=${toString port} HOST=0.0.0.0 TZ=${tz} ${bin}";
 in
 {

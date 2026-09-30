@@ -116,8 +116,6 @@ rec {
       mpv
 
       wev
-      xorg.xev
-      xdotool
 
       ocl-icd
 
@@ -139,7 +137,7 @@ rec {
     busybox
     zsh
     fish
-    silver-searcher
+    silver-searcher-ng
     pv
 
     gnumake

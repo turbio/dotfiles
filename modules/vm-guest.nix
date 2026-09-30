@@ -11,6 +11,15 @@
     vcpu = lib.mkDefault (vm.vcpu or 1);
     mem = lib.mkDefault (vm.mem or 512);
 
+    # microvm.nix defaults to "prefer", which makes virtiofsd reference inodes
+    # by file handle and reopen them by handle on later requests. on the zfs
+    # backed shares that breaks the open+unlink+read pattern (sqlite temp
+    # files, mkstemp): the handle of an unlinked inode is gone, every read on
+    # the still-open fd fails with ESTALE, and it surfaced 2026-09-29 as
+    # grafana 13's migration dying with "disk I/O error". O_PATH descriptors
+    # cost one fd per inode; the rlimit microvm.nix sets is 1M.
+    virtiofsd.inodeFileHandles = "never";
+
     interfaces = [
       {
         type = "tap";

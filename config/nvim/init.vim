@@ -55,10 +55,6 @@ vim.opt.ignorecase = true
 
 vim.opt.gdefault = true
 
-local codewindow = require('codewindow')
-codewindow.setup()
-codewindow.apply_default_keybinds()
-
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
 vim.keymap.set('n', 'gf', vim.lsp.buf.format)
 vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition)

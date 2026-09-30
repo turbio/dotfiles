@@ -12,7 +12,6 @@ let
       nvim-nio
       plenary-nvim
       popup-nvim
-      codewindow-nvim
 
       (pkgs.vimUtils.buildVimPlugin {
         pname = "muble";

@@ -10,6 +10,65 @@
   boot.zfs.extraPools = [ "tank" ];
   networking.hostId = "00ba1105";
 
+  # whole store lives on zfs and gets bind mounted over /nix/store in initrd, so
+  # nothing but kernel+initrd has to be on the root ssd. that means tank imports
+  # and tank/enc unlocks in initrd, which is where the key prompt shows up.
+  # the ext4 /nix/store under the bind stays as a fallback for pre-zfs gens
+  #
+  # tank and tank/enc get mounted in initrd too, otherwise stage 2's zfs mount -a
+  # drops tank over /tank and buries the nixstore mount underneath it
+  fileSystems."/tank" = {
+    device = "tank";
+    fsType = "zfs";
+    options = [ "zfsutil" ];
+    neededForBoot = true;
+  };
+  fileSystems."/tank/enc" = {
+    device = "tank/enc";
+    fsType = "zfs";
+    options = [ "zfsutil" ];
+    neededForBoot = true;
+  };
+  fileSystems."/tank/enc/nixstore" = {
+    device = "tank/enc/nixstore";
+    fsType = "zfs";
+    options = [ "zfsutil" ];
+    neededForBoot = true;
+  };
+  fileSystems."/nix/store" = {
+    device = "/tank/enc/nixstore";
+    fsType = "none";
+    options = [ "bind" ];
+    depends = [ "/tank/enc/nixstore" ];
+  };
+
+  # the zfs.pools ensure unit runs far too late to create the dataset for boot
+  # (it was created by hand), but it still owns the properties: virtiofsd
+  # exports the store to the microvms with --posix-acl, and without posixacl the
+  # host answers the guest's acl lookup with EOPNOTSUPP, which the guest kernel
+  # turns into exec failures for every non-root service.
+  zfs.pools.tank.datasets."enc/nixstore".properties = {
+    acltype = "posixacl";
+    xattr = "sa";
+  };
+
+  # sandbox build dirs on zfs (sync=disabled) instead of the root disk. after
+  # zfs-mount so this and zfs mount -a don't race for the same dataset
+  fileSystems."/tank/enc/nixbuilds" = {
+    device = "tank/enc/nixbuilds";
+    fsType = "zfs";
+    options = [
+      "zfsutil"
+      "x-systemd.after=zfs-mount.service"
+    ];
+  };
+  fileSystems."/nix/var/nix/builds" = {
+    device = "/tank/enc/nixbuilds";
+    fsType = "none";
+    options = [ "bind" ];
+    depends = [ "/tank/enc/nixbuilds" ];
+  };
+
   boot.initrd.availableKernelModules = [
     "ehci_pci"
     "ahci"

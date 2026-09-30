@@ -207,21 +207,21 @@ in
 
   # radicle lives in vms/radicle: the vm serves the explorer + httpd api on
   # :80; the p2p port is dnat-ed straight to the vm by the edges
-  services.nginx.virtualHosts."radicle.turb.io" = {
-    forceSSL = true;
-    useACMEHost = "turb.io";
-    http2 = true;
-
-    locations."/" = {
-      proxyPass = "http://${inventory.vms.radicle.addr.ip4}:80";
-      extraConfig = ''
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-      '';
-    };
-  };
+  # services.nginx.virtualHosts."radicle.turb.io" = {
+  #   forceSSL = true;
+  #   useACMEHost = "turb.io";
+  #   http2 = true;
+  #
+  #   locations."/" = {
+  #     proxyPass = "http://${inventory.vms.radicle.addr.ip4}:80";
+  #     extraConfig = ''
+  #       proxy_set_header Host $host;
+  #       proxy_set_header X-Real-IP $remote_addr;
+  #       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  #       proxy_set_header X-Forwarded-Proto $scheme;
+  #     '';
+  #   };
+  # };
 
   services.nginx.virtualHosts."colotop.turb.io" = {
     forceSSL = true;
@@ -873,44 +873,6 @@ in
         proxy_set_header Host $host;
         proxy_read_timeout 6000s;
       '';
-    };
-  };
-
-  services.promtail = {
-    enable = true;
-    configuration = {
-      server = {
-        http_listen_port = 9080;
-        grpc_listen_port = 0;
-      };
-      clients = [ { url = "http://${inventory.vms.loki.addr.ip4}:3100/loki/api/v1/push"; } ];
-      scrape_configs = [
-        {
-          job_name = "journal";
-          journal = {
-            max_age = "12h";
-            labels.job = "systemd-journal";
-          };
-          relabel_configs = [
-            {
-              source_labels = [ "__journal__systemd_unit" ];
-              target_label = "unit";
-            }
-            {
-              source_labels = [ "__journal_syslog_identifier" ];
-              target_label = "syslog_identifier";
-            }
-            {
-              source_labels = [ "__journal__hostname" ];
-              target_label = "hostname";
-            }
-            {
-              source_labels = [ "__journal_priority_keyword" ];
-              target_label = "level";
-            }
-          ];
-        }
-      ];
     };
   };
 }

@@ -7,6 +7,9 @@
   services.grafana = {
     enable = true;
 
+    # Keep the former default key for compatibility with the existing database.
+    settings.security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
+
     settings.server = {
       http_addr = "0.0.0.0";
       http_port = 3000;

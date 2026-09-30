@@ -2,16 +2,19 @@
   description = "dotfiles";
 
   nixConfig = {
-    abort-on-warn = true;
+    #abort-on-warn = true;
     extra-experimental-features = [ "pipe-operators" ];
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    nixvim.url = "github:nix-community/nixvim/nixos-25.11";
+    nix.url = "github:turbio/nix/master";
+    # TODO(turbio): can't follow, unstable Boost breaks URL tests
+
+    nixvim.url = "github:nix-community/nixvim/main";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
+
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -39,10 +42,10 @@
       flake = false;
       url = "github:turbio/schemeclub/nix";
     };
-    flippyflops = {
-      flake = false;
-      url = "github:turbio/flippyflops";
-    };
+    flippyflops.url = "github:turbio/flippyflops?dir=dots.turb.io";
+    # TODO(turbio): mkYarnPackage is gone from unstable, park flippyflops on 25.11 until its build is ported to the yarn hooks
+    nixpkgs-flippyflops.url = "github:nixos/nixpkgs/nixos-25.11";
+    flippyflops.inputs.nixpkgs.follows = "nixpkgs-flippyflops";
     wrappers.url = "github:turbio/wrappers";
     wrappers.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -64,7 +67,7 @@
     microvm.inputs.nixpkgs.follows = "nixpkgs";
 
     buildbot-nix.url = "github:nix-community/buildbot-nix";
-    buildbot-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    buildbot-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -138,7 +141,13 @@
           {
             nixpkgs.overlays = [
               wrappersOverlay
+              #inputs.nix.overlays.default
+              (final: prev: {
+                flippyflops = inputs.flippyflops.packages.${inventory.machines.${hostname}.arch}.flippyflops;
+              })
             ];
+
+            nix.package = inputs.nix.packages.x86_64-linux.nix;
           }
         ]
         ++ (secretsModuleFor hostname)
@@ -162,7 +171,7 @@
 
       # `nix run .#appliance`
       appliances = import ./appliances {
-        pkgs = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
         inherit (inputs) terranix;
       };
 
@@ -283,7 +292,12 @@
             lib.filterAttrs (name: _: inventory.machines.${name}.arch == system) self.nixosConfigurations;
         in
         {
-          x86_64-linux = toplevels (hostsBy "x86_64-linux");
+          x86_64-linux = toplevels (hostsBy "x86_64-linux") // {
+            joast-boot = import ./tests/joast-boot.nix {
+              pkgs = nixpkgs.legacyPackages.x86_64-linux;
+              joast = self.nixosConfigurations.joast;
+            };
+          };
           aarch64-linux = toplevels (hostsBy "aarch64-linux");
         };
 

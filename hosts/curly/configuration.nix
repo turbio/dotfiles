@@ -24,7 +24,6 @@ in
   boot.loader.timeout = 0;
 
   hardware.bluetooth.enable = true;
-  programs.light.enable = true;
 
   services.syncthing = {
     enable = true;
@@ -160,9 +159,7 @@ in
     HandleSuspendKey = "suspend-then-hibernate";
   };
 
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=1h
-  '';
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "1h";
 
   programs.hyprlock.enable = true;
 
@@ -170,6 +167,7 @@ in
 
   environment.systemPackages = [
     pkgs.swaylock
+    pkgs.brightnessctl
     lock
   ];
 

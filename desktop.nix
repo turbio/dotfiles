@@ -104,11 +104,10 @@ in
       };
     };
 
-    services.journald.extraConfig = ''
-      MaxRetentionSec=1week
-    '';
+    services.journald.settings.Journal.MaxRetentionSec = "1week";
 
     environment.systemPackages = (pkgs.callPackage ./packages.nix { inherit localpkgs; }).desktop ++ [
+      pkgs.android-tools
       (lib.mkIf (desktop == "sway") dbus-sway-environment)
       (lib.mkIf (desktop == "sway") configure-gtk)
     ];
@@ -136,9 +135,6 @@ in
       noto-fonts-color-emoji
       roboto
     ];
-
-    programs.adb.enable = true;
-    users.users.turbio.extraGroups = [ "adbusers" ];
 
     #programs.niri.enable = desktop == "niri";
 

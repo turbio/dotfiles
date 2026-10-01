@@ -59,10 +59,8 @@ rec {
       kitty
       neovide
       pavucontrol
-      blueberry
+      blueman
       pass
-      gtk_engines
-      gtk-engine-murrine
       gsettings-desktop-schemas
       lsb-release
 

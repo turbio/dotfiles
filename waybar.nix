@@ -56,7 +56,7 @@
     format = " {status}";
     format-connected = " {device_alias}";
     format-connected-battery = " {device_alias} {device_battery_percentage}%";
-    on-click = "blueberry";
+    on-click = "blueman-manager";
   };
 
   clock = {

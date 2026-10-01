@@ -79,6 +79,10 @@ in
     };
   };
 
+  # Q to exit and clear the screan, q to exit leaving behind displayed text
+  environment.variables.LESS = "-R --redraw-on-quit";
+  programs.less.commands.Q = "toggle-option ^P-redraw-on-quit\\nq";
+
   programs.niri = {
     enable = true;
     useNautilus = true;

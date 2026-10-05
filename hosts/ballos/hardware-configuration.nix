@@ -61,12 +61,6 @@
     "net.ipv4.conf.default.arp_announce" = 2;
   };
 
-  services.resolved.enable = true;
-  services.resolved.llmnr = "false";
-  services.resolved.extraConfig = ''
-    MulticastDNS=no
-  '';
-
   disko.devices.disk.main = {
     type = "disk";
     content = {

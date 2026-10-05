@@ -46,6 +46,12 @@
       mouse-scroll-multiplier = 3;
     };
   };
+  tmux = {
+    "tmux.conf".path = builtins.path {
+      path = ./config/tmux/tmux.conf;
+      name = "tmux.conf";
+    };
+  };
   mako = {
     configFile.path = builtins.path {
       path = ./config/mako/config;
@@ -57,30 +63,44 @@
     ".zshrc".content = ''
       ${builtins.readFile ./config/zsh/zshrc}
 
-      # bash completion compatibility (was programs.zsh.enableBashCompletion)
       autoload -U bashcompinit && bashcompinit
 
-      # oh-my-zsh lib defaults we'd gotten used to
-      setopt auto_cd auto_pushd pushd_ignore_dups interactive_comments
+      # oh-my-zsh defaults
+      setopt auto_cd auto_pushd pushd_ignore_dups pushdminus interactive_comments
       setopt complete_in_word always_to_end
+      setopt hist_ignore_space hist_expire_dups_first
+      setopt long_list_jobs multios
       unsetopt flowcontrol
       zstyle ':completion:*:*:*:*:*' menu select
       zstyle ':completion:*' list-colors ""
+      zstyle ':completion:*' special-dirs true
+      : "''${PAGER:=less}" "''${LESS:=-R}"
+      export PAGER LESS
       bindkey -M viins '^?' backward-delete-char
+      bindkey -M vicmd '^?' backward-delete-char
       bindkey -M viins '^[[1;5C' forward-word
       bindkey -M viins '^[[1;5D' backward-word
+      bindkey -M viins '^[[3;5~' kill-word
       bindkey -M vicmd '^[[1;5C' forward-word
       bindkey -M vicmd '^[[1;5D' backward-word
+      bindkey -M vicmd '^[[3;5~' kill-word
 
-      # plugins load last on purpose: syntax highlighting wraps every widget
-      # defined so far, and history-substring-search must come after it; the
-      # HISTORY_SUBSTRING_SEARCH_* vars above survive (the plugin only
-      # defaults them when unset)
+      # terminal title + cwd reporting
+      if [[ "$TERM" != (dumb|linux) ]]; then
+        autoload -Uz add-zsh-hook
+        _termtitle_precmd() {
+          print -rn -- $'\e]2;'"''${(%):-%~}"$'\a'
+          print -rn -- $'\e]7;file://'"$HOST$PWD"$'\a'
+        }
+        _termtitle_preexec() { print -rn -- $'\e]2;'"$1"$'\a' }
+        add-zsh-hook precmd _termtitle_precmd
+        add-zsh-hook preexec _termtitle_preexec
+      fi
+
       source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
       source ${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 
-      # arrows search history by what's typed (the oh-my-zsh plugin did this)
-      for m in emacs viins; do
+      for m in emacs viins vicmd; do
         [[ -n "$terminfo[kcuu1]" ]] && bindkey -M $m "$terminfo[kcuu1]" history-substring-search-up
         [[ -n "$terminfo[kcud1]" ]] && bindkey -M $m "$terminfo[kcud1]" history-substring-search-down
         bindkey -M $m '^[[A' history-substring-search-up

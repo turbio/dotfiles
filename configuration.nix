@@ -115,6 +115,11 @@ in
 
   programs.fish.enable = true;
   programs.zsh.enable = true;
+  # the real config lives in the wrapped zsh's ZDOTDIR (wrappers.nix): it runs
+  # its own compinit, and the default promptInit (`prompt suse`) would stomp
+  # prompt options before our PS1 loads (oh-my-zsh used to blank it)
+  programs.zsh.enableGlobalCompInit = false;
+  programs.zsh.promptInit = "";
 
   programs.mtr.enable = true;
 

@@ -34,8 +34,9 @@ export HISTFILE=~/.zsh/history
 
 setopt PROMPTSUBST
 zstyle ':completion::complete:*' use-cache 1
-autoload -U compinit && compinit
-compinit -C
+# keep the dump out of ZDOTDIR, which may be a read-only store path
+autoload -U compinit && compinit -d "$HOME/.zcompdump"
+compinit -C -d "$HOME/.zcompdump"
 setopt NORMSTARSILENT
 autoload zrecompile
 setopt NULLGLOB

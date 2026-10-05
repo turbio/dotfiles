@@ -59,10 +59,6 @@ in
     _JAVA_AWT_WM_NONREPARENTING = "1";
   };
 
-  environment.etc = {
-    "tmux.conf".source = ./config/tmux/tmux.conf;
-  };
-
   programs.firefox.enable = true;
 
   programs.nixvim.enable = true;

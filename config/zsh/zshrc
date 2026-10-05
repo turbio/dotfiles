@@ -31,6 +31,8 @@ setopt INC_APPEND_HISTORY
 export HISTSIZE=10000000
 export SAVEHIST=10000000
 export HISTFILE=~/.zsh/history
+# zsh creates the history file but not its parent directory
+mkdir -p ~/.zsh
 
 setopt PROMPTSUBST
 zstyle ':completion::complete:*' use-cache 1

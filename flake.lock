@@ -846,15 +846,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1763039116,
-        "narHash": "sha256-j5WniutWgA59X73zFjfYeFlIa1b3uQzUNF59O6dLNmM=",
-        "owner": "turbio",
+        "lastModified": 1789546006,
+        "narHash": "sha256-hv8Y2AcOGuCoI/5fVjPZzCAOygTbL9wvvY9HKXvvLEk=",
+        "owner": "lassulus",
         "repo": "wrappers",
-        "rev": "317896ca1fd671b299cb3890d44ac74b87d04918",
+        "rev": "e6676c0f59edd80dc1afb6a00047f5578095e4cb",
         "type": "github"
       },
       "original": {
-        "owner": "turbio",
+        "owner": "lassulus",
         "repo": "wrappers",
         "type": "github"
       }

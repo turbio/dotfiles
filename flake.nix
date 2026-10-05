@@ -46,7 +46,7 @@
     # TODO(turbio): mkYarnPackage is gone from unstable, park flippyflops on 25.11 until its build is ported to the yarn hooks
     nixpkgs-flippyflops.url = "github:nixos/nixpkgs/nixos-25.11";
     flippyflops.inputs.nixpkgs.follows = "nixpkgs-flippyflops";
-    wrappers.url = "github:turbio/wrappers";
+    wrappers.url = "github:lassulus/wrappers";
     wrappers.inputs.nixpkgs.follows = "nixpkgs";
 
     raspberry-pi-nix.url = "github:tstat/raspberry-pi-nix";

@@ -61,8 +61,6 @@ in
 
   environment.etc = {
     "tmux.conf".source = ./config/tmux/tmux.conf;
-
-    "zshrc.local".source = ./config/zsh/zshrc;
   };
 
   programs.firefox.enable = true;
@@ -83,21 +81,6 @@ in
       pull.ff = "only";
       init.defaultBranch = "master";
     };
-  };
-
-  programs.zsh = {
-    enable = true;
-    # actually set with `environment.etc."zshrc.local"` as it needs to run after
-    # oh-my-zsh is loaded.
-    # interactiveShellInit = builtins.readFile ./config/zsh/zshrc;
-
-    syntaxHighlighting.enable = true;
-    enableBashCompletion = true;
-
-    ohMyZsh.enable = true;
-    ohMyZsh.plugins = [
-      "history-substring-search"
-    ];
   };
 
   programs.niri = {

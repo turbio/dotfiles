@@ -47,10 +47,46 @@
     };
   };
   mako = {
-    config.path = builtins.path {
+    configFile.path = builtins.path {
       path = ./config/mako/config;
       name = "mako-config";
     };
+  };
+  zsh = {
+    settings.env = { };
+    ".zshrc".content = ''
+      ${builtins.readFile ./config/zsh/zshrc}
+
+      # bash completion compatibility (was programs.zsh.enableBashCompletion)
+      autoload -U bashcompinit && bashcompinit
+
+      # oh-my-zsh lib defaults we'd gotten used to
+      setopt auto_cd auto_pushd pushd_ignore_dups interactive_comments
+      setopt complete_in_word always_to_end
+      unsetopt flowcontrol
+      zstyle ':completion:*:*:*:*:*' menu select
+      zstyle ':completion:*' list-colors ""
+      bindkey -M viins '^?' backward-delete-char
+      bindkey -M viins '^[[1;5C' forward-word
+      bindkey -M viins '^[[1;5D' backward-word
+      bindkey -M vicmd '^[[1;5C' forward-word
+      bindkey -M vicmd '^[[1;5D' backward-word
+
+      # plugins load last on purpose: syntax highlighting wraps every widget
+      # defined so far, and history-substring-search must come after it; the
+      # HISTORY_SUBSTRING_SEARCH_* vars above survive (the plugin only
+      # defaults them when unset)
+      source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+      source ${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+      # arrows search history by what's typed (the oh-my-zsh plugin did this)
+      for m in emacs viins; do
+        [[ -n "$terminfo[kcuu1]" ]] && bindkey -M $m "$terminfo[kcuu1]" history-substring-search-up
+        [[ -n "$terminfo[kcud1]" ]] && bindkey -M $m "$terminfo[kcud1]" history-substring-search-down
+        bindkey -M $m '^[[A' history-substring-search-up
+        bindkey -M $m '^[[B' history-substring-search-down
+      done
+    '';
   };
   fuzzel = {
     settings = {
@@ -137,7 +173,7 @@
   };
   waybar = {
     settings = import ./waybar.nix { inherit pkgs lib; };
-    style.path = builtins.path {
+    "style.css".path = builtins.path {
       path = ./config/waybar/style.css;
       name = "waybar-style.css";
     };

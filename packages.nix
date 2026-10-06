@@ -56,7 +56,6 @@ rec {
       nix-output-monitor
 
       nixpkgs-fmt
-      kitty
       neovide
       pavucontrol
       blueman

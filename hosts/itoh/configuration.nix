@@ -129,10 +129,6 @@
     enable = true;
   };
 
-  services.ollama.enable = true;
-  services.ollama.acceleration = "rocm";
-  services.ollama.rocmOverrideGfx = "11.0.0";
-
   disko.devices.disk.main = {
     type = "disk";
     content = {

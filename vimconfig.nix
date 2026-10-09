@@ -51,6 +51,8 @@ in
       enable = true;
       keymaps = {
         "<C-/>" = "live_grep";
+        # same key, legacy encoding. tmux can't pass kitty's keyboard protocol
+        "<C-_>" = "live_grep";
         "<C-p>" = "files";
       };
     };

@@ -76,6 +76,7 @@ in
       user.name = "turbio";
       pull.ff = "only";
       init.defaultBranch = "master";
+      rerere.enabled = true;
     };
   };
 

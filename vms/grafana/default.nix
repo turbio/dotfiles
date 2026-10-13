@@ -7,8 +7,14 @@
   services.grafana = {
     enable = true;
 
-    # Keep the former default key for compatibility with the existing database.
+    # don't care tbh
     settings.security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
+
+    declarativePlugins = with pkgs.grafanaPlugins; [
+      prometheus
+      loki
+      grafana-lokiexplore-app
+    ];
 
     settings.server = {
       http_addr = "0.0.0.0";

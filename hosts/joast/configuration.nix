@@ -693,6 +693,22 @@ in
     };
   };
 
+  # 0.15.0 returns HTTP 500 for our SAS disks (unregistered verify metrics).
+  nixpkgs.overlays = [
+    (final: prev: {
+      prometheus-smartctl-exporter = prev.prometheus-smartctl-exporter.overrideAttrs {
+        version = "0.14.0";
+        src = final.fetchFromGitHub {
+          owner = "prometheus-community";
+          repo = "smartctl_exporter";
+          tag = "v0.14.0";
+          hash = "sha256-9woQgqkPYKMu8p35aeSv3ua1l35BuMzFT4oCVpmyG2E=";
+        };
+        vendorHash = "sha256-bDO7EgCjmObNaYHllczDKuFyKTKH0iCFDSLke6VMsHI=";
+      };
+    })
+  ];
+
   services.prometheus.exporters = {
     # exporters bind 0.0.0.0 but the firewall admits nothing beyond what the
     # inventory machine-ballos grants generate (the prometheus vm scrapes

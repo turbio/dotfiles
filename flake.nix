@@ -7,7 +7,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
     nix.url = "github:turbio/nix/master";
     # TODO(turbio): can't follow, unstable Boost breaks URL tests
@@ -101,15 +101,19 @@
           inherit lib;
           pkgs = final;
         }
-        |> (nixpkgs.lib.mapAttrs (
+        |> (nixpkgs.lib.mapAttrs' (
           name: config:
-          wrappers.wrapperModules.${name}.apply {
-            config = {
-              pkgs = prev;
+          # keep pkgs.zsh stock. kitty and direnv run zsh in their tests and
+          # choke on our zshrc, and we lose the cache hit
+          nixpkgs.lib.nameValuePair (if name == "zsh" then "zsh-wrapped" else name) (
+            wrappers.wrapperModules.${name}.apply {
+              config = {
+                pkgs = prev;
+              }
+              // config;
             }
-            // config;
-          }
-          |> (a: a.wrapper)
+            |> (a: a.wrapper)
+          )
         ));
 
       secretsModuleFor =

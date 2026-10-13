@@ -30,7 +30,7 @@
     uid = 1100;
     group = "molters";
     home = "/home/molters";
-    shell = pkgs.zsh;
+    shell = pkgs.zsh-wrapped;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio@iphone"

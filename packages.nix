@@ -132,7 +132,6 @@ rec {
     htop
     btop
     busybox
-    zsh
     fish
     silver-searcher-ng
     pv

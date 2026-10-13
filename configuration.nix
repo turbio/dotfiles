@@ -15,17 +15,6 @@ in
 
   services.fwupd.enable = true;
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      # is this the best way to disable zsh's newuser thing???
-      zsh = prev.zsh.overrideAttrs (old: {
-        postInstall = (old.postInstall or "") + ''
-          rm $out/lib/zsh/*/zsh/newuser.so $out/share/zsh/*/scripts/newuser
-        '';
-      });
-    })
-  ];
-
   nix = {
     #autoOptimiseStore = true;
 
@@ -100,7 +89,7 @@ in
       hostname != "zote" && hostname != "joast" && hostname != "j2" && hostname != "devvm"
     ) config.age.secrets.userpassword.path;
 
-    shell = pkgs.zsh;
+    shell = pkgs.zsh-wrapped;
     #shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio" # TODO(turbio): key management
@@ -115,6 +104,7 @@ in
 
   programs.fish.enable = true;
   programs.zsh.enable = true;
+  programs.zsh.package = pkgs.zsh-wrapped;
   # the real config lives in the wrapped zsh's ZDOTDIR (wrappers.nix): it runs
   # its own compinit, and the default promptInit (`prompt suse`) would stomp
   # prompt options before our PS1 loads (oh-my-zsh used to blank it)

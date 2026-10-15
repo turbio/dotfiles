@@ -133,15 +133,11 @@
           ./modules/vm-routes.nix
           ./modules/int-dns.nix
           ./configuration.nix
-          ./desktop.nix
-          ./home.nix
           ./services/syncthing.nix
-          ./vim.nix
           (./hosts + "/${hostname}" + /configuration.nix)
           (./hosts + "/${hostname}" + /hardware-configuration.nix)
           #./vpn.nix
           disko.nixosModules.disko
-          nixvim.nixosModules.nixvim
           {
             nixpkgs.overlays = [
               wrappersOverlay
@@ -151,8 +147,27 @@
               })
             ];
 
-            nix.package = inputs.nix.packages.x86_64-linux.nix;
+            nix.package =
+              let
+                arch = inventory.machines.${hostname}.arch;
+              in
+              # the fork isn't cached for arm and its seccomp test gate
+              # (enosys) can't run under binfmt, so cross it from x86 instead
+              if arch == "aarch64-linux" then
+                (inputs.nix.lib.makeComponents {
+                  pkgs = inputs.nix.inputs.nixpkgs.legacyPackages.x86_64-linux.pkgsCross.aarch64-multiplatform;
+                }).nix-everything
+              else
+                inputs.nix.packages.${arch}.nix;
           }
+        ]
+        # the workstation half: nixvim alone drags ghc and clang along, the
+        # edges can't afford it
+        ++ lib.optionals (!(inventory.machines.${hostname}.minimal or false)) [
+          ./desktop.nix
+          ./home.nix
+          ./vim.nix
+          nixvim.nixosModules.nixvim
         ]
         ++ (secretsModuleFor hostname)
         ++ extraModules;

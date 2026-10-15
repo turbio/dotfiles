@@ -9,6 +9,7 @@
 }:
 let
   packageset = pkgs.callPackage ./packages.nix { inherit localpkgs; };
+  minimal = inventory.machines.${hostname}.minimal or false;
 in
 {
   documentation.man.generateCaches = false; # building the cache takes forver and I don't use it
@@ -60,7 +61,9 @@ in
 
   i18n.defaultLocale = "en_US.UTF-8";
 
-  environment.systemPackages = packageset.core;
+  # minimal hosts skip vim.nix, still want some editor on em
+  environment.systemPackages = packageset.core ++ lib.optional minimal pkgs.vim;
+  environment.variables.EDITOR = lib.mkIf minimal "vim";
 
   users.mutableUsers = false;
   security.sudo.wheelNeedsPassword = false;
@@ -89,7 +92,7 @@ in
       hostname != "zote" && hostname != "joast" && hostname != "j2" && hostname != "devvm"
     ) config.age.secrets.userpassword.path;
 
-    shell = pkgs.zsh-wrapped;
+    shell = if minimal then pkgs.bashInteractive else pkgs.zsh-wrapped;
     #shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONmQgB3t8sb7r+LJ/HeaAY9Nz2aPS1XszXTub8A1y4n turbio" # TODO(turbio): key management
@@ -103,13 +106,15 @@ in
   '';
 
   programs.fish.enable = true;
-  programs.zsh.enable = true;
-  programs.zsh.package = pkgs.zsh-wrapped;
-  # the real config lives in the wrapped zsh's ZDOTDIR (wrappers.nix): it runs
-  # its own compinit, and the default promptInit (`prompt suse`) would stomp
-  # prompt options before our PS1 loads (oh-my-zsh used to blank it)
-  programs.zsh.enableGlobalCompInit = false;
-  programs.zsh.promptInit = "";
+  programs.zsh = lib.mkIf (!minimal) {
+    enable = true;
+    package = pkgs.zsh-wrapped;
+    # the real config lives in the wrapped zsh's ZDOTDIR (wrappers.nix): it runs
+    # its own compinit, and the default promptInit (`prompt suse`) would stomp
+    # prompt options before our PS1 loads (oh-my-zsh used to blank it)
+    enableGlobalCompInit = false;
+    promptInit = "";
+  };
 
   programs.mtr.enable = true;
 

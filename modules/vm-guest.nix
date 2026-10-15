@@ -29,6 +29,13 @@
       }
     ];
 
+    # sparse, mkfs'd on first start by microvm's autoCreate
+    volumes = lib.optional (vm ? rootDisk) {
+      image = "${inventory.storage.vmsPath}/${vm.name}/root.img";
+      mountPoint = "/";
+      size = vm.rootDisk;
+    };
+
     shares = [
       {
         proto = "virtiofs";

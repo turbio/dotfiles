@@ -30,6 +30,11 @@ in
     include "${config.age.secrets."rfc2136-acme".path}";
     include "${config.age.secrets."rfc2136-xfer".path}";
   '';
+  age.secrets."rfc2136-acme".owner = "named";
+  age.secrets."rfc2136-xfer".owner = "named";
+  # the module runs named-checkconf in the sandbox, where neither the agenix
+  # keys nor the /var/db/bind zones exist
+  services.bind.checkConfig = false;
 
   imports =
     domains

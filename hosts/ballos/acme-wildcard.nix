@@ -29,4 +29,7 @@ in
 
     dnsResolver = "8.8.8.8";
   };
+
+  # lego opens the tsig file itself, as acme
+  age.secrets."rfc2136-acme".owner = "acme";
 }

@@ -42,6 +42,12 @@ in
   };
 
   boot.kernelModules = [ "tcp_bbr" ];
+  boot.kernelParams = [
+    # single tenant, skylake pays dearly for these on every vm exit
+    "mitigations=off"
+    # guest ram is memfd (shmem), thp for it is a separate knob from anon
+    "transparent_hugepage_shmem=advise"
+  ];
   boot.kernel.sysctl = {
     "net.ipv4.tcp_congestion_control" = "bbr";
     "net.ipv4.tcp_wmem" = "4096 262144 67108864";

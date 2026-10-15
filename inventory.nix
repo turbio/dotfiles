@@ -162,7 +162,8 @@
       public.ip4 = "35.209.100.97";
       public.ip6 = "2600:1900:4000:e9d7::";
       tailscale.ip4 = "100.64.177.49";
-
+      # tiny disks. no nixvim, no wrapped zsh, none of home.nix
+      minimal = true;
     };
     backle = {
       arch = "aarch64-linux";
@@ -174,6 +175,7 @@
       public.ip4 = "146.235.204.90";
       public.ip6 = "2603:c024:c018:6b00:0:8870:dbc4:5495";
       tailscale.ip4 = "100.64.52.73";
+      minimal = true;
     };
     cackle = {
       arch = "aarch64-linux";
@@ -181,6 +183,7 @@
       public.ip4 = "163.192.60.165";
       public.ip6 = "2603:c024:c018:6b00:0:54b7:d0b:9783";
       tailscale.ip4 = "100.64.144.3";
+      minimal = true;
     };
     jenka = {
       arch = "aarch64-linux";
@@ -383,6 +386,30 @@
       # vcpus aren't reserved, so the ci vm gets a big slice
       vcpu = 32;
       mem = 131072;
+    };
+    bigdev = {
+      host = "joast";
+      # edges dnat public :2200 here
+      expose = [ { port = 22; } ];
+      egress = true;
+      # nixcache.int.turb.io
+      allow = [
+        {
+          machine = "joast";
+          ports = [ 443 ];
+        }
+      ];
+      vcpu = 64;
+      # balloons, so a ceiling not a reservation
+      mem = 204800;
+      # MiB like mem. sparse image on enc/vms/bigdev, root lives on it
+      rootDisk = 10 * 1024 * 1024;
+      zfs = {
+        # dev box, losing the last few seconds on a host crash is fine
+        sync = "disabled";
+        # the guest has 200G to cache with, don't keep a second copy in arc
+        primarycache = "metadata";
+      };
     };
     akvorado = {
       host = "joast";

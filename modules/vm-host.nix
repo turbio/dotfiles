@@ -14,7 +14,9 @@ let
   inv = inventory;
 
   myVms = lib.filterAttrs (n: v: v.host == hostname) inv.vms;
-  statefulVms = lib.filterAttrs (n: v: v.persistVar or false) myVms;
+  # a vm's dataset holds its /var share and/or its root disk image
+  isStateful = v: (v.persistVar or false) || v ? rootDisk;
+  statefulVms = lib.filterAttrs (n: v: isStateful v) myVms;
 
   mountDatasets = lib.foldl' lib.recursiveUpdate { } (
     lib.mapAttrsToList (
@@ -184,14 +186,20 @@ in
           };
         }
         // lib.mapAttrs' (
-          name: _:
+          name: vm:
           lib.nameValuePair "${inv.storage.vmsDataset}/${name}" {
             perms = {
               owner = "microvm";
               group = "kvm";
               mode = "0755";
             };
-            dirs = [ "var" ];
+            dirs = lib.optional (vm.persistVar or false) "var";
+            properties = {
+              atime = "off";
+            }
+            # 128K records turn every 4K guest write into a read-modify-write
+            // lib.optionalAttrs (vm ? rootDisk) { recordsize = "64K"; }
+            // (vm.zfs or { });
           }
         ) statefulVms
         // mountDatasets
@@ -219,7 +227,7 @@ in
           name: vm:
           let
             paths =
-              lib.optional (vm.persistVar or false) "${inv.storage.vmsPath}/${name}"
+              lib.optional (isStateful vm) "${inv.storage.vmsPath}/${name}"
               ++ map (m: inv.storage.datasetPath m.dataset) (lib.attrValues (vm.mounts or { }));
             guard = pkgs.writeShellScript "vm-${name}-datasets-mounted" ''
               for p in ${lib.escapeShellArgs paths}; do

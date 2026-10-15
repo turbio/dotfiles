@@ -1,11 +1,14 @@
-{ ... }:
+{ pkgs, ... }:
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 0;
 
   hardware.bluetooth.enable = true;
-  programs.light.enable = true;
+  # light got yanked from nixpkgs, sway config already calls brightnessctl.
+  # the udev rule is what lets the video group poke the backlight
+  environment.systemPackages = [ pkgs.brightnessctl ];
+  services.udev.packages = [ pkgs.brightnessctl ];
 
   networking.networkmanager.enable = true;
 

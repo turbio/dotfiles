@@ -68,6 +68,8 @@
 
     buildbot-nix.url = "github:nix-community/buildbot-nix";
     buildbot-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    llm-agents.url = "github:numtide/llm-agents.nix/main";
   };
 
   outputs =
@@ -274,6 +276,79 @@
               repos = inputs;
               isDesktop = false;
             };
+          };
+
+        devtools =
+          let
+            system = "x86_64-linux";
+            pkgs = import nixpkgs { inherit system; };
+          in
+          pkgs.buildEnv {
+            name = "tools-for-deving";
+            paths =
+              let
+                mypkgs = self.packages.x86_64-linux;
+              in
+              [
+                mypkgs.zsh-wrapped
+                mypkgs.vim
+                mypkgs.tmux
+
+                inputs.agenix.packages.${system}.agenix
+
+                # omitted, they update too often
+                inputs.llm-agents.packages.${system}.codex
+                inputs.llm-agents.packages.${system}.claude-code
+
+              ]
+              ++ (with pkgs; [
+                appimage-run
+                arduino
+                binwalk
+                btop
+                clang
+                cloc
+                coreutils-full
+                deploy-rs
+                dfc
+                difftastic
+                dnsutils
+                entr
+                fakeroot
+                fakeroot
+                fish
+                (pkgs.lib.setPrio 1 gcc) # prefer gcc for overlap w clang
+                gdb
+                git
+                gnumake
+                gnupg
+                go
+                htop
+                iotop
+                iperf
+                iptables
+                jq
+                lsof
+                ncdu
+                nethogs
+                nftables
+                nixd
+                nixos-firewall-tool
+                nixpkgs-fmt
+                nix-tree
+                nmap
+                nodejs
+                perf
+                progress
+                pv
+                python3
+                rust-analyzer
+                shellcheck
+                silver-searcher-ng
+                wget
+                wget2
+                nix-diff
+              ]);
           };
       };
 

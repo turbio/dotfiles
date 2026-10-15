@@ -40,7 +40,10 @@ in
 
   config = {
     # Show journal on tty1 instead of login prompt for debugging
-    services.journald.console = "/dev/tty1";
+    services.journald.settings.Journal = {
+      ForwardToConsole = true;
+      TTYPath = "/dev/tty1";
+    };
 
     boot.loader.grub.enable = false;
 
@@ -351,7 +354,8 @@ in
       path = [
         pkgs.curl
         pkgs.coreutils
-        pkgs.util-linux
+        # the initrd ships util-linux-minimal, the full one collides with it
+        config.boot.initrd.systemd.package.util-linux
       ];
 
       script = ''

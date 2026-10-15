@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+MARK='# devshell: exec nix-profile zsh'
+
+inject() {
+  grep -qF "$MARK" "$1" 2>/dev/null && return
+  cat >> "$1" <<EOF
+
+$MARK
+case \$- in *i*)
+  if [ -z "\${NO_DEVSHELL:-}" ] && [ -x "\$HOME/.nix-profile/bin/zsh" ]; then
+    export SHELL="\$HOME/.nix-profile/bin/zsh"
+    exec "\$SHELL" -l
+  fi ;;
+esac
+EOF
+  echo "added to $1"
+}
+
+# sh reads ~/.profile; bash reads the first of these that exists.
+inject "$HOME/.profile"
+for f in .bash_profile .bash_login; do
+  if [ -e "$HOME/$f" ]; then inject "$HOME/$f"; break; fi
+done

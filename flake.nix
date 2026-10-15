@@ -4,6 +4,8 @@
   nixConfig = {
     #abort-on-warn = true;
     extra-experimental-features = [ "pipe-operators" ];
+    extra-substituters = [ "https://nixcache.turb.io" ];
+    extra-trusted-public-keys = [ "nixcache.turb.io:FFCylJ0fphGs8IdYdpZBczLpUM9QRDzlN1oIUf2VxHI=" ];
   };
 
   inputs = {
